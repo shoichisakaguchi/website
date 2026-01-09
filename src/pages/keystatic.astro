@@ -1,7 +1,8 @@
 ---
 import { KeystaticAdmin } from '../components/KeystaticAdmin';
 
-export const prerender = false;
+export const prerender = true;
 ---
 
+<div style="display:none">Debug: Custom Keystatic Page Loaded</div>
 <KeystaticAdmin client:only="react" />
