@@ -1,0 +1,66 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+	<div class="container page-content">
+		<h1 class="page-title">About the Project</h1>
+		<div class="content-wrapper">
+			<p class="intro">
+				The RdRp Summit is a collaborative initiative dedicated to the study of RNA-dependent RNA polymerase (RdRp).
+				Our goal is to bring together researchers from around the world to share knowledge, data, and tools.
+			</p>
+			
+			<hr class="divider" />
+			
+			<h2>Mission</h2>
+			<p>
+				We aim to provide a comprehensive resource for the classification, discovery, and analysis of RdRp sequences
+				from diverse environments. By standardizing methods and data formats, we facilitate easier comparison
+				and meta-analysis across different studies.
+			</p>
+
+			<h2>History</h2>
+			<p>
+				Started as a small workshop, the RdRp Summit has grown into a global community. 
+				We hold regular meetings and maintain this centralized repository of information.
+			</p>
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.page-content {
+		max-width: 720px; /* Narrower for better reading experience */
+		margin: 0 auto;
+	}
+
+	.page-title {
+		margin-top: 40px;
+		margin-bottom: 40px;
+		text-align: center;
+	}
+
+	.content-wrapper {
+		font-size: 19px; /* Slightly larger reading text */
+		line-height: 1.6;
+		color: #333;
+	}
+
+	.intro {
+		font-weight: 500;
+		color: var(--c-text);
+		margin-bottom: 40px;
+	}
+
+	.divider {
+		border: 0;
+		border-top: 1px solid var(--c-divider);
+		margin: 40px 0;
+	}
+
+	h2 {
+		margin-top: 40px;
+		font-size: 28px;
+	}
+</style>

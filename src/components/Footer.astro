@@ -1,0 +1,53 @@
+---
+const year = new Date().getFullYear();
+---
+<footer class="global-footer">
+	<div class="container">
+		<div class="footer-content">
+			<p class="copyright">Copyright © {year} rdrp.io. All rights reserved.</p>
+			<div class="footer-links">
+				<a href="#">Privacy Policy</a>
+				<span class="sep">|</span>
+				<a href="#">Terms of Use</a>
+			</div>
+		</div>
+	</div>
+</footer>
+
+<style>
+	.global-footer {
+		background-color: var(--footer-bg);
+		padding: 2rem 0;
+		font-size: 12px;
+		color: var(--c-text-secondary);
+		margin-top: auto; /* Push to bottom if content is short */
+		border-top: 1px solid var(--c-divider);
+	}
+
+	.footer-content {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+
+	.footer-links {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+
+	a {
+		color: var(--c-text-secondary);
+		text-decoration: none;
+	}
+
+	a:hover {
+		text-decoration: underline;
+		color: var(--c-text);
+	}
+	
+	.sep {
+		color: #d2d2d7;
+	}
+</style>

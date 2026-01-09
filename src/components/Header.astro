@@ -1,0 +1,69 @@
+---
+---
+<header class="global-header">
+	<div class="header-content">
+		<a href="/" class="logo">rdrp.io</a>
+		<nav>
+			<ul>
+				<li><a href="/about">Project</a></li>
+				<li><a href="/summits">Summits</a></li>
+				<li><a href="/contact">Contact</a></li>
+			</ul>
+		</nav>
+	</div>
+</header>
+
+<style>
+	.global-header {
+		position: sticky;
+		top: 0;
+		z-index: 9999;
+		height: var(--nav-height);
+		background: rgba(251, 251, 253, 0.8);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		border-bottom: 1px solid rgba(0,0,0,0.04);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 12px;
+	}
+
+	.header-content {
+		width: 100%;
+		max-width: 980px;
+		padding: 0 22px;
+		display: flex;
+		justify-content: space-between; /* Space out logo and nav */
+		align-items: center;
+		height: 100%;
+	}
+
+	.logo {
+		font-weight: 600;
+		font-size: 14px; /* Slightly larger than links */
+		color: var(--c-text);
+		text-decoration: none;
+		letter-spacing: -0.01em;
+	}
+
+	nav ul {
+		display: flex;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		gap: 24px;
+	}
+
+	nav a {
+		color: var(--c-text);
+		opacity: 0.8;
+		transition: opacity 0.2s ease;
+		text-decoration: none;
+	}
+
+	nav a:hover {
+		opacity: 1;
+		text-decoration: none; /* No underline for nav items */
+	}
+</style>
