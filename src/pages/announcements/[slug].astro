@@ -1,0 +1,121 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const announcements = await getCollection('announcements');
+  return announcements.map(item => ({
+    params: { slug: item.slug },
+    props: { item },
+  }));
+}
+
+const { item } = Astro.props;
+const { Content } = await item.render();
+---
+
+<Layout title={item.data.title}>
+	<div class="container page-content">
+		<div class="back-link">
+			<a href="/announcements">← Back to announcements</a>
+		</div>
+        <header class="post-header">
+            <div class="meta">
+                <time>{item.data.date.toLocaleDateString()}</time>
+                {item.data.isPinned && <span class="badge">Pinned</span>}
+            </div>
+            <h1 class="page-title">{item.data.title}</h1>
+        </header>
+		<div class="content-wrapper">
+			<article>
+				<Content />
+			</article>
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.page-content {
+		max-width: 720px;
+		margin: 0 auto;
+	}
+
+	.page-title {
+		margin-top: 10px;
+		margin-bottom: 20px;
+	}
+    
+    .post-header {
+        margin-top: 40px;
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .meta {
+        color: var(--c-text-light, #666);
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        align-items: center;
+    }
+
+	.content-wrapper {
+		font-size: 18px;
+		line-height: 1.6;
+		color: var(--c-text, #333);
+	}
+
+	.back-link {
+		margin-top: 40px;
+	}
+
+	.back-link a {
+		color: var(--c-text-light, #666);
+		text-decoration: none;
+		font-size: 0.9em;
+	}
+
+	.back-link a:hover {
+		text-decoration: underline;
+	}
+    
+    .badge {
+        background: var(--c-link, #0070f3);
+        color: white;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.8em;
+        font-weight: bold;
+    }
+
+  /* Basic styling for content */
+  article :global(h2) {
+    margin-top: 2em;
+    font-size: 1.5em;
+    font-weight: 600;
+  }
+  
+  article :global(h3) {
+      margin-top: 1.5em;
+      font-size: 1.25em;
+      font-weight: 600;
+  }
+
+  article :global(p) {
+    margin-bottom: 1em;
+  }
+  
+  article :global(ul), article :global(ol) {
+    margin-bottom: 1em;
+    padding-left: 2em;
+  }
+  
+  article :global(img) {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+  }
+</style>

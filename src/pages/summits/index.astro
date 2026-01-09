@@ -1,0 +1,139 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { type CollectionEntry } from 'astro:content';
+
+export const prerender = true;
+
+const summits = await getCollection('summits');
+// Sort by year descending. Assuming year is a string "2024", but safely handle it.
+const sortedSummits = summits.sort((a, b) => {
+    return parseInt(b.data.year || '0') - parseInt(a.data.year || '0');
+});
+
+// Helper to get organizer name
+async function getOrganizerName(slug: string | undefined) {
+    if (!slug) return null;
+    try {
+        const person = await getEntry('people', slug);
+        return person ? person.data.name : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+// Pre-fetch organizer names
+const summitsWithOrganizers = await Promise.all(sortedSummits.map(async (summit) => {
+    const organizerName = await getOrganizerName(summit.data.organizer);
+    return { ...summit, organizerName };
+}));
+---
+
+<Layout>
+	<div class="container page-content">
+		<h1 class="text-center page-title">Past Summits</h1>
+		
+		<div class="summit-list">
+            {summitsWithOrganizers.map(summit => (
+                <div class="summit-item">
+                    <div class="summit-date">{summit.data.year}</div>
+                    <div class="summit-info">
+                        <h2>
+                            <a href={`/summits/${summit.slug}`}>{summit.data.title}</a>
+                        </h2>
+                        {summit.organizerName && <p class="organizer">Organizer: {summit.organizerName}</p>}
+                        <div class="actions">
+                            <a href={`/summits/${summit.slug}`}>View Proceedings &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            ))}
+            
+            {summitsWithOrganizers.length === 0 && (
+                <div class="no-summits">
+                    <p>No summits found. Please add content via Keystatic.</p>
+                </div>
+            )}
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.page-content {
+        max-width: 980px;
+        margin: 0 auto;
+    }
+
+	.page-title {
+		margin-bottom: 60px;
+        margin-top: 40px;
+        text-align: center;
+	}
+
+	.summit-list {
+		max-width: 800px;
+		margin: 0 auto;
+	}
+
+	.summit-item {
+		display: flex;
+		flex-direction: column;
+		padding: 40px 0;
+		border-bottom: 1px solid var(--c-divider, #eee);
+	}
+
+	.summit-item:last-child {
+		border-bottom: none;
+	}
+
+	@media (min-width: 600px) {
+		.summit-item {
+			flex-direction: row;
+			gap: 40px;
+		}
+	}
+
+	.summit-date {
+		font-size: 24px;
+		font-weight: 700;
+		color: var(--c-text-secondary, #666);
+		flex-basis: 120px;
+		flex-shrink: 0;
+	}
+
+	.summit-info h2 {
+		margin-top: 0;
+		font-size: 24px;
+		margin-bottom: 10px;
+	}
+    
+    .summit-info h2 a {
+        color: var(--c-text, #333);
+        text-decoration: none;
+    }
+    
+    .summit-info h2 a:hover {
+        color: var(--c-link, #0070f3);
+    }
+
+    .organizer {
+        color: var(--c-text-secondary, #666);
+        margin-bottom: 15px;
+    }
+    
+    .actions a {
+        color: var(--c-link, #0070f3);
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .actions a:hover {
+        text-decoration: underline;
+    }
+    
+    .no-summits {
+        text-align: center;
+        color: var(--c-text-secondary, #666);
+        padding: 40px;
+    }
+</style>

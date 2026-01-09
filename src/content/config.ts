@@ -11,4 +11,44 @@ const posts = defineCollection({
     }),
 });
 
-export const collections = { posts };
+const announcements = defineCollection({
+    schema: z.object({
+        title: z.string(),
+        date: z.coerce.date(), // Handles date strings from YAML
+        isPinned: z.boolean().default(false),
+    }),
+});
+
+const people = defineCollection({
+    type: 'data',
+    schema: z.object({
+        name: z.string(),
+        affiliation: z.string().optional(),
+        photo: z.string().optional(),
+    }),
+});
+
+const journalClub = defineCollection({
+    schema: z.object({
+        title: z.string(),
+        date: z.coerce.date(),
+        speaker: z.string().optional(),
+        paperUrl: z.string().optional(), // Relaxed from .url() to allow partial input or placeholder
+    }),
+});
+
+const summits = defineCollection({
+    schema: z.object({
+        title: z.string(),
+        year: z.string().optional(),
+        organizer: z.string().optional(), // Stores the slug of the related person
+    }),
+});
+
+export const collections = {
+    posts,
+    announcements,
+    people,
+    'journal-club': journalClub,
+    summits
+};

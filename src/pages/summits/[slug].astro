@@ -1,0 +1,119 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const summits = await getCollection('summits');
+  return summits.map(item => ({
+    params: { slug: item.slug },
+    props: { item },
+  }));
+}
+
+const { item } = Astro.props;
+const { Content } = await item.render();
+
+let organizerName = null;
+if (item.data.organizer) {
+    try {
+        const person = await getEntry('people', item.data.organizer);
+        organizerName = person ? person.data.name : null;
+    } catch(e) {}
+}
+---
+
+<Layout title={item.data.title}>
+	<div class="container page-content">
+		<div class="back-link">
+			<a href="/summits">← Back to Summits</a>
+		</div>
+        <header class="post-header">
+            <h1 class="page-title">{item.data.title}</h1>
+            <div class="meta">
+                <span class="year">{item.data.year}</span>
+                {organizerName && <span class="organizer">Organizer: {organizerName}</span>}
+            </div>
+        </header>
+
+		<div class="content-wrapper">
+			<article>
+				<Content />
+			</article>
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.page-content {
+		max-width: 720px;
+		margin: 0 auto;
+	}
+
+	.page-title {
+		margin-top: 20px;
+		margin-bottom: 15px;
+        text-align: center;
+	}
+    
+    .post-header {
+        margin-top: 40px;
+        margin-bottom: 40px;
+    }
+
+    .meta {
+        color: var(--c-text-light, #666);
+        text-align: center;
+        font-size: 1.1em;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+    
+    .year {
+        font-weight: bold;
+    }
+
+	.content-wrapper {
+		font-size: 18px;
+		line-height: 1.6;
+		color: var(--c-text, #333);
+	}
+
+	.back-link {
+		margin-top: 40px;
+	}
+
+	.back-link a {
+		color: var(--c-text-light, #666);
+		text-decoration: none;
+		font-size: 0.9em;
+	}
+
+	.back-link a:hover {
+		text-decoration: underline;
+	}
+
+  /* Basic styling for content */
+  article :global(h2) {
+    margin-top: 2em;
+    font-size: 1.5em;
+    font-weight: 600;
+  }
+  
+  article :global(h3) {
+      margin-top: 1.5em;
+      font-size: 1.25em;
+      font-weight: 600;
+  }
+
+  article :global(p) {
+    margin-bottom: 1em;
+  }
+  
+  article :global(ul), article :global(ol) {
+    margin-bottom: 1em;
+    padding-left: 2em;
+  }
+</style>

@@ -1,0 +1,166 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export const prerender = true;
+
+const items = await getCollection('journal-club');
+const sortedItems = items.sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf());
+---
+
+<Layout>
+	<div class="container page-content">
+		<h1 class="page-title">Journal Club</h1>
+		<div class="journal-list">
+            
+            <div class="table-container">
+                <table class="journal-table">
+                    <thead>
+                        <tr>
+                            <th class="col-date">Date</th>
+                            <th class="col-topic">Paper / Topic</th>
+                            <th class="col-speaker">Speaker</th>
+                            <th class="col-link">Paper</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {sortedItems.map(item => (
+                            <tr>
+                                <td class="col-date">{item.data.date.toLocaleDateString()}</td>
+                                <td class="col-topic">
+                                    <a href={`/journal-club/${item.slug}`} class="topic-link">{item.data.title}</a>
+                                </td>
+                                <td class="col-speaker">{item.data.speaker || '-'}</td>
+                                <td class="col-link">
+                                    {item.data.paperUrl ? (
+                                        <a href={item.data.paperUrl} target="_blank" rel="noopener noreferrer" class="paper-link">Link &nearr;</a>
+                                    ) : '-'}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="journal-list-mobile">
+                {sortedItems.map(item => (
+                    <div class="journal-item">
+                        <div class="item-date">{item.data.date.toLocaleDateString()}</div>
+                        <h3 class="item-title">
+                             <a href={`/journal-club/${item.slug}`}>{item.data.title}</a>
+                        </h3>
+                        {item.data.speaker && <div class="item-speaker">Speaker: {item.data.speaker}</div>}
+                        {item.data.paperUrl && (
+                             <a href={item.data.paperUrl} target="_blank" rel="noopener noreferrer" class="item-paper-link">Paper Link &nearr;</a>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.page-content {
+		max-width: 980px;
+		margin: 0 auto;
+	}
+
+	.page-title {
+		margin-top: 40px;
+		margin-bottom: 40px;
+		text-align: center;
+	}
+
+    /* Table Styles (Desktop) */
+    .table-container {
+        display: none;
+    }
+
+    @media (min-width: 768px) {
+        .table-container {
+            display: block;
+        }
+        .journal-list-mobile {
+            display: none;
+        }
+    }
+
+    .journal-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 16px;
+    }
+
+    .journal-table th, .journal-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid var(--c-divider, #eee);
+    }
+
+    .journal-table th {
+        font-weight: 600;
+        color: var(--c-text-secondary, #666);
+        border-bottom: 2px solid var(--c-divider, #eee);
+    }
+    
+    .col-date { white-space: nowrap; width: 120px; }
+    .col-speaker { width: 150px; }
+    .col-link { width: 100px; text-align: right !important; }
+
+    .topic-link {
+        font-weight: 500;
+        color: var(--c-text, #333);
+        text-decoration: none;
+    }
+    
+    .topic-link:hover {
+        color: var(--c-link, #0070f3);
+        text-decoration: underline;
+    }
+
+    .paper-link {
+        color: var(--c-link, #0070f3);
+        text-decoration: none;
+        font-size: 0.9em;
+    }
+    
+    .paper-link:hover {
+        text-decoration: underline;
+    }
+
+    /* Mobile List Styles */
+    .journal-item {
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--c-divider, #eee);
+    }
+    
+    .item-date {
+        font-size: 0.9em;
+        color: var(--c-text-secondary, #666);
+        margin-bottom: 4px;
+    }
+
+    .item-title {
+        margin: 0 0 8px;
+        font-size: 1.1em;
+    }
+    
+    .item-title a {
+        color: var(--c-text, #333);
+        text-decoration: none;
+    }
+    
+    .item-speaker {
+        font-size: 0.95em;
+        margin-bottom: 8px;
+    }
+
+    .item-paper-link {
+         color: var(--c-link, #0070f3);
+         text-decoration: none;
+         font-size: 0.9em;
+    }
+</style>
