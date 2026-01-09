@@ -28,6 +28,21 @@ Inside of your Astro project, you'll see the following folders and files:
 
 To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
 
+## 📝 Content Management
+This project uses [Keystatic](https://keystatic.com/) for content management.
+
+### Accessing the Admin Dashboard
+1. Start the development server:
+   ```sh
+   npm run dev
+   ```
+2. Navigate to:
+   [http://localhost:4321/keystatic](http://localhost:4321/keystatic)
+
+### Content Location
+- **Posts**: `src/content/posts/`
+- **Config**: `keystatic.config.ts`
+
 ## 🧞 Commands
 
 All commands are run from the root of the project, from a terminal:

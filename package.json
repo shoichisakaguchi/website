@@ -9,6 +9,13 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.16.7"
+    "@astrojs/cloudflare": "^12.6.12",
+    "@astrojs/markdoc": "^0.15.10",
+    "@astrojs/react": "^4.4.2",
+    "@keystatic/astro": "^5.0.6",
+    "@keystatic/core": "^0.5.48",
+    "astro": "^5.16.7",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   }
 }
