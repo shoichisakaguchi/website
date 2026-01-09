@@ -9,5 +9,9 @@ import markdoc from '@astrojs/markdoc';
 export default defineConfig({
     integrations: [react(), keystatic(), markdoc()],
     output: 'server',
-    adapter: cloudflare()
+    adapter: cloudflare({
+        platformProxy: {
+            enabled: true,
+        },
+    })
 });
