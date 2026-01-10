@@ -5,7 +5,40 @@
 <header class="global-header">
 	<div class="header-content">
 		<a href="/" class="logo">rdrp.io</a>
-		<nav>
+
+		<button id="menu-toggle" aria-label="Toggle menu" class="menu-toggle">
+			<svg
+				class="hamburger"
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<line x1="3" y1="12" x2="21" y2="12"></line>
+				<line x1="3" y1="6" x2="21" y2="6"></line>
+				<line x1="3" y1="18" x2="21" y2="18"></line>
+			</svg>
+			<svg
+				class="close"
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<line x1="18" y1="6" x2="6" y2="18"></line>
+				<line x1="6" y1="6" x2="18" y2="18"></line>
+			</svg>
+		</button>
+
+		<nav id="main-nav">
 			<ul>
 				<li><a href="/about">Project</a></li>
 				<li><a href="/announcements">Announcements</a></li>
@@ -17,6 +50,22 @@
 		</nav>
 	</div>
 </header>
+
+<script>
+	const toggle = document.getElementById("menu-toggle");
+	const nav = document.getElementById("main-nav");
+	const header = document.querySelector(".global-header");
+
+	if (toggle && nav && header) {
+		toggle.addEventListener("click", () => {
+			const isExpanded = toggle.getAttribute("aria-expanded") === "true";
+			toggle.setAttribute("aria-expanded", !isExpanded);
+			nav.classList.toggle("is-active");
+			toggle.classList.toggle("is-active");
+			header.classList.toggle("menu-open");
+		});
+	}
+</script>
 
 <style>
 	.global-header {
@@ -32,6 +81,11 @@
 		align-items: center;
 		justify-content: center;
 		font-size: 12px;
+		transition: background-color 0.2s ease;
+	}
+
+	.global-header.menu-open {
+		background: rgba(251, 251, 253, 1); /* Solid bg when menu open */
 	}
 
 	.header-content {
@@ -39,39 +93,28 @@
 		max-width: 980px;
 		padding: 0 22px;
 		display: flex;
-		justify-content: space-between; /* Space out logo and nav */
+		justify-content: space-between;
 		align-items: center;
 		height: 100%;
 	}
 
 	.logo {
 		font-weight: 600;
-		font-size: 14px; /* Slightly larger than links */
+		font-size: 14px;
 		color: var(--c-text);
 		text-decoration: none;
 		letter-spacing: -0.01em;
+		z-index: 10001; /* Above mobile menu overlay */
+		position: relative;
 	}
 
-	nav {
-		overflow-x: auto;
-		-webkit-overflow-scrolling: touch;
-		margin-left: 20px; /* Space from logo */
-		/* Hide scrollbar but keep functionality */
-		scrollbar-width: none; /* Firefox */
-		-ms-overflow-style: none; /* IE 10+ */
-	}
-	nav::-webkit-scrollbar {
-		display: none; /* Chrome/Safari */
-	}
-
+	/* Desktop Nav Default */
 	nav ul {
 		display: flex;
 		list-style: none;
 		margin: 0;
 		padding: 0;
 		gap: 24px;
-		white-space: nowrap; /* Prevent wrapping */
-		padding-right: 22px; /* End padding for scroll */
 	}
 
 	nav a {
@@ -83,6 +126,78 @@
 
 	nav a:hover {
 		opacity: 1;
-		text-decoration: none; /* No underline for nav items */
+		text-decoration: none;
+	}
+
+	/* Hamburger Button (Hidden on Desktop) */
+	.menu-toggle {
+		display: none;
+		background: none;
+		border: none;
+		cursor: pointer;
+		padding: 0;
+		color: var(--c-text);
+		z-index: 10001;
+		position: relative;
+	}
+
+	.menu-toggle svg {
+		display: block;
+	}
+
+	.menu-toggle .close {
+		display: none;
+	}
+	.menu-toggle.is-active .hamburger {
+		display: none;
+	}
+	.menu-toggle.is-active .close {
+		display: block;
+	}
+
+	/* Mobile Styles */
+	@media (max-width: 768px) {
+		.menu-toggle {
+			display: block;
+		}
+
+		nav {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100vh;
+			background: rgba(251, 251, 253, 0.98);
+			backdrop-filter: blur(20px);
+			-webkit-backdrop-filter: blur(20px);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			opacity: 0;
+			visibility: hidden;
+			transition:
+				opacity 0.3s ease,
+				visibility 0.3s ease;
+			transform: translateY(-10px);
+			z-index: 10000;
+		}
+
+		nav.is-active {
+			opacity: 1;
+			visibility: visible;
+			transform: translateY(0);
+		}
+
+		nav ul {
+			flex-direction: column;
+			gap: 32px;
+			text-align: center;
+			font-size: 24px;
+			font-weight: 600;
+		}
+
+		nav a {
+			opacity: 1;
+		}
 	}
 </style>
