@@ -1,0 +1,52 @@
+<div id="search" class="search-container"></div>
+
+<script>
+    // Only run on client
+    window.addEventListener("DOMContentLoaded", () => {
+        // Dynamic import to avoid build errors if not found, or just checks
+        if (typeof window !== "undefined") {
+            const script = document.createElement("script");
+            script.src = "/pagefind/pagefind-ui.js";
+            script.onload = () => {
+                // @ts-ignore
+                new PagefindUI({
+                    element: "#search",
+                    showSubResults: true,
+                    showImages: false,
+                });
+            };
+            script.onerror = () => {
+                console.warn(
+                    "Pagefind script not found. Search is only available in production.",
+                );
+                const el = document.getElementById("search");
+                if (el)
+                    el.innerHTML =
+                        "<p style='font-size:12px;color:#666;'>Search available in production build</p>";
+            };
+            document.head.appendChild(script);
+
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = "/pagefind/pagefind-ui.css";
+            document.head.appendChild(link);
+        }
+    });
+</script>
+
+<style is:global>
+    /* Customizing Pagefind UI */
+    .pagefind-ui__search-input {
+        font-size: 14px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+    .pagefind-ui__result-title {
+        font-size: 16px;
+        font-weight: 600;
+    }
+    .pagefind-ui__result-excerpt {
+        font-size: 13px;
+        color: #666;
+    }
+</style>

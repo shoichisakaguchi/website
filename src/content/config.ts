@@ -1,22 +1,12 @@
 import { defineCollection, z } from 'astro:content';
 
-const posts = defineCollection({
-    // Keystatic creates Markdoc files by default if using 'document' field
-    // or Markdown/MDX depending on configuration. 
-    // Based on your previous file open 'hello-world.mdoc', it seems to be Markdoc or default.
-    // We'll treat it as standard collection for now, but integration might need @astrojs/markdoc if .mdoc is used.
-    // Let's assume standard schema based on keystatic config.
-    schema: z.object({
-        title: z.string(),
-        date: z.coerce.date().default(() => new Date()),
-        isPinned: z.boolean().default(false),
-    }),
-});
+
 
 const announcements = defineCollection({
     schema: z.object({
         title: z.string(),
         date: z.coerce.date(), // Handles date strings from YAML
+        category: z.enum(['update', 'event', 'general']).optional().default('update'),
         isPinned: z.boolean().default(false),
     }),
 });
@@ -49,10 +39,26 @@ const summits = defineCollection({
     }),
 });
 
+const summit = defineCollection({
+    type: 'data',
+    schema: z.object({
+        startDate: z.coerce.date().optional(),
+        venue: z.string().optional(),
+        fee: z.string().optional(),
+        registrationUrl: z.string().url().optional(),
+        callForPapersUrl: z.string().url().optional(),
+        keynotes: z.array(z.object({
+            name: z.string(),
+            affiliation: z.string().optional(),
+            image: z.string().optional(),
+        })).optional(),
+    }),
+});
+
 export const collections = {
-    posts,
     announcements,
     people,
     'journal-club': journalClub,
-    summits
+    summits,
+    summit,
 };

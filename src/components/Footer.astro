@@ -1,11 +1,49 @@
 ---
 const year = new Date().getFullYear();
 ---
+
 <footer class="global-footer">
 	<div class="container">
 		<div class="footer-content">
-			<p class="copyright">Copyright © {year} rdrp.io. All rights reserved.</p>
+			<p class="copyright">
+				Copyright © {year} rdrp.io. All rights reserved.
+			</p>
 			<div class="footer-links">
+				<div class="social-links">
+					<a
+						href="https://x.com/rdrp_summit"
+						target="_blank"
+						aria-label="X (Twitter)"
+					>
+						<svg
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="currentColor"
+						>
+							<path
+								d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+							></path>
+						</svg>
+					</a>
+					<a
+						href="https://bsky.app/profile/rdrp.io"
+						target="_blank"
+						aria-label="Bluesky"
+					>
+						<svg
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="currentColor"
+						>
+							<path
+								d="M12 10.8c-1.087-2.114-4.046-6.053-6.798-7.995C2.566.944 1.561 1.266.902 1.565-.131 2.032-.787 3.518.665 7.15c2.316 5.8 5.756 8.353 5.756 8.353.407.25.92.053 1.056-.411.083-.284.157-.597.226-.931.256-1.25.328-3.085-.705-5.323-.198-.429 1.144-1.93 5-1.93s5.196 1.501 5 1.93c-1.034 2.238-.96 4.073-.705 5.323.069.334.143.647.226.931.136.464.649.661 1.056.411 0 0 3.44-2.553 5.756-8.353 1.452-3.632.796-5.118-.237-5.585-.659-.299-1.664-.621-4.301 1.24C16.046 4.748 13.087 8.686 12 10.8Z"
+							></path>
+						</svg>
+					</a>
+				</div>
+				<span class="sep">|</span>
 				<a href="#">Privacy Policy</a>
 				<span class="sep">|</span>
 				<a href="#">Terms of Use</a>
@@ -46,7 +84,7 @@ const year = new Date().getFullYear();
 		text-decoration: underline;
 		color: var(--c-text);
 	}
-	
+
 	.sep {
 		color: #d2d2d7;
 	}

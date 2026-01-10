@@ -5,9 +5,12 @@ import keystatic from '@keystatic/astro';
 import cloudflare from '@astrojs/cloudflare';
 import markdoc from '@astrojs/markdoc';
 
+import sitemap from '@astrojs/sitemap';
+
 // https://astro.build/config
 export default defineConfig({
-    integrations: [react(), keystatic(), markdoc()],
+    integrations: [react(), keystatic(), markdoc(), sitemap()],
     output: 'server',
-    adapter: cloudflare()
+    adapter: cloudflare(),
+    site: 'https://rdrp.io'
 });

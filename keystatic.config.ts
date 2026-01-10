@@ -1,5 +1,5 @@
 // keystatic.config.ts
-import { config, fields, collection } from '@keystatic/core';
+import { config, fields, collection, singleton } from '@keystatic/core';
 
 export default config({
     storage: import.meta.env.DEV
@@ -11,25 +11,7 @@ export default config({
             repo: 'shoichisakaguchi/website',
         },
     collections: {
-        posts: collection({
-            label: 'Posts',
-            slugField: 'title',
-            path: 'src/content/posts/*',
-            format: { contentField: 'content' },
-            previewUrl: '/posts/{slug}',
-            schema: {
-                title: fields.slug({ name: { label: 'Title' } }),
-                date: fields.date({ label: 'Date', validation: { isRequired: true } }),
-                isPinned: fields.checkbox({ label: 'Pin to top', defaultValue: false }),
-                content: fields.document({
-                    label: 'Content',
-                    formatting: true,
-                    dividers: true,
-                    links: true,
-                    images: true,
-                }),
-            },
-        }),
+
         announcements: collection({
             label: 'Announcements',
             slugField: 'title',
@@ -39,6 +21,15 @@ export default config({
             schema: {
                 title: fields.slug({ name: { label: 'Title' } }),
                 date: fields.date({ label: 'Date', validation: { isRequired: true } }),
+                category: fields.select({
+                    label: 'Category',
+                    options: [
+                        { label: 'Update', value: 'update' },
+                        { label: 'Event', value: 'event' },
+                        { label: 'Genera', value: 'general' },
+                    ],
+                    defaultValue: 'update',
+                }),
                 isPinned: fields.checkbox({ label: 'Pin to top', defaultValue: false }),
                 content: fields.document({
                     label: 'Content',
@@ -103,6 +94,34 @@ export default config({
                     links: true,
                     images: true,
                 }),
+            },
+        }),
+    },
+    singletons: {
+        summit: singleton({
+            label: 'Summit Info',
+            path: 'src/content/summit/info',
+            schema: {
+                startDate: fields.date({ label: 'Start Date' }),
+                venue: fields.text({ label: 'Venue' }),
+                fee: fields.text({ label: 'Registration Fee' }),
+                registrationUrl: fields.url({ label: 'Registration URL' }),
+                callForPapersUrl: fields.url({ label: 'Call for Papers URL' }),
+                keynotes: fields.array(
+                    fields.object({
+                        name: fields.text({ label: 'Name' }),
+                        affiliation: fields.text({ label: 'Affiliation' }),
+                        image: fields.image({
+                            label: 'Image',
+                            directory: 'public/images/keynotes',
+                            publicPath: '/images/keynotes',
+                        }),
+                    }),
+                    {
+                        label: 'Keynote Speakers',
+                        itemLabel: (props) => props.fields.name.value,
+                    }
+                ),
             },
         }),
     },
