@@ -8,6 +8,8 @@ const posts = defineCollection({
     // Let's assume standard schema based on keystatic config.
     schema: z.object({
         title: z.string(),
+        date: z.coerce.date().default(() => new Date()),
+        isPinned: z.boolean().default(false),
     }),
 });
 
@@ -32,6 +34,7 @@ const journalClub = defineCollection({
     schema: z.object({
         title: z.string(),
         date: z.coerce.date(),
+        isPinned: z.boolean().default(false),
         speaker: z.string().optional(),
         paperUrl: z.string().optional(), // Relaxed from .url() to allow partial input or placeholder
     }),
@@ -40,6 +43,7 @@ const journalClub = defineCollection({
 const summits = defineCollection({
     schema: z.object({
         title: z.string(),
+        startDate: z.coerce.date().optional(),
         year: z.string().optional(),
         organizer: z.string().optional(), // Stores the slug of the related person
     }),

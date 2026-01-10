@@ -16,8 +16,11 @@ export default config({
             slugField: 'title',
             path: 'src/content/posts/*',
             format: { contentField: 'content' },
+            previewUrl: '/posts/{slug}',
             schema: {
                 title: fields.slug({ name: { label: 'Title' } }),
+                date: fields.date({ label: 'Date', validation: { isRequired: true } }),
+                isPinned: fields.checkbox({ label: 'Pin to top', defaultValue: false }),
                 content: fields.document({
                     label: 'Content',
                     formatting: true,
@@ -32,6 +35,7 @@ export default config({
             slugField: 'title',
             path: 'src/content/announcements/*',
             format: { contentField: 'content' },
+            previewUrl: '/announcements/{slug}',
             schema: {
                 title: fields.slug({ name: { label: 'Title' } }),
                 date: fields.date({ label: 'Date', validation: { isRequired: true } }),
@@ -67,6 +71,7 @@ export default config({
             schema: {
                 title: fields.slug({ name: { label: 'Paper Title/Topic' } }),
                 date: fields.date({ label: 'Date', validation: { isRequired: true } }),
+                isPinned: fields.checkbox({ label: 'Pin to top', defaultValue: false }),
                 speaker: fields.text({ label: 'Speaker' }),
                 paperUrl: fields.url({ label: 'Paper URL' }),
                 content: fields.document({
@@ -85,6 +90,7 @@ export default config({
             format: { contentField: 'summary' },
             schema: {
                 title: fields.slug({ name: { label: 'Title' } }),
+                startDate: fields.date({ label: 'Start Date' }),
                 year: fields.text({ label: 'Year' }),
                 organizer: fields.relationship({
                     label: 'Organizer',

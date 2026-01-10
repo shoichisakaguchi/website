@@ -1,0 +1,269 @@
+---
+import { getCollection } from "astro:content";
+
+// Fetch all collections
+const allAnnouncements = await getCollection("announcements");
+const allPosts = await getCollection("posts");
+const allJournalClub = await getCollection("journal-club");
+const allSummits = await getCollection("summits");
+
+// Normalize structure
+const announcements = allAnnouncements.map((item) => ({
+    ...item,
+    collection: "announcements",
+    url: `/announcements/${item.slug}`,
+    date: item.data.date,
+}));
+
+const posts = allPosts.map((item) => ({
+    ...item,
+    collection: "posts",
+    url: `/posts/${item.slug}`,
+    date: item.data.date,
+}));
+
+const journalClub = allJournalClub.map((item) => ({
+    ...item,
+    collection: "journal-club",
+    url: `/journal-club/${item.slug}`, // Link to detail page (or could be paperUrl?) User asked for "link to Journal Club also pinned", implies internal page mostly.
+    date: item.data.date,
+}));
+
+// Process Summits for "Upcoming" check
+const today = new Date();
+// Normalize time to start of day for comparison if needed, but direct comparison is fine.
+const upcomingSummits = allSummits
+    .filter((s) => s.data.startDate && new Date(s.data.startDate) >= today)
+    .sort(
+        (a, b) =>
+            new Date(a.data.startDate!).valueOf() -
+            new Date(b.data.startDate!).valueOf(),
+    ) // Soonest first
+    .map((item) => ({
+        ...item,
+        collection: "summits",
+        url: `/summits`, // Or specific summit page? Current router is /summits or /summits/[slug]?
+        // Checking pages/summits: index.astro and [slug].astro exist.
+        // So link to /summits/[slug]
+        url: `/summits/${item.slug}`,
+        date: item.data.startDate,
+        isPinned: true, // Implicitly pinned by being upcoming
+        isFeaturedSummit: true, // Special flag for styling
+    }));
+
+// Merge feed items (Announcements, Posts, Journal)
+const feedItems = [...announcements, ...posts, ...journalClub];
+
+// Sort feed by date descending
+const sortedFeed = feedItems.sort((a, b) => {
+    const dateA = a.date ? new Date(a.date).valueOf() : 0;
+    const dateB = b.date ? new Date(b.date).valueOf() : 0;
+    return dateB - dateA;
+});
+
+// Pinned Feed Items
+const pinnedFeed = sortedFeed.filter((item) => item.data.isPinned);
+
+// Latest 3 Feed Items (excluding what's already in pinned to avoid dups)
+// Strategy: Take top 3 of the sorted list.
+const latestFeed = sortedFeed.slice(0, 3);
+
+// Combine Feed: Pinned -> Latest. Deduplicate.
+const displayFeed = [...pinnedFeed];
+latestFeed.forEach((item) => {
+    const isAlreadyIn = displayFeed.find(
+        (p) => p.slug === item.slug && p.collection === item.collection,
+    );
+    if (!isAlreadyIn) {
+        displayFeed.push(item);
+    }
+});
+
+// Final Display List: Upcoming Summits (Top Priority) -> Feed (Pinned -> Latest)
+// Note: User said "Summit page comes to most top".
+// So we prepend upcoming summits.
+const finalDisplayList = [...upcomingSummits, ...displayFeed];
+---
+
+{
+    finalDisplayList.length > 0 && (
+        <section class="announcements-section">
+            <h2 class="section-title">Updates</h2>
+            <div class="announcements-list">
+                {finalDisplayList.map((item) => (
+                    <article
+                        class={`announcement-card ${item.data.isPinned || (item as any).isFeaturedSummit ? "pinned" : ""} ${(item as any).isFeaturedSummit ? "featured-summit" : ""}`}
+                    >
+                        <a href={(item as any).url} class="card-link">
+                            <div class="content">
+                                <div class="meta">
+                                    <span class="date">
+                                        {(item as any).date
+                                            ? new Date(
+                                                  (item as any).date,
+                                              ).toLocaleDateString()
+                                            : ""}
+                                    </span>
+                                    {(item.data.isPinned ||
+                                        (item as any).isFeaturedSummit) && (
+                                        <span class="badge">Pinned</span>
+                                    )}
+                                    {(item as any).isFeaturedSummit && (
+                                        <span class="badge upcoming">
+                                            Upcoming
+                                        </span>
+                                    )}
+                                    <span
+                                        class={`type-badge ${item.collection}`}
+                                    >
+                                        {item.collection === "announcements"
+                                            ? "News"
+                                            : item.collection === "posts"
+                                              ? "Post"
+                                              : item.collection ===
+                                                  "journal-club"
+                                                ? "Journal"
+                                                : "Summit"}
+                                    </span>
+                                </div>
+                                <h3 class="title">{item.data.title}</h3>
+                                {item.collection === "journal-club" &&
+                                    (item.data as any).speaker && (
+                                        <p class="speaker">
+                                            Speaker:{" "}
+                                            {(item.data as any).speaker}
+                                        </p>
+                                    )}
+                            </div>
+                        </a>
+                    </article>
+                ))}
+            </div>
+        </section>
+    )
+}
+
+<style>
+    .announcements-section {
+        margin-bottom: 60px;
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .section-title {
+        text-align: center;
+        margin-bottom: 24px;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .announcements-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .announcement-card {
+        background: white;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .announcement-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .announcement-card.pinned {
+        border-left: 4px solid var(--c-link, #0070f3);
+        background-color: #fafbfc;
+    }
+
+    .announcement-card.featured-summit {
+        border-left: 4px solid #7928ca; /* Distinct purple for Summit */
+        background-color: #fcfaff;
+    }
+
+    .card-link {
+        display: block;
+        padding: 20px;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .meta {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        background-color: var(--c-link, #0070f3);
+        color: white;
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .badge.upcoming {
+        background-color: #7928ca;
+    }
+
+    .type-badge {
+        font-size: 11px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background-color: #f0f0f0;
+        color: #555;
+        font-weight: 500;
+        text-transform: uppercase;
+    }
+
+    .type-badge.announcements {
+        background-color: #e6f6ff;
+        color: #0070f3;
+    }
+    .type-badge.posts {
+        background-color: #f0f0f0;
+        color: #555;
+    }
+    .type-badge.journal-club {
+        background-color: #fff0f6;
+        color: #d6336c;
+    }
+    .type-badge.summits {
+        background-color: #f3e8ff;
+        color: #7928ca;
+    }
+
+    .title {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.4;
+        color: var(--c-text, #333);
+    }
+
+    .speaker {
+        margin: 4px 0 0;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .announcement-card:hover .title {
+        color: var(--c-link, #0070f3);
+    }
+</style>
