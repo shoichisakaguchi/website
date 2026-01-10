@@ -53,22 +53,50 @@ const journalClubCalendarUrl = makeGoogleCalendarUrl(upcomingJournalClub);
 						<span class="eyebrow">Upcoming Summit</span>
 						<h1 class="summit-title">
 							RdRp Summit{" "}
-							{summitData.startDate
-								? new Date(summitData.startDate).getFullYear()
-								: ""}
+							{summitData.year ||
+								(summitData.startDate
+									? new Date(
+											summitData.startDate,
+										).getFullYear()
+									: "")}
 						</h1>
 
 						<div class="summit-details">
-							{summitData.startDate && (
+							{(summitData.startDate || summitData.year) && (
 								<div class="detail-item">
 									<span class="icon">📅</span>
-									{new Date(
-										summitData.startDate,
-									).toLocaleDateString("en-US", {
-										month: "long",
-										day: "numeric",
-										year: "numeric",
-									})}
+									{summitData.startDate &&
+									summitData.endDate ? (
+										/* Date Range */
+										<span>
+											{new Date(
+												summitData.startDate,
+											).toLocaleDateString("en-US", {
+												month: "long",
+												day: "numeric",
+											})}
+											{" – "}
+											{new Date(
+												summitData.endDate,
+											).toLocaleDateString("en-US", {
+												month: "long",
+												day: "numeric",
+												year: "numeric",
+											})}
+										</span>
+									) : summitData.startDate ? (
+										/* Single Date */
+										new Date(
+											summitData.startDate,
+										).toLocaleDateString("en-US", {
+											month: "long",
+											day: "numeric",
+											year: "numeric",
+										})
+									) : (
+										/* Year Fallback */
+										summitData.year
+									)}
 								</div>
 							)}
 							{summitData.venue && (

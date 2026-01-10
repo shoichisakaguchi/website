@@ -102,7 +102,9 @@ export default config({
             label: 'Summit Info',
             path: 'src/content/summit/info',
             schema: {
+                year: fields.text({ label: 'Year (e.g. 2027)' }), // Displayed if dates are missing, or as title suffix
                 startDate: fields.date({ label: 'Start Date' }),
+                endDate: fields.date({ label: 'End Date' }),
                 venue: fields.text({ label: 'Venue' }),
                 fee: fields.text({ label: 'Registration Fee' }),
                 registrationUrl: fields.url({ label: 'Registration URL' }),

@@ -42,7 +42,9 @@ const summits = defineCollection({
 const summit = defineCollection({
     type: 'data',
     schema: z.object({
+        year: z.string().optional(),
         startDate: z.coerce.date().optional(),
+        endDate: z.coerce.date().optional(),
         venue: z.string().optional(),
         fee: z.string().optional(),
         registrationUrl: z.string().url().optional(),
