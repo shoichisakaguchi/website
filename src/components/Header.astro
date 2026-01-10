@@ -1,5 +1,7 @@
 ---
+
 ---
+
 <header class="global-header">
 	<div class="header-content">
 		<a href="/" class="logo">rdrp.io</a>
@@ -25,7 +27,7 @@
 		background: rgba(251, 251, 253, 0.8);
 		backdrop-filter: blur(20px);
 		-webkit-backdrop-filter: blur(20px);
-		border-bottom: 1px solid rgba(0,0,0,0.04);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -50,12 +52,26 @@
 		letter-spacing: -0.01em;
 	}
 
+	nav {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		margin-left: 20px; /* Space from logo */
+		/* Hide scrollbar but keep functionality */
+		scrollbar-width: none; /* Firefox */
+		-ms-overflow-style: none; /* IE 10+ */
+	}
+	nav::-webkit-scrollbar {
+		display: none; /* Chrome/Safari */
+	}
+
 	nav ul {
 		display: flex;
 		list-style: none;
 		margin: 0;
 		padding: 0;
 		gap: 24px;
+		white-space: nowrap; /* Prevent wrapping */
+		padding-right: 22px; /* End padding for scroll */
 	}
 
 	nav a {

@@ -42,7 +42,6 @@ const upcomingSummits = allSummits
     .map((item) => ({
         ...item,
         collection: "summits",
-        url: `/summits`, // Or specific summit page? Current router is /summits or /summits/[slug]?
         // Checking pages/summits: index.astro and [slug].astro exist.
         // So link to /summits/[slug]
         url: `/summits/${item.slug}`,
@@ -92,7 +91,7 @@ const finalDisplayList = [...upcomingSummits, ...displayFeed];
             <div class="announcements-list">
                 {finalDisplayList.map((item) => (
                     <article
-                        class={`announcement-card ${item.data.isPinned || (item as any).isFeaturedSummit ? "pinned" : ""} ${(item as any).isFeaturedSummit ? "featured-summit" : ""}`}
+                        class={`announcement-card ${(item.data as any).isPinned || (item as any).isFeaturedSummit ? "pinned" : ""} ${(item as any).isFeaturedSummit ? "featured-summit" : ""}`}
                     >
                         <a href={(item as any).url} class="card-link">
                             <div class="content">
@@ -104,14 +103,14 @@ const finalDisplayList = [...upcomingSummits, ...displayFeed];
                                               ).toLocaleDateString()
                                             : ""}
                                     </span>
-                                    {(item.data.isPinned ||
-                                        (item as any).isFeaturedSummit) && (
-                                        <span class="badge">Pinned</span>
-                                    )}
                                     {(item as any).isFeaturedSummit && (
                                         <span class="badge upcoming">
                                             Upcoming
                                         </span>
+                                    )}
+                                    {((item.data as any).isPinned ||
+                                        (item as any).isFeaturedSummit) && (
+                                        <span class="badge">Pinned</span>
                                     )}
                                     <span
                                         class={`type-badge ${item.collection}`}
