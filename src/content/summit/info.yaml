@@ -1,14 +1,2 @@
-featuredSummit: rdrp-summit-2027
+featuredSummit: rdrp-summit-2025
 overridePhase: Auto
-topMessagePlanning:
-  - type: paragraph
-    children:
-      - text: Discussions for the next edition are ongoing on Slack. Official updates will be posted here.
-topMessageLive:
-  - type: paragraph
-    children:
-      - text: Welcome to RdRp Summit 2027! Check below for the latest schedule and keynote speakers.
-topMessageArchived:
-  - type: paragraph
-    children:
-      - text: This summit has concluded. Thank you for your participation!
