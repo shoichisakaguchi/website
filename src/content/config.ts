@@ -22,6 +22,11 @@ const people = defineCollection({
             role: z.string(),
             affiliation: z.string(),
             image: image(),
+            customImage: image().optional(),
+            githubId: z.string().optional().or(z.literal('')),
+            blueskyId: z.string().optional().or(z.literal('')),
+            xId: z.string().optional().or(z.literal('')),
+            websiteUrl: z.string().url().optional().or(z.literal('')),
             link: z.string().url().optional().or(z.literal('')),
         }),
 });

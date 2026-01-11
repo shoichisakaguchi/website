@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import { Image } from "astro:assets";
 import Layout from "../../layouts/Layout.astro";
+import defaultAvatar from "../../assets/images/default-avatar.png";
 
 export const prerender = true;
 
@@ -40,6 +41,9 @@ const editionGroups = Object.keys(groupedByEdition)
 			a.data.name.localeCompare(b.data.name),
 		),
 	}));
+
+const normalizeHandle = (value?: string) =>
+	value ? value.trim().replace(/^@/, "") : "";
 ---
 
 <Layout>
@@ -54,36 +58,163 @@ const editionGroups = Object.keys(groupedByEdition)
 					</h2>
 				</div>
 				<div class="people-grid">
-					{group.people.map((person) => (
-						<article class="person-card">
-							<div class="photo-wrapper">
-								<Image
-									src={person.data.image}
-									alt={person.data.name}
-									width={160}
-									height={160}
-									class="person-photo"
-								/>
-							</div>
-							<h3 class="person-name">
-								{person.data.link ? (
-									<a
-										href={person.data.link}
-										target="_blank"
-										rel="noopener noreferrer"
-									>
-										{person.data.name}
-									</a>
-								) : (
-									person.data.name
-								)}
-							</h3>
-							<p class="person-role">{person.data.role}</p>
-							<p class="person-affiliation">
-								{person.data.affiliation}
-							</p>
-						</article>
-					))}
+					{group.people.map((person) => {
+						const websiteUrl =
+							person.data.websiteUrl || person.data.link;
+						const githubId = normalizeHandle(person.data.githubId);
+						const blueskyId = normalizeHandle(
+							person.data.blueskyId,
+						);
+						const xId = normalizeHandle(person.data.xId);
+						const githubUrl = githubId
+							? `https://github.com/${githubId}`
+							: "";
+						const blueskyUrl = blueskyId
+							? `https://bsky.app/profile/${blueskyId}`
+							: "";
+						const xUrl = xId ? `https://x.com/${xId}` : "";
+						const fallbackAvatar = githubId
+							? `https://github.com/${githubId}.png?size=200`
+							: defaultAvatar.src;
+
+						return (
+							<article class="person-card">
+								<div class="photo-wrapper">
+									{person.data.customImage ? (
+										<Image
+											src={person.data.customImage}
+											alt={person.data.name}
+											width={160}
+											height={160}
+											class="person-photo"
+										/>
+									) : (
+										<img
+											src={fallbackAvatar}
+											alt={person.data.name}
+											width="160"
+											height="160"
+											class="person-photo"
+											loading="lazy"
+										/>
+									)}
+								</div>
+								<h3 class="person-name">
+									{websiteUrl ? (
+										<a
+											href={websiteUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											{person.data.name}
+										</a>
+									) : (
+										person.data.name
+									)}
+								</h3>
+								<p class="person-role">{person.data.role}</p>
+								<p class="person-affiliation">
+									{person.data.affiliation}
+								</p>
+								<div class="social-links">
+									{githubUrl && (
+										<a
+											href={githubUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="social-link"
+											aria-label="GitHub"
+										>
+											<svg
+												viewBox="0 0 24 24"
+												aria-hidden="true"
+											>
+												<path
+													fill="currentColor"
+													d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 15.07 3.633 14.7 3.633 14.7c-1.087-.744.084-.729.084-.729 1.205.084 1.84 1.237 1.84 1.237 1.07 1.835 2.807 1.305 3.492.998.108-.776.418-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.468-2.38 1.236-3.22-.124-.303-.536-1.524.117-3.176 0 0 1.008-.322 3.3 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.29-1.552 3.297-1.23 3.297-1.23.653 1.653.241 2.874.118 3.176.77.84 1.235 1.91 1.235 3.22 0 4.61-2.804 5.625-5.475 5.92.43.372.823 1.103.823 2.222 0 1.606-.014 2.898-.014 3.293 0 .32.217.694.825.576C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+												/>
+											</svg>
+										</a>
+									)}
+									{blueskyUrl && (
+										<a
+											href={blueskyUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="social-link"
+											aria-label="Bluesky"
+										>
+											<svg
+												viewBox="0 0 24 24"
+												aria-hidden="true"
+											>
+												<path
+													d="M7 15.5a4.5 4.5 0 0 1 4.5-4.5H12m0 0h4.5a4.5 4.5 0 0 1 0 9H9.5A4.5 4.5 0 0 1 7 15.5Z"
+													fill="none"
+													stroke="currentColor"
+													stroke-width="1.6"
+													stroke-linecap="round"
+													stroke-linejoin="round"
+												/>
+											</svg>
+										</a>
+									)}
+									{xUrl && (
+										<a
+											href={xUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="social-link"
+											aria-label="X"
+										>
+											<svg
+												viewBox="0 0 24 24"
+												aria-hidden="true"
+											>
+												<path
+													d="M18 6L6 18M6 6l12 12"
+													fill="none"
+													stroke="currentColor"
+													stroke-width="1.8"
+													stroke-linecap="round"
+													stroke-linejoin="round"
+												/>
+											</svg>
+										</a>
+									)}
+									{websiteUrl && (
+										<a
+											href={websiteUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="social-link"
+											aria-label="Website"
+										>
+											<svg
+												viewBox="0 0 24 24"
+												aria-hidden="true"
+											>
+												<circle
+													cx="12"
+													cy="12"
+													r="9"
+													fill="none"
+													stroke="currentColor"
+													stroke-width="1.5"
+												/>
+												<path
+													d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"
+													fill="none"
+													stroke="currentColor"
+													stroke-width="1.2"
+												/>
+											</svg>
+										</a>
+									)}
+								</div>
+							</article>
+						);
+					})}
 				</div>
 			</section>
 		))}
@@ -185,5 +316,35 @@ const editionGroups = Object.keys(groupedByEdition)
 		font-size: 0.9em;
 		margin: 0;
 		line-height: 1.4;
+	}
+
+	.social-links {
+		display: flex;
+		justify-content: center;
+		gap: 10px;
+		margin-top: 10px;
+		color: #6b7280;
+	}
+
+	.social-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		background: rgba(0, 0, 0, 0.04);
+		color: inherit;
+		transition: background-color 0.2s ease, color 0.2s ease;
+	}
+
+	.social-link svg {
+		width: 16px;
+		height: 16px;
+	}
+
+	.social-link:hover {
+		background: rgba(0, 0, 0, 0.08);
+		color: var(--c-text, #1d1d1f);
 	}
 </style>
