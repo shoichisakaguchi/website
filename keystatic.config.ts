@@ -44,18 +44,28 @@ export default config({
         }),
         people: collection({
             label: 'People',
-            slugField: 'name',
+            slugField: 'entryId',
             path: 'src/content/people/*',
             schema: {
-                edition: fields.text({ label: 'Edition (e.g. 2025 Lisbon)' }),
-                role: fields.text({ label: 'Role' }),
-                name: fields.slug({ name: { label: 'Name' } }),
-                affiliation: fields.text({ label: 'Affiliation' }),
+                entryId: fields.slug({ name: { label: 'Entry ID' } }),
+                name: fields.text({ label: 'Name', validation: { isRequired: true } }),
+                edition: fields.select({
+                    label: 'Edition',
+                    options: [
+                        { label: '2025 Lisbon', value: '2025 Lisbon' },
+                        { label: '2023 Valencia', value: '2023 Valencia' },
+                        { label: '2027 Germany', value: '2027 Germany' },
+                    ],
+                    defaultValue: '2025 Lisbon',
+                }),
+                role: fields.text({ label: 'Role', validation: { isRequired: true } }),
+                affiliation: fields.text({ label: 'Affiliation', validation: { isRequired: true } }),
                 image: fields.image({
                     label: 'Image',
-                    directory: 'public/images/people',
-                    publicPath: '/images/people',
+                    directory: 'src/assets/images/people',
+                    publicPath: '/src/assets/images/people',
                 }),
+                link: fields.url({ label: 'Social/Web Link' }),
             },
         }),
         journalClub: collection({

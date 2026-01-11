@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import HomeAnnouncements from "../components/HomeAnnouncements.astro";
 import { getEntry, getCollection } from "astro:content";
+import { Image } from "astro:assets";
 
 export const prerender = true;
 
@@ -18,6 +19,30 @@ const summitData = featuredSummit?.data;
 const overridePhase = summitInfo?.data?.overridePhase ?? "Auto";
 const autoPhase = summitData?.phase ?? "Planning";
 const currentPhase = overridePhase === "Auto" ? autoPhase : overridePhase;
+
+const allSummits = await getCollection("summits");
+const liveSummitEntry = allSummits.find(
+	(summit) => summit.data.phase === "Live",
+);
+const liveSummitData =
+	liveSummitEntry?.data ?? (currentPhase === "Live" ? summitData : null);
+
+const getEditionLabel = (summit: any) => {
+	if (!summit) return null;
+	const year = summit.year ? String(summit.year) : "";
+	const location = summit.location ? summit.location.split(",")[0].trim() : "";
+	const label = [year, location].filter(Boolean).join(" ");
+	return label || null;
+};
+
+const allPeople = await getCollection("people");
+const liveEditionLabel = liveSummitData ? getEditionLabel(liveSummitData) : null;
+const liveOrganizers = liveEditionLabel
+	? allPeople.filter((person) => person.data.edition === liveEditionLabel)
+	: [];
+const sortedLiveOrganizers = liveOrganizers.sort((a, b) =>
+	a.data.name.localeCompare(b.data.name),
+);
 
 // Select the top message based on phase
 let topMessage = null;
@@ -188,6 +213,40 @@ import { DocumentRenderer } from "@keystatic/core/renderer";
 			</section>
 		)
 	}
+
+	{currentPhase === "Live" && sortedLiveOrganizers.length > 0 && (
+		<section class="organizers-section">
+			<div class="container">
+				<div class="organizers-header">
+					<div>
+						<span class="eyebrow">Organizing Team</span>
+						<h2 class="organizers-title">
+							{liveEditionLabel || "Current Summit"}
+						</h2>
+					</div>
+					<a href="/people" class="link-arrow">
+						See all past organizers &rarr;
+					</a>
+				</div>
+				<div class="organizers-grid">
+					{sortedLiveOrganizers.map((person) => (
+						<article class="organizer-card">
+							<div class="organizer-photo">
+								<Image
+									src={person.data.image}
+									alt={person.data.name}
+									width={120}
+									height={120}
+									class="organizer-img"
+								/>
+							</div>
+							<p class="organizer-name">{person.data.name}</p>
+						</article>
+					))}
+				</div>
+			</div>
+		</section>
+	)}
 
 	{/* JOURNAL CLUB SECTION */}
 	<section class="journal-section">
@@ -402,6 +461,68 @@ import { DocumentRenderer } from "@keystatic/core/renderer";
 		display: flex;
 		gap: 16px;
 		justify-content: center;
+	}
+
+	/* Organizers Section */
+	.organizers-section {
+		padding: 40px 0 20px;
+		margin-top: -10px;
+		margin-bottom: 40px;
+	}
+
+	.organizers-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+		gap: 20px;
+		flex-wrap: wrap;
+		margin-bottom: 24px;
+	}
+
+	.organizers-title {
+		font-size: 28px;
+		font-weight: 700;
+		margin: 0;
+	}
+
+	.organizers-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+		gap: 18px;
+	}
+
+	.organizer-card {
+		background: #fff;
+		border: 1px solid rgba(0, 0, 0, 0.05);
+		border-radius: 14px;
+		padding: 16px;
+		text-align: center;
+		box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04);
+	}
+
+	.organizer-photo {
+		width: 96px;
+		height: 96px;
+		border-radius: 50%;
+		overflow: hidden;
+		margin: 0 auto 12px;
+		background: #eef1f5;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.organizer-img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.organizer-name {
+		margin: 0;
+		font-size: 0.95em;
+		font-weight: 600;
+		color: var(--c-text);
 	}
 
 	/* Journal Club Section */

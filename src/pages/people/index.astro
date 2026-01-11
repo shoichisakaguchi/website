@@ -1,51 +1,98 @@
 ---
 import { getCollection } from "astro:content";
+import { Image } from "astro:assets";
 import Layout from "../../layouts/Layout.astro";
 
 export const prerender = true;
 
 const people = await getCollection("people");
-// Sorting by name implicitly or we could add an explicit order field.
-// For now, let's keep it default or sort by name.
-const sortedPeople = people.sort((a, b) =>
-	a.data.name.localeCompare(b.data.name),
+
+const getEditionYear = (edition: string) => {
+	const match = edition.match(/\d{4}/);
+	return match ? Number(match[0]) : 0;
+};
+
+const makeEditionId = (edition: string) =>
+	edition
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/(^-|-$)/g, "");
+
+const groupedByEdition = people.reduce(
+	(acc: Record<string, typeof people>, person) => {
+		const edition = person.data.edition;
+		if (!acc[edition]) acc[edition] = [];
+		acc[edition].push(person);
+		return acc;
+	},
+	{},
 );
+
+const editionGroups = Object.keys(groupedByEdition)
+	.sort((a, b) => {
+		const yearDiff = getEditionYear(b) - getEditionYear(a);
+		return yearDiff !== 0 ? yearDiff : a.localeCompare(b);
+	})
+	.map((edition) => ({
+		edition,
+		id: makeEditionId(edition),
+		people: groupedByEdition[edition].sort((a, b) =>
+			a.data.name.localeCompare(b.data.name),
+		),
+	}));
 ---
 
 <Layout>
 	<div class="container page-content">
 		<h1 class="page-title">People</h1>
-		<div class="people-grid">
-			{
-				sortedPeople.map((person) => (
-					<div class="person-card">
-						<div class="photo-wrapper">
-							{person.data.image ? (
-								<img
+
+		{editionGroups.map((group) => (
+			<section class="edition-block">
+				<div class="edition-header">
+					<h2 id={group.id} class="edition-title">
+						{group.edition}
+					</h2>
+				</div>
+				<div class="people-grid">
+					{group.people.map((person) => (
+						<article class="person-card">
+							<div class="photo-wrapper">
+								<Image
 									src={person.data.image}
 									alt={person.data.name}
+									width={160}
+									height={160}
 									class="person-photo"
 								/>
-							) : (
-								<div class="placeholder-photo" />
-							)}
-						</div>
-						<h2 class="person-name">{person.data.name}</h2>
-						{person.data.affiliation && (
+							</div>
+							<h3 class="person-name">
+								{person.data.link ? (
+									<a
+										href={person.data.link}
+										target="_blank"
+										rel="noopener noreferrer"
+									>
+										{person.data.name}
+									</a>
+								) : (
+									person.data.name
+								)}
+							</h3>
+							<p class="person-role">{person.data.role}</p>
 							<p class="person-affiliation">
 								{person.data.affiliation}
 							</p>
-						)}
-					</div>
-				))
-			}
-		</div>
+						</article>
+					))}
+				</div>
+			</section>
+		))}
 	</div>
 </Layout>
 
 <style>
 	.page-content {
-		max-width: 980px;
+		max-width: 1080px;
 		margin: 0 auto;
 	}
 
@@ -55,24 +102,53 @@ const sortedPeople = people.sort((a, b) =>
 		text-align: center;
 	}
 
+	.edition-block {
+		margin-bottom: 64px;
+	}
+
+	.edition-header {
+		margin-bottom: 24px;
+		padding-bottom: 12px;
+		border-bottom: 1px solid var(--c-divider, #e6e6e6);
+	}
+
+	.edition-title {
+		font-size: 28px;
+		font-weight: 700;
+		letter-spacing: -0.01em;
+	}
+
 	.people-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-		gap: 40px;
-		justify-content: center;
+		grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+		gap: 24px;
+	}
+
+	@media (max-width: 640px) {
+		.people-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 
 	.person-card {
+		background: #fff;
+		border-radius: 16px;
+		padding: 20px 18px;
+		border: 1px solid rgba(0, 0, 0, 0.05);
+		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
 		text-align: center;
 	}
 
 	.photo-wrapper {
-		width: 150px;
-		height: 150px;
-		margin: 0 auto 20px;
+		width: 160px;
+		height: 160px;
+		margin: 0 auto 16px;
 		border-radius: 50%;
 		overflow: hidden;
-		background-color: #f0f0f0;
+		background-color: #f0f2f6;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 
 	.person-photo {
@@ -81,16 +157,27 @@ const sortedPeople = people.sort((a, b) =>
 		object-fit: cover;
 	}
 
-	.placeholder-photo {
-		width: 100%;
-		height: 100%;
-		background-color: #e0e0e0;
+	.person-name {
+		font-size: 1.1em;
+		margin: 0 0 6px;
+		font-weight: 600;
+		color: var(--c-text, #1d1d1f);
 	}
 
-	.person-name {
-		font-size: 1.25em;
-		margin: 0 0 8px;
+	.person-name a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.person-name a:hover {
+		text-decoration: underline;
+	}
+
+	.person-role {
+		margin: 0 0 6px;
 		font-weight: 600;
+		color: #1f2937;
+		font-size: 0.95em;
 	}
 
 	.person-affiliation {

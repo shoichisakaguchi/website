@@ -14,13 +14,16 @@ const announcements = defineCollection({
 
 const people = defineCollection({
     type: 'data',
-    schema: z.object({
-        edition: z.string().optional(),
-        role: z.string().optional(),
-        name: z.string(),
-        affiliation: z.string().optional(),
-        image: z.string().optional(),
-    }),
+    schema: ({ image }) =>
+        z.object({
+            entryId: z.string(),
+            name: z.string(),
+            edition: z.string(),
+            role: z.string(),
+            affiliation: z.string(),
+            image: image(),
+            link: z.string().url().optional().or(z.literal('')),
+        }),
 });
 
 const journalClub = defineCollection({
