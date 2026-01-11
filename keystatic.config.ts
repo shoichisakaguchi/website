@@ -18,6 +18,7 @@ export default config({
             path: 'src/content/announcements/*',
             format: { contentField: 'content' },
             previewUrl: '/announcements/{slug}',
+            entryLabel: (entry) => entry.title,
             schema: {
                 title: fields.slug({ name: { label: 'Title' } }),
                 publishedDate: fields.date({ label: 'Published Date', validation: { isRequired: true } }),
@@ -46,6 +47,7 @@ export default config({
             label: 'People',
             slugField: 'entryId',
             path: 'src/content/people/*',
+            entryLabel: (entry) => entry.name,
             schema: {
                 entryId: fields.slug({ name: { label: 'Entry ID' } }),
                 name: fields.text({ label: 'Name', validation: { isRequired: true } }),
@@ -64,11 +66,13 @@ export default config({
                     label: 'Image',
                     directory: 'src/assets/images/people',
                     publicPath: '/src/assets/images/people',
+                    validation: { isRequired: false },
                 }),
                 customImage: fields.image({
                     label: 'Custom Image',
                     directory: 'src/assets/images/people',
                     publicPath: '/src/assets/images/people',
+                    validation: { isRequired: false },
                 }),
                 githubId: fields.text({ label: 'GitHub ID' }),
                 blueskyId: fields.text({ label: 'Bluesky ID' }),
