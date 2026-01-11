@@ -21,7 +21,7 @@ const people = defineCollection({
             edition: z.string(),
             role: z.string(),
             affiliation: z.string(),
-            image: image(),
+            image: image().optional(),
             customImage: image().optional(),
             githubId: z.string().optional().or(z.literal('')),
             blueskyId: z.string().optional().or(z.literal('')),
