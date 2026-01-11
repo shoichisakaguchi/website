@@ -5,8 +5,9 @@ import { defineCollection, z } from 'astro:content';
 const announcements = defineCollection({
     schema: z.object({
         title: z.string(),
-        date: z.coerce.date(), // Handles date strings from YAML
-        category: z.enum(['update', 'event', 'general']).optional().default('update'),
+        publishedDate: z.coerce.date(),
+        eventDate: z.coerce.date().optional(),
+        category: z.enum(['News', 'Event', 'Journal Club', 'Community']).optional().default('News'),
         isPinned: z.boolean().default(false),
     }),
 });
@@ -14,9 +15,11 @@ const announcements = defineCollection({
 const people = defineCollection({
     type: 'data',
     schema: z.object({
+        edition: z.string().optional(),
+        role: z.string().optional(),
         name: z.string(),
         affiliation: z.string().optional(),
-        photo: z.string().optional(),
+        image: z.string().optional(),
     }),
 });
 
@@ -33,27 +36,40 @@ const journalClub = defineCollection({
 const summits = defineCollection({
     schema: z.object({
         title: z.string(),
-        startDate: z.coerce.date().optional(),
+        phase: z.enum(['Planning', 'Live', 'Archived']).optional().default('Planning'),
         year: z.string().optional(),
-        organizer: z.string().optional(), // Stores the slug of the related person
+        startDate: z.coerce.date().optional(),
+        endDate: z.coerce.date().optional(),
+        location: z.string().optional(),
+        venue: z.string().optional(),
+        organizers: z.array(z.object({
+            person: z.string(),
+            role: z.string().optional(),
+            section: z.string().optional(),
+        })).optional(),
+        links: z.object({
+            registration: z.string().url().optional().or(z.literal('')),
+            callForPapers: z.string().url().optional().or(z.literal('')),
+            slack: z.string().url().optional().or(z.literal('')),
+            googleCalendar: z.string().url().optional().or(z.literal('')),
+        }).optional(),
+        keynotes: z.array(z.object({
+            name: z.string(),
+            affiliation: z.string().optional(),
+            url: z.string().url().optional().or(z.literal('')),
+            image: z.string().optional(),
+        })).optional(),
     }),
 });
 
 const summit = defineCollection({
     type: 'data',
     schema: z.object({
-        year: z.string().optional(),
-        startDate: z.coerce.date().optional(),
-        endDate: z.coerce.date().optional(),
-        venue: z.string().optional(),
-        fee: z.string().optional(),
-        registrationUrl: z.string().url().optional(),
-        callForPapersUrl: z.string().url().optional(),
-        keynotes: z.array(z.object({
-            name: z.string(),
-            affiliation: z.string().optional(),
-            image: z.string().optional(),
-        })).optional(),
+        featuredSummit: z.string().optional(),
+        overridePhase: z.enum(['Auto', 'Planning', 'Live', 'Archived']).optional().default('Auto'),
+        topMessagePlanning: z.any().optional(),
+        topMessageLive: z.any().optional(),
+        topMessageArchived: z.any().optional(),
     }),
 });
 

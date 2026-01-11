@@ -1,14 +1,17 @@
 ---
-import { getCollection } from 'astro:content';
-import Layout from '../../layouts/Layout.astro';
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
 
 export const prerender = true;
 
-const announcements = await getCollection('announcements');
+const announcements = await getCollection("announcements");
 const sortedAnnouncements = announcements.sort((a, b) => {
-  if (a.data.isPinned && !b.data.isPinned) return -1;
-  if (!a.data.isPinned && b.data.isPinned) return 1;
-  return new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf();
+	if (a.data.isPinned && !b.data.isPinned) return -1;
+	if (!a.data.isPinned && b.data.isPinned) return 1;
+	return (
+		new Date(b.data.publishedDate).valueOf() -
+		new Date(a.data.publishedDate).valueOf()
+	);
 });
 ---
 
@@ -17,15 +20,26 @@ const sortedAnnouncements = announcements.sort((a, b) => {
 		<h1 class="page-title">Announcements</h1>
 		<div class="content-wrapper">
 			<ul class="announcement-list">
-				{sortedAnnouncements.map(item => (
-					<li class={item.data.isPinned ? 'pinned' : ''}>
-                        <div class="meta">
-                            <span class="date">{item.data.date.toLocaleDateString()}</span>
-                            {item.data.isPinned && <span class="badge">Pinned</span>}
-                        </div>
-						<a href={`/announcements/${item.slug}`} class="title">{item.data.title}</a>
-					</li>
-				))}
+				{
+					sortedAnnouncements.map((item) => (
+						<li class={item.data.isPinned ? "pinned" : ""}>
+							<div class="meta">
+								<span class="date">
+									{item.data.publishedDate.toLocaleDateString()}
+								</span>
+								{item.data.isPinned && (
+									<span class="badge">Pinned</span>
+								)}
+							</div>
+							<a
+								href={`/announcements/${item.slug}`}
+								class="title"
+							>
+								{item.data.title}
+							</a>
+						</li>
+					))
+				}
 			</ul>
 		</div>
 	</div>
@@ -52,38 +66,38 @@ const sortedAnnouncements = announcements.sort((a, b) => {
 		padding: 20px 0;
 		border-bottom: 1px solid var(--c-divider, #eee);
 	}
-    
-    .announcement-list li:last-child {
-        border-bottom: none;
-    }
 
-    .meta {
-        font-size: 0.9em;
-        color: var(--c-text-light, #666);
-        margin-bottom: 4px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
+	.announcement-list li:last-child {
+		border-bottom: none;
+	}
+
+	.meta {
+		font-size: 0.9em;
+		color: var(--c-text-light, #666);
+		margin-bottom: 4px;
+		display: flex;
+		gap: 10px;
+		align-items: center;
+	}
 
 	.title {
 		text-decoration: none;
 		color: var(--c-text, #333);
 		font-size: 1.2em;
-        font-weight: 600;
-        display: block;
+		font-weight: 600;
+		display: block;
 	}
 
 	.title:hover {
 		color: var(--c-link, #0070f3);
 	}
 
-    .badge {
-        background: var(--c-link, #0070f3);
-        color: white;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 0.8em;
-        font-weight: bold;
-    }
+	.badge {
+		background: var(--c-link, #0070f3);
+		color: white;
+		padding: 2px 6px;
+		border-radius: 4px;
+		font-size: 0.8em;
+		font-weight: bold;
+	}
 </style>

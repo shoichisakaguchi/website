@@ -6,14 +6,29 @@ import { getEntry, getCollection } from "astro:content";
 export const prerender = true;
 
 // 1. Fetch Key Data
-const summit = await getEntry("summit", "info");
-const allJournalClub = await getCollection("journal-club");
+// 1. Fetch Key Data
+const summitInfo = await getEntry("summit", "info");
+const featuredSummitSlug = summitInfo?.data?.featuredSummit;
+const featuredSummit = featuredSummitSlug
+	? await getEntry("summits", featuredSummitSlug)
+	: null;
+const summitData = featuredSummit?.data;
 
-// 2. Process Summit Data
-const summitData = summit?.data;
-const showSummitHero = !!summitData;
+// 2. Determine Phase & Content
+const overridePhase = summitInfo?.data?.overridePhase ?? "Auto";
+const autoPhase = summitData?.phase ?? "Planning";
+const currentPhase = overridePhase === "Auto" ? autoPhase : overridePhase;
+
+// Select the top message based on phase
+let topMessage = null;
+if (currentPhase === "Planning")
+	topMessage = summitInfo?.data?.topMessagePlanning;
+else if (currentPhase === "Live") topMessage = summitInfo?.data?.topMessageLive;
+else if (currentPhase === "Archived")
+	topMessage = summitInfo?.data?.topMessageArchived;
 
 // 3. Process Journal Club (Find next meeting)
+const allJournalClub = await getCollection("journal-club");
 const today = new Date();
 // Filter for future meetings (including today)
 const upcomingJournalClub = allJournalClub
@@ -41,90 +56,133 @@ const makeGoogleCalendarUrl = (item: any) => {
 };
 
 const journalClubCalendarUrl = makeGoogleCalendarUrl(upcomingJournalClub);
+
+import { DocumentRenderer } from "@keystatic/core/renderer";
 ---
 
 <Layout>
 	{/* HERO SECTION: SUMMIT */}
 	{
-		showSummitHero && (
-			<section class="hero-summit">
+		summitData && (
+			<section class={`hero-summit phase-${currentPhase.toLowerCase()}`}>
 				<div class="container">
-					<div class="summit-content">
-						<span class="eyebrow">Upcoming Summit</span>
-						<h1 class="summit-title">
-							RdRp Summit{" "}
-							{summitData.year ||
-								(summitData.startDate
-									? new Date(
-											summitData.startDate,
-										).getFullYear()
-									: "")}
-						</h1>
+					<span class="eyebrow">
+						{currentPhase === "Archived"
+							? "Past Event"
+							: currentPhase === "Planning"
+								? "Planning Phase"
+								: "Upcoming Summit"}
+					</span>
+					<h1 class="summit-title">
+						{summitData.title || `RdRp Summit ${summitData.year}`}
+					</h1>
 
-						<div class="summit-details">
-							{(summitData.startDate || summitData.year) && (
-								<div class="detail-item">
-									<span class="icon">📅</span>
-									{summitData.startDate &&
-									summitData.endDate ? (
-										/* Date Range */
-										<span>
-											{new Date(
-												summitData.startDate,
-											).toLocaleDateString("en-US", {
-												month: "long",
-												day: "numeric",
-											})}
-											{" – "}
-											{new Date(
-												summitData.endDate,
-											).toLocaleDateString("en-US", {
-												month: "long",
-												day: "numeric",
-												year: "numeric",
-											})}
-										</span>
-									) : summitData.startDate ? (
-										/* Single Date */
-										new Date(
-											summitData.startDate,
-										).toLocaleDateString("en-US", {
-											month: "long",
-											day: "numeric",
-											year: "numeric",
-										})
-									) : (
-										/* Year Fallback */
-										summitData.year
+					<div class="summit-message">
+						{topMessage && (
+							<div class="rich-text">
+								<DocumentRenderer document={topMessage} />
+							</div>
+						)}
+					</div>
+
+					{/* Live / Archived Details: Show Dates & Venue */}
+					{currentPhase !== "Planning" && (
+						<div class="summit-info-grid">
+							{(summitData.startDate || summitData.location) && (
+								<div class="summit-details">
+									{summitData.startDate && (
+										<div class="detail-item">
+											<span class="icon">📅</span>
+											<span>
+												{new Date(
+													summitData.startDate,
+												).toLocaleDateString("en-US", {
+													month: "long",
+													day: "numeric",
+												})}
+												{summitData.endDate &&
+													` – ${new Date(summitData.endDate).toLocaleDateString("en-US", { month: "long", day: "numeric" })}`}
+												{", "}
+												{summitData.year}
+											</span>
+										</div>
+									)}
+									{summitData.location && (
+										<div class="detail-item">
+											<span class="icon">📍</span>
+											<span>
+												{summitData.location}
+												{summitData.venue &&
+													` (${summitData.venue})`}
+											</span>
+										</div>
 									)}
 								</div>
 							)}
-							{summitData.venue && (
-								<div class="detail-item">
-									<span class="icon">📍</span>
-									{summitData.venue}
-								</div>
-							)}
-						</div>
 
-						<div class="cta-group">
-							{summitData.registrationUrl && (
+							{/* Keynotes */}
+							{summitData.keynotes &&
+								summitData.keynotes.length > 0 && (
+									<div class="keynotes-section">
+										<h3>Keynote Speakers</h3>
+										<div class="keynotes-list">
+											{summitData.keynotes.map(
+												(speaker: any) => (
+													<div class="keynote-card">
+														{speaker.image && (
+															<img
+																src={
+																	speaker.image
+																}
+																alt={
+																	speaker.name
+																}
+																class="keynote-img"
+															/>
+														)}
+														<div class="keynote-info">
+															<span class="keynote-name">
+																{speaker.name}
+															</span>
+															<span class="keynote-affil">
+																{
+																	speaker.affiliation
+																}
+															</span>
+														</div>
+													</div>
+												),
+											)}
+										</div>
+									</div>
+								)}
+						</div>
+					)}
+
+					{/* CTA Buttons */}
+					<div class="cta-group">
+						{summitData.links?.registration &&
+							currentPhase === "Live" && (
 								<a
-									href={summitData.registrationUrl}
+									href={summitData.links.registration}
 									class="button primary"
 								>
 									Register Now
 								</a>
 							)}
-							{summitData.callForPapersUrl && (
-								<a
-									href={summitData.callForPapersUrl}
-									class="button secondary"
-								>
-									Call for Papers
-								</a>
-							)}
-						</div>
+						{summitData.links?.slack && (
+							<a
+								href={summitData.links.slack}
+								class="button secondary"
+							>
+								Join Slack
+							</a>
+						)}
+						{currentPhase === "Archived" && (
+							<a href="/summits" class="button outline">
+								View Past Summits
+							</a>
+						)}
 					</div>
 				</div>
 			</section>
@@ -139,6 +197,12 @@ const journalClubCalendarUrl = makeGoogleCalendarUrl(upcomingJournalClub);
 				<p class="subtitle">
 					Join our bi-weekly discussion on the latest RdRp research.
 				</p>
+				<div class="calendar-note">
+					<p>
+						<span class="icon">🕒</span> Time is managed via Google Calendar
+						(automatically adjusted to your local timezone).
+					</p>
+				</div>
 
 				<div class="actions">
 					<a

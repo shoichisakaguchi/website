@@ -6,11 +6,13 @@ const allAnnouncements = await getCollection("announcements");
 
 // Sort by date descending
 const sortedAnnouncements = allAnnouncements.sort(
-    (a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf(),
+    (a, b) =>
+        new Date(b.data.publishedDate).valueOf() -
+        new Date(a.data.publishedDate).valueOf(),
 );
 
-// Take latest 5
-const latestAnnouncements = sortedAnnouncements.slice(0, 5);
+// Take latest 3
+const latestAnnouncements = sortedAnnouncements.slice(0, 3);
 ---
 
 {
@@ -27,9 +29,9 @@ const latestAnnouncements = sortedAnnouncements.slice(0, 5);
                             <div class="content">
                                 <div class="meta">
                                     <span class="date">
-                                        {item.data.date
+                                        {item.data.publishedDate
                                             ? new Date(
-                                                  item.data.date,
+                                                  item.data.publishedDate,
                                               ).toLocaleDateString("en-US", {
                                                   year: "numeric",
                                                   month: "short",
@@ -39,7 +41,7 @@ const latestAnnouncements = sortedAnnouncements.slice(0, 5);
                                     </span>
                                     {item.data.category && (
                                         <span
-                                            class={`type-badge ${item.data.category}`}
+                                            class={`type-badge ${item.data.category.toLowerCase().replace(/\s+/g, "-")}`}
                                         >
                                             {item.data.category}
                                         </span>
@@ -131,7 +133,7 @@ const latestAnnouncements = sortedAnnouncements.slice(0, 5);
         letter-spacing: 0.02em;
     }
 
-    .type-badge.update {
+    .type-badge.news {
         background-color: #e6f6ff;
         color: #0070f3;
     }
@@ -139,7 +141,11 @@ const latestAnnouncements = sortedAnnouncements.slice(0, 5);
         background-color: #f3e8ff;
         color: #7928ca;
     }
-    .type-badge.general {
+    .type-badge.journal-club {
+        background-color: #fce7f3;
+        color: #db2777;
+    }
+    .type-badge.community {
         background-color: #f0f0f0;
         color: #555;
     }

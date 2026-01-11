@@ -1,6 +1,14 @@
-year: 2027 (demo)
-venue: To be updated
-fee: not yet determined
-registrationUrl: https://rdrp.io/registration-pending
-callForPapersUrl: https://rdrp.io/call-for-papers-pending
-keynotes: []
+featuredSummit: rdrp-summit-2027
+overridePhase: Auto
+topMessagePlanning:
+  - type: paragraph
+    children:
+      - text: Discussions for the next edition are ongoing on Slack. Official updates will be posted here.
+topMessageLive:
+  - type: paragraph
+    children:
+      - text: Welcome to RdRp Summit 2027! Check below for the latest schedule and keynote speakers.
+topMessageArchived:
+  - type: paragraph
+    children:
+      - text: This summit has concluded. Thank you for your participation!
