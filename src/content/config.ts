@@ -16,18 +16,12 @@ const people = defineCollection({
     type: 'data',
     schema: ({ image }) =>
         z.object({
-            entryId: z.string(),
             name: z.string(),
-            edition: z.string(),
-            role: z.string(),
             affiliation: z.string(),
             image: image().optional(),
-            customImage: image().optional(),
-            githubId: z.string().optional().or(z.literal('')),
             blueskyId: z.string().optional().or(z.literal('')),
             xId: z.string().optional().or(z.literal('')),
             websiteUrl: z.string().url().optional().or(z.literal('')),
-            link: z.string().url().optional().or(z.literal('')),
         }),
 });
 
@@ -54,6 +48,7 @@ const summits = defineCollection({
             person: z.string(),
             role: z.string().optional(),
             section: z.string().optional(),
+            weight: z.number().optional().default(50),
         })).optional(),
         links: z.object({
             registration: z.string().url().optional().or(z.literal('')),
@@ -61,11 +56,15 @@ const summits = defineCollection({
             slack: z.string().url().optional().or(z.literal('')),
             googleCalendar: z.string().url().optional().or(z.literal('')),
         }).optional(),
-        keynotes: z.array(z.object({
+        speakers: z.array(z.object({
             name: z.string(),
-            affiliation: z.string().optional(),
-            url: z.string().url().optional().or(z.literal('')),
-            image: z.string().optional(),
+            talks: z.array(z.object({
+                name: z.string(),
+                affiliation: z.string().optional(),
+                title: z.string(),
+                url: z.string().url().optional().or(z.literal('')),
+                image: z.string().optional(),
+            })),
         })).optional(),
     }),
 });

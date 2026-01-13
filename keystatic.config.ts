@@ -2,6 +2,9 @@
 import { config, fields, collection, singleton } from '@keystatic/core';
 
 export default config({
+    ui: {
+        brand: { name: 'rdrp.io admin' },
+    },
     storage: import.meta.env.DEV
         ? {
             kind: 'local',
@@ -45,40 +48,27 @@ export default config({
         }),
         people: collection({
             label: 'People',
-            slugField: 'entryId',
+            slugField: 'name',
             path: 'src/content/people/*',
             entryLabel: (entry) => entry.name,
             schema: {
-                entryId: fields.slug({ name: { label: 'Entry ID' } }),
-                name: fields.text({ label: 'Name', validation: { isRequired: true } }),
-                edition: fields.select({
-                    label: 'Edition',
-                    options: [
-                        { label: '2025 Lisbon', value: '2025 Lisbon' },
-                        { label: '2023 Valencia', value: '2023 Valencia' },
-                        { label: '2027 Germany', value: '2027 Germany' },
-                    ],
-                    defaultValue: '2025 Lisbon',
-                }),
-                role: fields.text({ label: 'Role', validation: { isRequired: true } }),
+                name: fields.slug({ name: { label: 'Name' } }),
                 affiliation: fields.text({ label: 'Affiliation', validation: { isRequired: true } }),
+                country: fields.text({ label: 'Country (Name & Flag)' }),
+                bio: fields.document({
+                    label: 'Bio',
+                    formatting: true,
+                    links: true,
+                }),
                 image: fields.image({
                     label: 'Image',
                     directory: 'src/assets/images/people',
                     publicPath: '/src/assets/images/people',
                     validation: { isRequired: false },
                 }),
-                customImage: fields.image({
-                    label: 'Custom Image',
-                    directory: 'src/assets/images/people',
-                    publicPath: '/src/assets/images/people',
-                    validation: { isRequired: false },
-                }),
-                githubId: fields.text({ label: 'GitHub ID' }),
                 blueskyId: fields.text({ label: 'Bluesky ID' }),
-                xId: fields.text({ label: 'X ID' }),
+                xId: fields.text({ label: 'X (Twitter) ID' }),
                 websiteUrl: fields.url({ label: 'Website URL' }),
-                link: fields.url({ label: 'Social/Web Link' }),
             },
         }),
         journalClub: collection({
@@ -130,11 +120,16 @@ export default config({
                             validation: { isRequired: true }
                         }),
                         role: fields.text({ label: 'Role' }),
+                        affiliation: fields.text({ label: 'Affiliation (Override)' }),
                         section: fields.text({ label: 'Team / Section' }),
                     }),
                     {
                         label: 'Organizers',
-                        itemLabel: (props) => props.fields.person.value || 'Organizer',
+                        itemLabel: (props) => {
+                            const name = props.fields.person.value || 'Organizer';
+                            const role = props.fields.role.value;
+                            return role ? `${name} — ${role}` : name;
+                        },
                     }
                 ),
                 links: fields.object({
@@ -143,19 +138,29 @@ export default config({
                     slack: fields.url({ label: 'Slack Invite URL' }),
                     googleCalendar: fields.url({ label: 'Google Calendar URL' }),
                 }, { label: 'Key Links' }),
-                keynotes: fields.array(
+                speakers: fields.array(
                     fields.object({
-                        name: fields.text({ label: 'Name' }),
-                        affiliation: fields.text({ label: 'Affiliation' }),
-                        url: fields.url({ label: 'Website URL' }),
-                        image: fields.image({
-                            label: 'Image',
-                            directory: 'public/images/keynotes',
-                            publicPath: '/images/keynotes',
-                        }),
+                        name: fields.text({ label: 'Session Name' }),
+                        talks: fields.array(
+                            fields.object({
+                                name: fields.text({ label: 'Name' }),
+                                affiliation: fields.text({ label: 'Affiliation' }),
+                                title: fields.text({ label: 'Title', multiline: true }),
+                                url: fields.url({ label: 'Website URL' }),
+                                image: fields.image({
+                                    label: 'Image',
+                                    directory: 'public/images/speakers',
+                                    publicPath: '/images/speakers',
+                                }),
+                            }),
+                            {
+                                label: 'Talks',
+                                itemLabel: (props) => `${props.fields.name.value} — ${props.fields.title.value}`,
+                            }
+                        ),
                     }),
                     {
-                        label: 'Keynote Speakers',
+                        label: 'Featured Invited Speakers',
                         itemLabel: (props) => props.fields.name.value,
                     }
                 ),
