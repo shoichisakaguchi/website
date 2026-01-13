@@ -98,6 +98,13 @@ export default config({
             format: { contentField: 'summary' },
             schema: {
                 title: fields.slug({ name: { label: 'Title' } }),
+                heroImage: fields.image({
+                    label: 'Hero Image',
+                    directory: 'public/images/summits/hero',
+                    publicPath: '/images/summits/hero',
+                }),
+                description: fields.text({ label: 'Description (OGP/Card)', multiline: true }),
+                tags: fields.array(fields.text({ label: 'Tag' }), { label: 'Tags' }),
                 phase: fields.select({
                     label: 'Phase',
                     options: [
@@ -110,8 +117,23 @@ export default config({
                 year: fields.text({ label: 'Year' }),
                 startDate: fields.date({ label: 'Start Date' }),
                 endDate: fields.date({ label: 'End Date' }),
-                location: fields.text({ label: 'Location (City, Country)' }),
+                location: fields.text({ label: 'Location Display String' }),
+                city: fields.text({ label: 'City' }),
+                country: fields.text({ label: 'Country' }),
                 venue: fields.text({ label: 'Venue (Facility Name)' }),
+                format: fields.select({
+                    label: 'Format',
+                    options: [
+                        { label: 'On-site', value: 'On-site' },
+                        { label: 'Hybrid', value: 'Hybrid' },
+                        { label: 'Online', value: 'Online' },
+                    ],
+                    defaultValue: 'On-site',
+                }),
+                satelliteOf: fields.object({
+                    name: fields.text({ label: 'Parent Event Name' }),
+                    url: fields.url({ label: 'Parent Event URL' }),
+                }, { label: 'Satellite Event Of' }),
                 organizers: fields.array(
                     fields.object({
                         person: fields.relationship({
@@ -137,7 +159,66 @@ export default config({
                     callForPapers: fields.url({ label: 'Call for Papers URL' }),
                     slack: fields.url({ label: 'Slack Invite URL' }),
                     googleCalendar: fields.url({ label: 'Google Calendar URL' }),
+                    detailedProgram: fields.url({ label: 'Detailed Program URL' }),
+                    codeOfConduct: fields.url({ label: 'Code of Conduct URL' }),
+                    contact: fields.url({ label: 'Contact URL / Email (mailto:)' }),
                 }, { label: 'Key Links' }),
+                sponsors: fields.array(
+                    fields.object({
+                        name: fields.text({ label: 'Sponsor Name' }),
+                        url: fields.url({ label: 'Website URL' }),
+                        logo: fields.image({
+                            label: 'Logo',
+                            directory: 'public/images/summits/sponsors',
+                            publicPath: '/images/summits/sponsors',
+                        }),
+                        supportType: fields.text({ label: 'Support Type (e.g. Platinum, Travel)' }),
+                    }),
+                    {
+                        label: 'Sponsors',
+                        itemLabel: (props) => props.fields.name.value,
+                    }
+                ),
+                travelGrant: fields.object({
+                    amount: fields.text({ label: 'Amount' }),
+                    currency: fields.text({ label: 'Currency' }),
+                    eligibility: fields.text({ label: 'Eligibility' }),
+                    applicationUrl: fields.url({ label: 'Application URL' }),
+                    notes: fields.text({ label: 'Notes', multiline: true }),
+                }, { label: 'Travel Grants' }),
+                archiveResources: fields.object({
+                    photoGalleryUrl: fields.url({ label: 'Photo Gallery URL' }),
+                    recordingsUrl: fields.url({ label: 'Recordings URL' }),
+                    slidesUrl: fields.url({ label: 'Slides URL' }),
+                    reportUrl: fields.url({ label: 'Report URL' }),
+                }, { label: 'Archive Resources' }),
+                communityOutcomes: fields.array(
+                    fields.object({
+                        type: fields.select({
+                            label: 'Type',
+                            options: [
+                                { label: 'Consensus statement', value: 'Consensus statement' },
+                                { label: 'Dataset', value: 'Dataset' },
+                                { label: 'Software', value: 'Software' },
+                                { label: 'Report', value: 'Report' },
+                                { label: 'Slides', value: 'Slides' },
+                                { label: 'Recording', value: 'Recording' },
+                                { label: 'Photo', value: 'Photo' },
+                                { label: 'Other', value: 'Other' },
+                            ],
+                            defaultValue: 'Report',
+                        }),
+                        title: fields.text({ label: 'Title' }),
+                        url: fields.url({ label: 'URL' }),
+                        doi: fields.text({ label: 'DOI' }),
+                        date: fields.date({ label: 'Date' }),
+                        description: fields.text({ label: 'Description', multiline: true }),
+                    }),
+                    {
+                        label: 'Community Outcomes',
+                        itemLabel: (props) => props.fields.title.value,
+                    }
+                ),
                 speakers: fields.array(
                     fields.object({
                         name: fields.text({ label: 'Session Name' }),

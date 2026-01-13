@@ -59,12 +59,62 @@ if (item.data.organizers) {
       <a href="/summits">← Back to Summits</a>
     </div>
     <header class="post-header">
+      {
+        item.data.phase && (
+          <div class={`phase-badge ${item.data.phase.toLowerCase()}`}>
+            {item.data.phase}
+          </div>
+        )
+      }
       <h1 class="page-title">{item.data.title}</h1>
       <div class="meta">
         <span class="year">{item.data.year}</span>
         {
-          item.data.location && (
-            <span class="location">{item.data.location}</span>
+          item.data.city || item.data.country ? (
+            <span class="location">
+              {[item.data.city, item.data.country].filter(Boolean).join(", ")}
+            </span>
+          ) : (
+            item.data.location && (
+              <span class="location">{item.data.location}</span>
+            )
+          )
+        }
+        {item.data.format && <span class="format">({item.data.format})</span>}
+      </div>
+      {
+        item.data.satelliteOf && (
+          <div class="satellite-info">
+            Satellite event of{" "}
+            {item.data.satelliteOf.url ? (
+              <a
+                href={item.data.satelliteOf.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {item.data.satelliteOf.name}
+              </a>
+            ) : (
+              item.data.satelliteOf.name
+            )}
+          </div>
+        )
+      }
+
+      {/* Key Links Buttons */}
+      <div class="header-actions">
+        {
+          item.data.links?.detailedProgram && (
+            <a href={item.data.links.detailedProgram} class="button primary">
+              View Detailed Program
+            </a>
+          )
+        }
+        {
+          item.data.links?.registration && item.data.phase === "Planning" && (
+            <a href={item.data.links.registration} class="button secondary">
+              Register Now
+            </a>
           )
         }
       </div>
@@ -74,6 +124,162 @@ if (item.data.organizers) {
       <article>
         <Content />
       </article>
+
+      {/* Community Outcomes */}
+      {
+        item.data.communityOutcomes &&
+          item.data.communityOutcomes.length > 0 && (
+            <section class="outcomes-section">
+              <h2>Community Outcomes</h2>
+              <div class="outcomes-list">
+                {item.data.communityOutcomes.map((outcome) => (
+                  <div class="outcome-item">
+                    <span class="outcome-type">{outcome.type}</span>
+                    <div class="outcome-details">
+                      <h3 class="outcome-title">
+                        {outcome.url ? (
+                          <a
+                            href={outcome.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {outcome.title}
+                          </a>
+                        ) : (
+                          outcome.title
+                        )}
+                      </h3>
+                      {outcome.description && (
+                        <p class="outcome-desc">{outcome.description}</p>
+                      )}
+                      <div class="outcome-meta">
+                        {outcome.doi && (
+                          <span class="doi">DOI: {outcome.doi}</span>
+                        )}
+                        {outcome.date && (
+                          <span class="date">
+                            {new Date(outcome.date).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )
+      }
+
+      {/* Archive Resources */}
+      {
+        item.data.links &&
+          (item.data.archiveResources?.recordingsUrl ||
+            item.data.archiveResources?.slidesUrl ||
+            item.data.archiveResources?.photoGalleryUrl ||
+            item.data.archiveResources?.reportUrl) && (
+            <section class="archive-section">
+              <h2>Archive Resources</h2>
+              <div class="archive-links">
+                {item.data.archiveResources.reportUrl && (
+                  <a
+                    href={item.data.archiveResources.reportUrl}
+                    class="archive-link"
+                  >
+                    📄 Post-Summit Report
+                  </a>
+                )}
+                {item.data.archiveResources.recordingsUrl && (
+                  <a
+                    href={item.data.archiveResources.recordingsUrl}
+                    class="archive-link"
+                  >
+                    ▶️ Recordings
+                  </a>
+                )}
+                {item.data.archiveResources.slidesUrl && (
+                  <a
+                    href={item.data.archiveResources.slidesUrl}
+                    class="archive-link"
+                  >
+                    📊 Slides
+                  </a>
+                )}
+                {item.data.archiveResources.photoGalleryUrl && (
+                  <a
+                    href={item.data.archiveResources.photoGalleryUrl}
+                    class="archive-link"
+                  >
+                    📸 Photo Gallery
+                  </a>
+                )}
+              </div>
+            </section>
+          )
+      }
+
+      {/* Sponsors */}
+      {
+        item.data.sponsors && item.data.sponsors.length > 0 && (
+          <section class="sponsors-section">
+            <h2>Sponsors</h2>
+            <div class="sponsors-grid">
+              {item.data.sponsors.map((sponsor) => (
+                <a
+                  href={sponsor.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="sponsor-card"
+                >
+                  {sponsor.logo ? (
+                    <img
+                      src={sponsor.logo}
+                      alt={sponsor.name}
+                      class="sponsor-logo"
+                    />
+                  ) : (
+                    <span class="sponsor-name">{sponsor.name}</span>
+                  )}
+                  {sponsor.supportType && (
+                    <span class="support-type">{sponsor.supportType}</span>
+                  )}
+                </a>
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      {/* Travel Grants */}
+      {
+        item.data.travelGrant && (
+          <section class="grants-section">
+            <h2>Travel Grants</h2>
+            <div class="grant-card">
+              <p>
+                <strong>Amount:</strong> {item.data.travelGrant.amount}{" "}
+                {item.data.travelGrant.currency}
+              </p>
+              {item.data.travelGrant.eligibility && (
+                <p>
+                  <strong>Eligibility:</strong>{" "}
+                  {item.data.travelGrant.eligibility}
+                </p>
+              )}
+              {item.data.travelGrant.notes && (
+                <p class="grant-notes">{item.data.travelGrant.notes}</p>
+              )}
+              {item.data.travelGrant.applicationUrl && (
+                <a
+                  href={item.data.travelGrant.applicationUrl}
+                  class="button small"
+                >
+                  Apply for Grant
+                </a>
+              )}
+            </div>
+          </section>
+        )
+      }
 
       {
         item.data.speakers && item.data.speakers.length > 0 && (
@@ -146,6 +352,26 @@ if (item.data.organizers) {
               ))}
             </div>
           </section>
+        )
+      }
+
+      {/* Footer Links (CoC, Contact) */}
+      {
+        (item.data.links?.codeOfConduct || item.data.links?.contact) && (
+          <div class="footer-links">
+            {item.data.links.codeOfConduct && (
+              <a
+                href={item.data.links.codeOfConduct}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Code of Conduct
+              </a>
+            )}
+            {item.data.links.contact && (
+              <a href={item.data.links.contact}>Contact Us</a>
+            )}
+          </div>
         )
       }
     </div>
@@ -360,5 +586,246 @@ if (item.data.organizers) {
     font-size: 0.85rem;
     color: #888;
     margin-top: 0.1rem;
+  }
+
+  /* Header actions & Badges */
+  .phase-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+  .phase-badge.planning {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+  .phase-badge.live {
+    background: #dcfce7;
+    color: #15803d;
+  }
+  .phase-badge.archived {
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  .header-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+  }
+  .button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .button.primary {
+    background: var(--c-primary, #0066cc);
+    color: white;
+  }
+  .button.primary:hover {
+    opacity: 0.9;
+  }
+  .button.secondary {
+    background: white;
+    border: 2px solid var(--c-primary, #0066cc);
+    color: var(--c-primary, #0066cc);
+  }
+  .button.secondary:hover {
+    background: #f0f9ff;
+  }
+
+  /* Outcomes */
+  .outcomes-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  .outcomes-section h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+  }
+  .outcomes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .outcome-item {
+    border-left: 4px solid var(--c-primary, #0066cc);
+    padding-left: 1rem;
+  }
+  .outcome-type {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #666;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .outcome-title {
+    font-size: 1.2rem;
+    margin: 0.25rem 0;
+    font-weight: 600;
+  }
+  .outcome-title a {
+    text-decoration: none;
+    color: inherit;
+  }
+  .outcome-title a:hover {
+    color: var(--c-primary, #0066cc);
+    text-decoration: underline;
+  }
+  .outcome-desc {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+  }
+  .outcome-meta {
+    font-size: 0.85rem;
+    color: #888;
+    display: flex;
+    gap: 1rem;
+  }
+
+  /* Archive */
+  .archive-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+    text-align: center;
+  }
+  .archive-section h2 {
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+  }
+  .archive-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  .archive-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .archive-link:hover {
+    background: white;
+    border-color: var(--c-primary, #0066cc);
+    color: var(--c-primary, #0066cc);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Sponsors */
+  .sponsors-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  .sponsors-section h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+  }
+  .sponsors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 2rem;
+    align-items: center;
+    justify-content: center;
+  }
+  .sponsor-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #333;
+    padding: 1rem;
+    transition: transform 0.2s;
+  }
+  .sponsor-card:hover {
+    transform: translateY(-3px);
+  }
+  .sponsor-logo {
+    max-width: 100%;
+    max-height: 80px;
+    object-fit: contain;
+    filter: grayscale(100%);
+    transition: filter 0.3s;
+  }
+  .sponsor-card:hover .sponsor-logo {
+    filter: grayscale(0%);
+  }
+  .sponsor-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  .support-type {
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #666;
+    text-transform: uppercase;
+  }
+
+  /* Grants */
+  .grants-section {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: #f0f9ff;
+    border-radius: 12px;
+  }
+  .grants-section h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #0369a1;
+  }
+  .grant-card p {
+    margin-bottom: 0.5rem;
+  }
+  .grant-notes {
+    font-size: 0.9rem;
+    color: #555;
+    font-style: italic;
+  }
+  .button.small {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  /* Footer Links */
+  .footer-links {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 2px solid #eee;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+  }
+  .footer-links a {
+    color: #666;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+  .footer-links a:hover {
+    color: var(--c-primary, #0066cc);
+    text-decoration: underline;
   }
 </style>
