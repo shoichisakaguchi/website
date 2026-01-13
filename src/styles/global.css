@@ -85,7 +85,8 @@ p {
 
 @media print {
 	/* Hide non-essential elements */
-	header, footer, nav, .button, .cta-group, .back-link, .link-arrow, .badge {
+	/* Hide non-essential elements */
+	.global-header, footer, nav, .button, .cta-group, .back-link, .link-arrow, .badge {
 		display: none !important;
 	}
 

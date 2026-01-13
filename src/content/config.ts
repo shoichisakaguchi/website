@@ -83,6 +83,17 @@ const summits = defineCollection({
             applicationUrl: z.string().url().optional().or(z.literal('')),
             notes: z.string().optional(),
         }).optional(),
+        programArchive: z.object({
+            label: z.string().default('View Program'),
+            url: z.string().optional().or(z.literal('')),
+            items: z.array(z.object({
+                time: z.string().optional(),
+                title: z.string(),
+                speakers: z.string().optional(),
+                note: z.string().optional(),
+                link: z.string().optional().or(z.literal('')),
+            })).optional(),
+        }).optional(),
         archiveResources: z.object({
             photoGalleryUrl: z.string().url().optional().or(z.literal('')),
             recordingsUrl: z.string().url().optional().or(z.literal('')),

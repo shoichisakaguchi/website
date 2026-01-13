@@ -21,7 +21,6 @@ export default config({
             path: 'src/content/announcements/*',
             format: { contentField: 'content' },
             previewUrl: '/announcements/{slug}',
-            entryLabel: (entry) => entry.title,
             schema: {
                 title: fields.slug({ name: { label: 'Title' } }),
                 publishedDate: fields.date({ label: 'Published Date', validation: { isRequired: true } }),
@@ -50,7 +49,6 @@ export default config({
             label: 'People',
             slugField: 'name',
             path: 'src/content/people/*',
-            entryLabel: (entry) => entry.name,
             schema: {
                 name: fields.slug({ name: { label: 'Name' } }),
                 affiliation: fields.text({ label: 'Affiliation', validation: { isRequired: true } }),
@@ -190,6 +188,27 @@ export default config({
                     applicationUrl: fields.url({ label: 'Application URL' }),
                     notes: fields.text({ label: 'Notes', multiline: true }),
                 }, { label: 'Travel Grants' }),
+                programArchive: fields.object({
+                    label: fields.text({ label: 'Button Label', defaultValue: 'View Program' }),
+                    url: fields.file({
+                        label: 'Program File (PDF)',
+                        directory: 'public/files/summits',
+                        publicPath: '/files/summits',
+                    }),
+                    items: fields.array(
+                        fields.object({
+                            time: fields.text({ label: 'Time' }),
+                            title: fields.text({ label: 'Title', validation: { isRequired: true } }),
+                            speakers: fields.text({ label: 'Speakers (Comma separated)' }),
+                            note: fields.text({ label: 'Note' }),
+                            link: fields.text({ label: 'Link' }),
+                        }),
+                        {
+                            label: 'Program Items',
+                            itemLabel: (props) => `${props.fields.time.value || ''} ${props.fields.title.value}`,
+                        }
+                    ),
+                }, { label: 'Program (Archive)' }),
                 archiveResources: fields.object({
                     photoGalleryUrl: fields.url({ label: 'Photo Gallery URL' }),
                     recordingsUrl: fields.url({ label: 'Recordings URL' }),
