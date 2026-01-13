@@ -104,6 +104,11 @@ export default config({
                     publicPath: '/images/summits/hero',
                 }),
                 description: fields.text({ label: 'Description (OGP/Card)', multiline: true }),
+                intro: fields.text({
+                    label: 'Intro / Context',
+                    description: 'A brief introduction or teaser text (top of page).',
+                    multiline: true,
+                }),
                 tags: fields.array(fields.text({ label: 'Tag' }), { label: 'Tags' }),
                 phase: fields.select({
                     label: 'Phase',
@@ -161,7 +166,6 @@ export default config({
                     googleCalendar: fields.url({ label: 'Google Calendar URL' }),
                     detailedProgram: fields.url({ label: 'Detailed Program URL' }),
                     codeOfConduct: fields.url({ label: 'Code of Conduct URL' }),
-                    contact: fields.url({ label: 'Contact URL / Email (mailto:)' }),
                 }, { label: 'Key Links' }),
                 sponsors: fields.array(
                     fields.object({
@@ -221,24 +225,15 @@ export default config({
                 ),
                 speakers: fields.array(
                     fields.object({
-                        name: fields.text({ label: 'Session Name' }),
-                        talks: fields.array(
-                            fields.object({
-                                name: fields.text({ label: 'Name' }),
-                                affiliation: fields.text({ label: 'Affiliation' }),
-                                title: fields.text({ label: 'Title', multiline: true }),
-                                url: fields.url({ label: 'Website URL' }),
-                                image: fields.image({
-                                    label: 'Image',
-                                    directory: 'public/images/speakers',
-                                    publicPath: '/images/speakers',
-                                }),
-                            }),
-                            {
-                                label: 'Talks',
-                                itemLabel: (props) => `${props.fields.name.value} — ${props.fields.title.value}`,
-                            }
-                        ),
+                        name: fields.text({ label: 'Name' }),
+                        affiliation: fields.text({ label: 'Affiliation' }),
+                        role: fields.text({ label: 'Role / Title' }),
+                        link: fields.url({ label: 'Link (Personal Page)' }),
+                        image: fields.image({
+                            label: 'Headshot',
+                            directory: 'public/images/speakers',
+                            publicPath: '/images/speakers',
+                        }),
                     }),
                     {
                         label: 'Featured Invited Speakers',

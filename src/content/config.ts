@@ -40,6 +40,7 @@ const summits = defineCollection({
         title: z.string(),
         heroImage: z.string().optional(),
         description: z.string().optional(),
+        intro: z.string().optional(),
         tags: z.array(z.string()).optional(),
         phase: z.enum(['Planning', 'Live', 'Archived']).optional().default('Planning'),
         year: z.string().optional(),
@@ -68,7 +69,6 @@ const summits = defineCollection({
             googleCalendar: z.string().url().optional().or(z.literal('')),
             detailedProgram: z.string().url().optional().or(z.literal('')),
             codeOfConduct: z.string().url().optional().or(z.literal('')),
-            contact: z.string().url().optional().or(z.literal('')),
         }).optional(),
         sponsors: z.array(z.object({
             name: z.string(),
@@ -99,13 +99,10 @@ const summits = defineCollection({
         })).optional(),
         speakers: z.array(z.object({
             name: z.string(),
-            talks: z.array(z.object({
-                name: z.string(),
-                affiliation: z.string().optional(),
-                title: z.string(),
-                url: z.string().url().optional().or(z.literal('')),
-                image: z.string().optional(),
-            })),
+            affiliation: z.string().optional(),
+            role: z.string().optional(),
+            link: z.string().url().optional().or(z.literal('')),
+            image: z.string().optional(),
         })).optional(),
     }),
 });

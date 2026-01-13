@@ -51,6 +51,22 @@ if (item.data.organizers) {
     (org): org is Organizer => org !== null,
   );
 }
+
+// Helper to check if optional sections have content
+const hasTravelGrant =
+  item.data.travelGrant &&
+  (item.data.travelGrant.amount ||
+    item.data.travelGrant.currency ||
+    item.data.travelGrant.eligibility ||
+    item.data.travelGrant.applicationUrl ||
+    item.data.travelGrant.notes);
+
+const hasArchiveResources =
+  item.data.archiveResources &&
+  (item.data.archiveResources.recordingsUrl ||
+    item.data.archiveResources.slidesUrl ||
+    item.data.archiveResources.photoGalleryUrl ||
+    item.data.archiveResources.reportUrl);
 ---
 
 <Layout title={item.data.title}>
@@ -59,6 +75,18 @@ if (item.data.organizers) {
       <a href="/summits">← Back to Summits</a>
     </div>
     <header class="post-header">
+      {
+        item.data.heroImage && (
+          <div class="hero-image-wrapper">
+            <img
+              src={item.data.heroImage}
+              alt=""
+              class="hero-image"
+              loading="eager"
+            />
+          </div>
+        )
+      }
       {
         item.data.phase && (
           <div class={`phase-badge ${item.data.phase.toLowerCase()}`}>
@@ -104,13 +132,6 @@ if (item.data.organizers) {
       {/* Key Links Buttons */}
       <div class="header-actions">
         {
-          item.data.links?.detailedProgram && (
-            <a href={item.data.links.detailedProgram} class="button primary">
-              View Detailed Program
-            </a>
-          )
-        }
-        {
           item.data.links?.registration && item.data.phase === "Planning" && (
             <a href={item.data.links.registration} class="button secondary">
               Register Now
@@ -121,6 +142,119 @@ if (item.data.organizers) {
     </header>
 
     <div class="content-wrapper">
+      {/* Intro / Context */}
+      {
+        item.data.intro && (
+          <div class="summit-intro">
+            <p>{item.data.intro}</p>
+          </div>
+        )
+      }
+
+      {/* Featured Invited Speakers */}
+      {
+        item.data.speakers && item.data.speakers.length > 0 && (
+          <section class="speakers-section">
+            <h2>Featured Invited Speakers</h2>
+            <div class="speakers-grid">
+              {item.data.speakers.map((speaker) => (
+                <div class="speaker-card">
+                  {/* Headshot */}
+                  {speaker.image && (
+                    <img
+                      src={speaker.image}
+                      alt={speaker.name}
+                      class="speaker-headshot"
+                      loading="lazy"
+                    />
+                  )}
+                  <div class="speaker-info">
+                    <h4 class="speaker-name">
+                      {speaker.link ? (
+                        <a
+                          href={speaker.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {speaker.name}
+                        </a>
+                      ) : (
+                        speaker.name
+                      )}
+                    </h4>
+                    {speaker.role && <p class="speaker-role">{speaker.role}</p>}
+                    {speaker.affiliation && (
+                      <p class="speaker-affiliation">{speaker.affiliation}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      {/* Program / Archive Block */}
+      {
+        (item.data.links?.detailedProgram || hasArchiveResources) && (
+          <section class="program-archive-section">
+            <div class="program-archive-container">
+              {item.data.links?.detailedProgram && (
+                <div class="program-block">
+                  <h3>Detailed Program</h3>
+                  <a
+                    href={item.data.links.detailedProgram}
+                    class="button primary"
+                  >
+                    View Detailed Program
+                  </a>
+                </div>
+              )}
+
+              {hasArchiveResources && (
+                <div class="archive-block">
+                  <h3>Archive Resources</h3>
+                  <div class="archive-links">
+                    {item.data.archiveResources?.reportUrl && (
+                      <a
+                        href={item.data.archiveResources.reportUrl}
+                        class="archive-link"
+                      >
+                        📄 Post-Summit Report
+                      </a>
+                    )}
+                    {item.data.archiveResources?.recordingsUrl && (
+                      <a
+                        href={item.data.archiveResources.recordingsUrl}
+                        class="archive-link"
+                      >
+                        ▶️ Recordings
+                      </a>
+                    )}
+                    {item.data.archiveResources?.slidesUrl && (
+                      <a
+                        href={item.data.archiveResources.slidesUrl}
+                        class="archive-link"
+                      >
+                        📊 Slides
+                      </a>
+                    )}
+                    {item.data.archiveResources?.photoGalleryUrl && (
+                      <a
+                        href={item.data.archiveResources.photoGalleryUrl}
+                        class="archive-link"
+                      >
+                        📸 Photo Gallery
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        )
+      }
+
       <article>
         <Content />
       </article>
@@ -170,53 +304,6 @@ if (item.data.organizers) {
           )
       }
 
-      {/* Archive Resources */}
-      {
-        item.data.links &&
-          (item.data.archiveResources?.recordingsUrl ||
-            item.data.archiveResources?.slidesUrl ||
-            item.data.archiveResources?.photoGalleryUrl ||
-            item.data.archiveResources?.reportUrl) && (
-            <section class="archive-section">
-              <h2>Archive Resources</h2>
-              <div class="archive-links">
-                {item.data.archiveResources.reportUrl && (
-                  <a
-                    href={item.data.archiveResources.reportUrl}
-                    class="archive-link"
-                  >
-                    📄 Post-Summit Report
-                  </a>
-                )}
-                {item.data.archiveResources.recordingsUrl && (
-                  <a
-                    href={item.data.archiveResources.recordingsUrl}
-                    class="archive-link"
-                  >
-                    ▶️ Recordings
-                  </a>
-                )}
-                {item.data.archiveResources.slidesUrl && (
-                  <a
-                    href={item.data.archiveResources.slidesUrl}
-                    class="archive-link"
-                  >
-                    📊 Slides
-                  </a>
-                )}
-                {item.data.archiveResources.photoGalleryUrl && (
-                  <a
-                    href={item.data.archiveResources.photoGalleryUrl}
-                    class="archive-link"
-                  >
-                    📸 Photo Gallery
-                  </a>
-                )}
-              </div>
-            </section>
-          )
-      }
-
       {/* Sponsors */}
       {
         item.data.sponsors && item.data.sponsors.length > 0 && (
@@ -251,24 +338,27 @@ if (item.data.organizers) {
 
       {/* Travel Grants */}
       {
-        item.data.travelGrant && (
+        hasTravelGrant && (
           <section class="grants-section">
             <h2>Travel Grants</h2>
             <div class="grant-card">
-              <p>
-                <strong>Amount:</strong> {item.data.travelGrant.amount}{" "}
-                {item.data.travelGrant.currency}
-              </p>
-              {item.data.travelGrant.eligibility && (
+              {item.data.travelGrant?.amount &&
+                item.data.travelGrant?.currency && (
+                  <p>
+                    <strong>Amount:</strong> {item.data.travelGrant.amount}{" "}
+                    {item.data.travelGrant.currency}
+                  </p>
+                )}
+              {item.data.travelGrant?.eligibility && (
                 <p>
                   <strong>Eligibility:</strong>{" "}
                   {item.data.travelGrant.eligibility}
                 </p>
               )}
-              {item.data.travelGrant.notes && (
+              {item.data.travelGrant?.notes && (
                 <p class="grant-notes">{item.data.travelGrant.notes}</p>
               )}
-              {item.data.travelGrant.applicationUrl && (
+              {item.data.travelGrant?.applicationUrl && (
                 <a
                   href={item.data.travelGrant.applicationUrl}
                   class="button small"
@@ -276,48 +366,6 @@ if (item.data.organizers) {
                   Apply for Grant
                 </a>
               )}
-            </div>
-          </section>
-        )
-      }
-
-      {
-        item.data.speakers && item.data.speakers.length > 0 && (
-          <section class="speakers-section">
-            <h2>Featured Invited Speakers</h2>
-            <div class="speakers-list">
-              {item.data.speakers.map((session) => (
-                <div class="session-block">
-                  <h3 class="session-title">{session.name}</h3>
-                  <div class="talks-grid">
-                    {session.talks.map((talk) => (
-                      <div class="talk-card">
-                        <div class="talk-header">
-                          <h4 class="speaker-name">
-                            {talk.url ? (
-                              <a
-                                href={talk.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {talk.name}
-                              </a>
-                            ) : (
-                              talk.name
-                            )}
-                          </h4>
-                          {talk.affiliation && (
-                            <span class="speaker-affiliation">
-                              {talk.affiliation}
-                            </span>
-                          )}
-                        </div>
-                        <p class="talk-title">“{talk.title}”</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
             </div>
           </section>
         )
@@ -355,9 +403,9 @@ if (item.data.organizers) {
         )
       }
 
-      {/* Footer Links (CoC, Contact) */}
+      {/* Footer Links (CoC) */}
       {
-        (item.data.links?.codeOfConduct || item.data.links?.contact) && (
+        item.data.links?.codeOfConduct && (
           <div class="footer-links">
             {item.data.links.codeOfConduct && (
               <a
@@ -367,9 +415,6 @@ if (item.data.organizers) {
               >
                 Code of Conduct
               </a>
-            )}
-            {item.data.links.contact && (
-              <a href={item.data.links.contact}>Contact Us</a>
             )}
           </div>
         )
@@ -396,6 +441,21 @@ if (item.data.organizers) {
     margin-top: 40px;
     margin-bottom: 60px;
     text-align: center;
+  }
+
+  .hero-image-wrapper {
+    margin-bottom: 30px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .hero-image {
+    width: 100%;
+    height: auto;
+    max-height: 450px;
+    object-fit: cover;
+    display: block;
   }
 
   .meta {
@@ -450,9 +510,9 @@ if (item.data.organizers) {
 
   /* Speakers Section */
   .speakers-section {
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid #eee;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #eee;
   }
 
   .speakers-section h2 {
@@ -462,42 +522,126 @@ if (item.data.organizers) {
     color: var(--c-text);
   }
 
-  .session-block {
-    margin-bottom: 2.5rem;
-  }
-
-  .session-title {
-    text-align: center;
-    font-size: 1.3rem;
-    font-weight: 600;
-    margin-bottom: 1.5rem;
-    color: var(--c-primary, #0066cc);
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 0.5rem;
-    display: inline-block;
-    width: 100%;
-  }
-
-  .talks-grid {
+  .speakers-grid {
     display: grid;
-    gap: 1.5rem;
+    grid-template-columns: 1fr; /* Mobile: 1 col */
+    gap: 2rem;
   }
 
-  .talk-card {
+  @media (min-width: 640px) {
+    .speakers-grid {
+      grid-template-columns: repeat(2, 1fr); /* Tablet: 2 cols */
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .speakers-grid {
+      grid-template-columns: repeat(3, 1fr); /* Desktop: 3 cols */
+    }
+  }
+
+  .speaker-card {
     background: #f9f9f9;
-    padding: 1.2rem;
-    border-radius: 8px;
-    border-left: 4px solid var(--c-primary, #0066cc);
+    padding: 1.5rem;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+  .speaker-card:hover {
+    transform: translateY(-3px);
   }
 
-  .talk-header {
-    margin-bottom: 0.5rem;
+  .speaker-headshot {
+    width: 96px;
+    height: 96px;
+    border-radius: 0.5rem; /* Rounding only */
+    object-fit: cover;
+    aspect-ratio: 1/1;
+    margin-bottom: 1rem;
+    background-color: #ddd;
+  }
+
+  @media (min-width: 640px) {
+    .speaker-headshot {
+      width: 110px;
+      height: 110px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .speaker-headshot {
+      width: 130px;
+      height: 130px;
+    }
+  }
+
+  /* Intro Section */
+  .summit-intro {
+    max-width: 700px;
+    margin: 0 auto 3rem auto;
+    font-size: 1.25rem;
+    line-height: 1.6;
+    color: var(--c-text, #333);
+    text-align: left; /* Or center? User didn't specify, standard text usually left or center. Intro/Teaser often centered if short. */
+  }
+
+  /* Program & Archive Section */
+  .program-archive-section {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .program-archive-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .program-block h3,
+  .archive-block h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.4rem;
+  }
+
+  /* Re-use Archive Link Styles */
+  .archive-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+  .archive-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+  }
+  .archive-link:hover {
+    border-color: var(--c-primary, #0066cc);
+    color: var(--c-primary, #0066cc);
   }
 
   .speaker-name {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 700;
-    margin: 0;
+    margin: 0 0 0.5rem 0;
     color: var(--c-text);
   }
 
@@ -511,20 +655,20 @@ if (item.data.organizers) {
     color: var(--c-primary, #0066cc);
   }
 
+  .speaker-role {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--c-primary, #0066cc);
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+  }
+
   .speaker-affiliation {
     display: block;
     font-size: 0.9rem;
     color: #666;
-    margin-top: 0.2rem;
+    margin-top: 0;
     font-style: italic;
-  }
-
-  .talk-title {
-    font-size: 1rem;
-    margin: 0;
-    font-weight: 500;
-    color: #333;
-    line-height: 1.5;
   }
 
   /* Organizers Section */
@@ -554,8 +698,8 @@ if (item.data.organizers) {
   }
 
   .organizer-image {
-    width: 120px;
-    height: 120px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     object-fit: cover;
     margin-bottom: 1rem;
@@ -693,44 +837,6 @@ if (item.data.organizers) {
     gap: 1rem;
   }
 
-  /* Archive */
-  .archive-section {
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid #eee;
-    text-align: center;
-  }
-  .archive-section h2 {
-    margin-bottom: 1.5rem;
-    font-size: 2rem;
-  }
-  .archive-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 1rem;
-  }
-  .archive-link {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.75rem 1.25rem;
-    background: #f8f9fa;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #333;
-    font-weight: 500;
-    transition: all 0.2s;
-  }
-  .archive-link:hover {
-    background: white;
-    border-color: var(--c-primary, #0066cc);
-    color: var(--c-primary, #0066cc);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  }
-
   /* Sponsors */
   .sponsors-section {
     margin-top: 3rem;
@@ -771,61 +877,48 @@ if (item.data.organizers) {
   .sponsor-card:hover .sponsor-logo {
     filter: grayscale(0%);
   }
-  .sponsor-name {
-    font-weight: 600;
-    font-size: 1.1rem;
-  }
-  .support-type {
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
-    color: #666;
-    text-transform: uppercase;
-  }
 
-  /* Grants */
+  /* Travel Grants */
   .grants-section {
     margin-top: 3rem;
-    padding: 2rem;
-    background: #f0f9ff;
-    border-radius: 12px;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
   }
   .grants-section h2 {
-    margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-    color: #0369a1;
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+  }
+  .grant-card {
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
   }
   .grant-card p {
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
   }
   .grant-notes {
-    font-size: 0.9rem;
-    color: #555;
     font-style: italic;
-  }
-  .button.small {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    margin-top: 1rem;
+    color: #666;
   }
 
-  /* Footer Links */
   .footer-links {
     margin-top: 4rem;
     padding-top: 2rem;
-    border-top: 2px solid #eee;
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
+    border-top: 1px solid #eee;
+    text-align: center;
   }
   .footer-links a {
     color: #666;
     text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
   .footer-links a:hover {
-    color: var(--c-primary, #0066cc);
     text-decoration: underline;
+    color: var(--c-primary, #0066cc);
   }
 </style>
