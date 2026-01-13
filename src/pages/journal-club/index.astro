@@ -1,18 +1,52 @@
 ---
-import { getCollection } from 'astro:content';
-import Layout from '../../layouts/Layout.astro';
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
 
 export const prerender = true;
 
-const items = await getCollection('journal-club');
-const sortedItems = items.sort((a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf());
+const items = await getCollection("journal-club");
+const sortedItems = items.sort(
+    (a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf(),
+);
 ---
 
 <Layout>
-	<div class="container page-content">
-		<h1 class="page-title">Journal Club</h1>
-		<div class="journal-list">
-            
+    <div class="container page-content">
+        <h1 class="page-title">RNA Virus Journal Club</h1>
+
+        <div class="intro-section">
+            <p class="intro-text">
+                The <strong>RNA Virus Journal Club</strong> is a community project
+                emerging from the <a href="/">RdRp Summit</a>. Driven by the
+                community, it provides a platform to discuss recent papers,
+                methods, and ideas related to RNA virus biology, RdRp discovery,
+                and computational virology.
+            </p>
+            <p class="intro-text">
+                Announcements and discussions take place on our <strong
+                    >Slack</strong
+                > channel, and session times are coordinated via our <strong
+                    >Google Calendar</strong
+                >.
+            </p>
+
+            <div class="action-container">
+                <a
+                    href="PLACEHOLDER_URL_PLEASE_UPDATE"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="nomination-button"
+                >
+                    Nominate a Speaker / Chair
+                </a>
+                <p class="action-note">
+                    Community members are encouraged to nominate themselves or
+                    others.
+                </p>
+            </div>
+        </div>
+
+        <div class="journal-list">
             <div class="table-container">
                 <table class="journal-table">
                     <thead>
@@ -24,54 +58,130 @@ const sortedItems = items.sort((a, b) => new Date(b.data.date).valueOf() - new D
                         </tr>
                     </thead>
                     <tbody>
-                        {sortedItems.map(item => (
-                            <tr>
-                                <td class="col-date">{item.data.date.toLocaleDateString()}</td>
-                                <td class="col-topic">
-                                    <a href={`/journal-club/${item.slug}`} class="topic-link">{item.data.title}</a>
-                                </td>
-                                <td class="col-speaker">{item.data.speaker || '-'}</td>
-                                <td class="col-link">
-                                    {item.data.paperUrl ? (
-                                        <a href={item.data.paperUrl} target="_blank" rel="noopener noreferrer" class="paper-link">Link &nearr;</a>
-                                    ) : '-'}
-                                </td>
-                            </tr>
-                        ))}
+                        {
+                            sortedItems.map((item) => (
+                                <tr>
+                                    <td class="col-date">
+                                        {item.data.date.toLocaleDateString()}
+                                    </td>
+                                    <td class="col-topic">
+                                        <a
+                                            href={`/journal-club/${item.slug}`}
+                                            class="topic-link"
+                                        >
+                                            {item.data.title}
+                                        </a>
+                                    </td>
+                                    <td class="col-speaker">
+                                        {item.data.speaker || "-"}
+                                    </td>
+                                    <td class="col-link">
+                                        {item.data.paperUrl ? (
+                                            <a
+                                                href={item.data.paperUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                class="paper-link"
+                                            >
+                                                Link &nearr;
+                                            </a>
+                                        ) : (
+                                            "-"
+                                        )}
+                                    </td>
+                                </tr>
+                            ))
+                        }
                     </tbody>
                 </table>
             </div>
 
             <div class="journal-list-mobile">
-                {sortedItems.map(item => (
-                    <div class="journal-item">
-                        <div class="item-date">{item.data.date.toLocaleDateString()}</div>
-                        <h3 class="item-title">
-                             <a href={`/journal-club/${item.slug}`}>{item.data.title}</a>
-                        </h3>
-                        {item.data.speaker && <div class="item-speaker">Speaker: {item.data.speaker}</div>}
-                        {item.data.paperUrl && (
-                             <a href={item.data.paperUrl} target="_blank" rel="noopener noreferrer" class="item-paper-link">Paper Link &nearr;</a>
-                        )}
-                    </div>
-                ))}
+                {
+                    sortedItems.map((item) => (
+                        <div class="journal-item">
+                            <div class="item-date">
+                                {item.data.date.toLocaleDateString()}
+                            </div>
+                            <h3 class="item-title">
+                                <a href={`/journal-club/${item.slug}`}>
+                                    {item.data.title}
+                                </a>
+                            </h3>
+                            {item.data.speaker && (
+                                <div class="item-speaker">
+                                    Speaker: {item.data.speaker}
+                                </div>
+                            )}
+                            {item.data.paperUrl && (
+                                <a
+                                    href={item.data.paperUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="item-paper-link"
+                                >
+                                    Paper Link &nearr;
+                                </a>
+                            )}
+                        </div>
+                    ))
+                }
             </div>
-
-		</div>
-	</div>
+        </div>
+    </div>
 </Layout>
 
 <style>
-	.page-content {
-		max-width: 980px;
-		margin: 0 auto;
-	}
+    .page-content {
+        max-width: 980px;
+        margin: 0 auto;
+    }
 
-	.page-title {
-		margin-top: 40px;
-		margin-bottom: 40px;
-		text-align: center;
-	}
+    .page-title {
+        margin-top: 40px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .intro-section {
+        max-width: 700px;
+        margin: 0 auto 50px;
+        text-align: center;
+    }
+
+    .intro-text {
+        font-size: 1.1em;
+        line-height: 1.5;
+        color: var(--c-text);
+        margin-bottom: 1em;
+    }
+
+    .action-container {
+        margin-top: 30px;
+    }
+
+    .nomination-button {
+        display: inline-block;
+        padding: 10px 24px;
+        background-color: var(--c-link);
+        color: white;
+        text-decoration: none;
+        border-radius: 999px;
+        font-weight: 500;
+        transition: opacity 0.2s;
+    }
+
+    .nomination-button:hover {
+        opacity: 0.8;
+        text-decoration: none;
+        color: white;
+    }
+
+    .action-note {
+        margin-top: 12px;
+        font-size: 0.9em;
+        color: var(--c-text-secondary);
+    }
 
     /* Table Styles (Desktop) */
     .table-container {
@@ -93,7 +203,8 @@ const sortedItems = items.sort((a, b) => new Date(b.data.date).valueOf() - new D
         font-size: 16px;
     }
 
-    .journal-table th, .journal-table td {
+    .journal-table th,
+    .journal-table td {
         padding: 12px 15px;
         text-align: left;
         border-bottom: 1px solid var(--c-divider, #eee);
@@ -104,17 +215,25 @@ const sortedItems = items.sort((a, b) => new Date(b.data.date).valueOf() - new D
         color: var(--c-text-secondary, #666);
         border-bottom: 2px solid var(--c-divider, #eee);
     }
-    
-    .col-date { white-space: nowrap; width: 120px; }
-    .col-speaker { width: 150px; }
-    .col-link { width: 100px; text-align: right !important; }
+
+    .col-date {
+        white-space: nowrap;
+        width: 120px;
+    }
+    .col-speaker {
+        width: 150px;
+    }
+    .col-link {
+        width: 100px;
+        text-align: right !important;
+    }
 
     .topic-link {
         font-weight: 500;
         color: var(--c-text, #333);
         text-decoration: none;
     }
-    
+
     .topic-link:hover {
         color: var(--c-link, #0070f3);
         text-decoration: underline;
@@ -125,7 +244,7 @@ const sortedItems = items.sort((a, b) => new Date(b.data.date).valueOf() - new D
         text-decoration: none;
         font-size: 0.9em;
     }
-    
+
     .paper-link:hover {
         text-decoration: underline;
     }
@@ -136,7 +255,7 @@ const sortedItems = items.sort((a, b) => new Date(b.data.date).valueOf() - new D
         padding-bottom: 24px;
         border-bottom: 1px solid var(--c-divider, #eee);
     }
-    
+
     .item-date {
         font-size: 0.9em;
         color: var(--c-text-secondary, #666);
@@ -147,20 +266,20 @@ const sortedItems = items.sort((a, b) => new Date(b.data.date).valueOf() - new D
         margin: 0 0 8px;
         font-size: 1.1em;
     }
-    
+
     .item-title a {
         color: var(--c-text, #333);
         text-decoration: none;
     }
-    
+
     .item-speaker {
         font-size: 0.95em;
         margin-bottom: 8px;
     }
 
     .item-paper-link {
-         color: var(--c-link, #0070f3);
-         text-decoration: none;
-         font-size: 0.9em;
+        color: var(--c-link, #0070f3);
+        text-decoration: none;
+        font-size: 0.9em;
     }
 </style>
