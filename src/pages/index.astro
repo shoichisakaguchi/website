@@ -48,17 +48,17 @@ if (!activeSummit && allSummits.length > 0) {
 	})[0];
 }
 
-// Apply Phase Override if present
+// Apply Phase Override if present AND not "Auto"
 if (
 	activeSummit &&
-	summitInfo?.data?.overridePhase &&
-	summitInfo.data.overridePhase !== "Auto"
+	summitInfo.data.overridePhase &&
+	summitInfo.data.overridePhase !== 'Auto'
 ) {
 	activeSummit = {
 		...activeSummit,
 		data: {
 			...activeSummit.data,
-			phase: summitInfo.data.overridePhase as any, // Type cast if needed
+			phase: summitInfo.data.overridePhase,
 		},
 	};
 }
