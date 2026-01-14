@@ -105,7 +105,7 @@ const currentPhase = activeSummit?.data.phase || "Planning";
         */
 		}
 		{
-			currentPhase === "Preview" && activeSummit && (
+			currentPhase === "Preview" && !!activeSummit && (
 				<>
 					<section class="hero-preview">
 						<div class="container hero-content">
@@ -153,7 +153,7 @@ const currentPhase = activeSummit?.data.phase || "Planning";
         */
 		}
 		{
-			currentPhase === "Live" && activeSummit && (
+			currentPhase === "Live" && !!activeSummit && (
 				<>
 					<SummitDetail item={activeSummit} variant="home" />
 					<JournalClubHome variant="standard" showIcon={false} />
@@ -169,7 +169,7 @@ const currentPhase = activeSummit?.data.phase || "Planning";
         */
 		}
 		{
-			currentPhase === "Archived" && activeSummit && (
+			currentPhase === "Archived" && !!activeSummit && (
 				<>
 					<JournalClubHome variant="hero" showIcon={true} />
 
