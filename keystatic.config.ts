@@ -152,7 +152,10 @@ export default config({
                     {
                         label: 'Organizers',
                         itemLabel: (props) => {
-                            const name = props.fields.person.value || 'Organizer';
+                            const personValue = props.fields.person.value;
+                            const name = (typeof personValue === 'string'
+                                ? personValue
+                                : (personValue as { slug?: string })?.slug) || 'Organizer';
                             const role = props.fields.role.value;
                             return role ? `${name} — ${role}` : name;
                         },
