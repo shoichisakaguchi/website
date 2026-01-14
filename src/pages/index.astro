@@ -5,6 +5,8 @@ import JournalClubHome from "../components/JournalClubHome.astro";
 import { getCollection, getEntry, type CollectionEntry } from "astro:content";
 import SummitDetail from "../components/SummitDetail.astro";
 
+export const prerender = true;
+
 // 1. Determine "Active Summit" (Single Source of Truth)
 const allSummits = await getCollection("summits");
 const summitInfo = await getEntry("summit", "info");
