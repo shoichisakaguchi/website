@@ -30,8 +30,22 @@ const journalClub = defineCollection({
         title: z.string(),
         date: z.coerce.date(),
         isPinned: z.boolean().default(false),
+        // New structured speaker fields
+        speakerName: z.string().optional(),
+        speakerAffiliation: z.string().optional(),
+        // New generalized links array
+        links: z.array(z.object({
+            label: z.string(),
+            url: z.string().url().or(z.literal('')),
+            isPrimary: z.boolean().default(false),
+        })).optional(),
+        // Calendar and Zoom links
+        calendarUrl: z.string().url().optional().or(z.literal('')),
+        zoomUrl: z.string().url().optional().or(z.literal('')),
+        showZoomLink: z.boolean().default(false),
+        // Legacy fields (kept for backward compatibility during migration)
         speaker: z.string().optional(),
-        paperUrl: z.string().optional(), // Relaxed from .url() to allow partial input or placeholder
+        paperUrl: z.string().optional(),
     }),
 });
 

@@ -8,6 +8,32 @@ const items = await getCollection("journal-club");
 const sortedItems = items.sort(
     (a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf(),
 );
+
+// Helper to get speaker display string
+function getSpeakerDisplay(data: typeof sortedItems[0]['data']): string {
+    // New structured fields
+    if (data.speakerName) {
+        return data.speakerAffiliation
+            ? `${data.speakerName} (${data.speakerAffiliation})`
+            : data.speakerName;
+    }
+    // Fallback to legacy field
+    return data.speaker || '-';
+}
+
+// Helper to get primary link
+function getPrimaryLink(data: typeof sortedItems[0]['data']): { label: string; url: string } | null {
+    // New links array
+    if (data.links && data.links.length > 0) {
+        const primary = data.links.find(l => l.isPrimary) || data.links[0];
+        return { label: primary.label, url: primary.url };
+    }
+    // Fallback to legacy field
+    if (data.paperUrl) {
+        return { label: 'Link', url: data.paperUrl };
+    }
+    return null;
+}
 ---
 
 <Layout>
@@ -59,38 +85,41 @@ const sortedItems = items.sort(
                     </thead>
                     <tbody>
                         {
-                            sortedItems.map((item) => (
-                                <tr>
-                                    <td class="col-date">
-                                        {item.data.date.toLocaleDateString()}
-                                    </td>
-                                    <td class="col-topic">
-                                        <a
-                                            href={`/journal-club/${item.slug}`}
-                                            class="topic-link"
-                                        >
-                                            {item.data.title}
-                                        </a>
-                                    </td>
-                                    <td class="col-speaker">
-                                        {item.data.speaker || "-"}
-                                    </td>
-                                    <td class="col-link">
-                                        {item.data.paperUrl ? (
+                            sortedItems.map((item) => {
+                                const primaryLink = getPrimaryLink(item.data);
+                                return (
+                                    <tr>
+                                        <td class="col-date">
+                                            {item.data.date.toLocaleDateString()}
+                                        </td>
+                                        <td class="col-topic">
                                             <a
-                                                href={item.data.paperUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                class="paper-link"
+                                                href={`/journal-club/${item.slug}`}
+                                                class="topic-link"
                                             >
-                                                Link &nearr;
+                                                {item.data.title}
                                             </a>
-                                        ) : (
-                                            "-"
-                                        )}
-                                    </td>
-                                </tr>
-                            ))
+                                        </td>
+                                        <td class="col-speaker">
+                                            {getSpeakerDisplay(item.data)}
+                                        </td>
+                                        <td class="col-link">
+                                            {primaryLink ? (
+                                                <a
+                                                    href={primaryLink.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="paper-link"
+                                                >
+                                                    {primaryLink.label} &nearr;
+                                                </a>
+                                            ) : (
+                                                "-"
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         }
                     </tbody>
                 </table>
@@ -98,33 +127,37 @@ const sortedItems = items.sort(
 
             <div class="journal-list-mobile">
                 {
-                    sortedItems.map((item) => (
-                        <div class="journal-item">
-                            <div class="item-date">
-                                {item.data.date.toLocaleDateString()}
-                            </div>
-                            <h3 class="item-title">
-                                <a href={`/journal-club/${item.slug}`}>
-                                    {item.data.title}
-                                </a>
-                            </h3>
-                            {item.data.speaker && (
-                                <div class="item-speaker">
-                                    Speaker: {item.data.speaker}
+                    sortedItems.map((item) => {
+                        const speakerDisplay = getSpeakerDisplay(item.data);
+                        const primaryLink = getPrimaryLink(item.data);
+                        return (
+                            <div class="journal-item">
+                                <div class="item-date">
+                                    {item.data.date.toLocaleDateString()}
                                 </div>
-                            )}
-                            {item.data.paperUrl && (
-                                <a
-                                    href={item.data.paperUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="item-paper-link"
-                                >
-                                    Paper Link &nearr;
-                                </a>
-                            )}
-                        </div>
-                    ))
+                                <h3 class="item-title">
+                                    <a href={`/journal-club/${item.slug}`}>
+                                        {item.data.title}
+                                    </a>
+                                </h3>
+                                {speakerDisplay !== '-' && (
+                                    <div class="item-speaker">
+                                        Speaker: {speakerDisplay}
+                                    </div>
+                                )}
+                                {primaryLink && (
+                                    <a
+                                        href={primaryLink.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="item-paper-link"
+                                    >
+                                        {primaryLink.label} &nearr;
+                                    </a>
+                                )}
+                            </div>
+                        );
+                    })
                 }
             </div>
         </div>

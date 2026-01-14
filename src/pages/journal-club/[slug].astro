@@ -14,6 +14,31 @@ export async function getStaticPaths() {
 
 const { item } = Astro.props;
 const { Content } = await item.render();
+const { data } = item;
+
+// Helper to get speaker display string
+function getSpeakerDisplay(): string {
+    if (data.speakerName) {
+        return data.speakerAffiliation
+            ? `${data.speakerName} (${data.speakerAffiliation})`
+            : data.speakerName;
+    }
+    return data.speaker || '';
+}
+
+// Get all links (new format or legacy)
+function getAllLinks(): { label: string; url: string; isPrimary: boolean }[] {
+    if (data.links && data.links.length > 0) {
+        return data.links;
+    }
+    if (data.paperUrl) {
+        return [{ label: 'Paper', url: data.paperUrl, isPrimary: true }];
+    }
+    return [];
+}
+
+const speakerDisplay = getSpeakerDisplay();
+const allLinks = getAllLinks();
 ---
 
 <Layout title={item.data.title}>
@@ -26,13 +51,51 @@ const { Content } = await item.render();
                 <time>{item.data.date.toLocaleDateString()}</time>
             </div>
             <h1 class="page-title">{item.data.title}</h1>
-            
+
             <div class="details">
-                {item.data.speaker && <div class="detail-item"><strong>Speaker:</strong> {item.data.speaker}</div>}
-                {item.data.paperUrl && (
-                    <div class="detail-item">
-                        <strong>Paper:</strong> <a href={item.data.paperUrl} target="_blank" rel="noopener noreferrer">Original Article &nearr;</a>
-                    </div>
+                {speakerDisplay && <div class="detail-item"><strong>Speaker:</strong> {speakerDisplay}</div>}
+            </div>
+
+            {/* Links section */}
+            {allLinks.length > 0 && (
+                <div class="links-section">
+                    {allLinks.map(link => (
+                        <a
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class={`link-button ${link.isPrimary ? 'primary' : ''}`}
+                        >
+                            {link.label} &nearr;
+                        </a>
+                    ))}
+                </div>
+            )}
+
+            {/* Action buttons */}
+            <div class="action-buttons">
+                {data.calendarUrl && (
+                    <a
+                        href={data.calendarUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="action-button calendar-button"
+                    >
+                        Add to Calendar
+                    </a>
+                )}
+                {data.zoomUrl && data.showZoomLink && (
+                    <a
+                        href={data.zoomUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="action-button zoom-button"
+                    >
+                        Join Zoom
+                    </a>
+                )}
+                {data.zoomUrl && !data.showZoomLink && (
+                    <span class="zoom-note">Zoom link available via Slack</span>
                 )}
             </div>
         </header>
@@ -75,10 +138,84 @@ const { Content } = await item.render();
         margin-top: 20px;
         font-size: 1.1em;
     }
-    
+
     .detail-item a {
         color: var(--c-link, #0070f3);
         text-decoration: none;
+    }
+
+    .links-section {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+    }
+
+    .link-button {
+        display: inline-block;
+        padding: 8px 16px;
+        border: 1px solid var(--c-link, #0070f3);
+        border-radius: 6px;
+        color: var(--c-link, #0070f3);
+        text-decoration: none;
+        font-size: 0.95em;
+        transition: background-color 0.2s, color 0.2s;
+    }
+
+    .link-button:hover {
+        background-color: var(--c-link, #0070f3);
+        color: white;
+        text-decoration: none;
+    }
+
+    .link-button.primary {
+        background-color: var(--c-link, #0070f3);
+        color: white;
+    }
+
+    .link-button.primary:hover {
+        opacity: 0.9;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .action-button {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 999px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.95em;
+        transition: opacity 0.2s;
+    }
+
+    .action-button:hover {
+        opacity: 0.8;
+        text-decoration: none;
+    }
+
+    .calendar-button {
+        background-color: #4285f4;
+        color: white;
+    }
+
+    .zoom-button {
+        background-color: #2d8cff;
+        color: white;
+    }
+
+    .zoom-note {
+        font-size: 0.9em;
+        color: var(--c-text-secondary, #666);
+        font-style: italic;
     }
 
 	.content-wrapper {

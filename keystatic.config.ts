@@ -78,8 +78,22 @@ export default config({
                 title: fields.slug({ name: { label: 'Paper Title/Topic' } }),
                 date: fields.date({ label: 'Date', validation: { isRequired: true } }),
                 isPinned: fields.checkbox({ label: 'Pin to top', defaultValue: false }),
-                speaker: fields.text({ label: 'Speaker' }),
-                paperUrl: fields.url({ label: 'Paper URL' }),
+                speakerName: fields.text({ label: 'Speaker Name' }),
+                speakerAffiliation: fields.text({ label: 'Speaker Affiliation' }),
+                links: fields.array(
+                    fields.object({
+                        label: fields.text({ label: 'Label', validation: { isRequired: true } }),
+                        url: fields.url({ label: 'URL', validation: { isRequired: true } }),
+                        isPrimary: fields.checkbox({ label: 'Primary Link', defaultValue: false }),
+                    }),
+                    {
+                        label: 'Links',
+                        itemLabel: (props) => props.fields.label.value || 'Link',
+                    }
+                ),
+                calendarUrl: fields.url({ label: 'Google Calendar URL' }),
+                zoomUrl: fields.url({ label: 'Zoom URL' }),
+                showZoomLink: fields.checkbox({ label: 'Show Zoom Link', defaultValue: false }),
                 content: fields.document({
                     label: 'Content',
                     formatting: true,
