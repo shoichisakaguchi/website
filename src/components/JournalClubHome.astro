@@ -1,0 +1,374 @@
+---
+import { getCollection } from "astro:content";
+
+interface Props {
+    variant?: "standard" | "hero";
+    showIcon?: boolean;
+}
+
+const { variant = "standard", showIcon = false } = Astro.props;
+
+// Process Journal Club (Find next meeting)
+const allJournalClub = await getCollection("journal-club");
+const today = new Date();
+// Filter for future meetings (including today)
+const upcomingJournalClub = allJournalClub
+    .filter((item) => new Date(item.data.date) >= today)
+    .sort(
+        (a, b) =>
+            new Date(a.data.date).valueOf() - new Date(b.data.date).valueOf(),
+    )[0];
+
+// Helper for "Add to Calendar" (Google Calendar)
+const makeGoogleCalendarUrl = (item: any) => {
+    if (!item) return "#";
+    const date = new Date(item.data.date);
+    const start = date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+    // Assume 1 hour duration
+    const endDate = new Date(date.getTime() + 60 * 60 * 1000);
+    const end = endDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
+
+    const title = encodeURIComponent(`RdRp Journal Club: ${item.data.title}`);
+    const details = encodeURIComponent(
+        `Speaker: ${item.data.speaker || "TBA"}\nPaper: ${item.data.paperUrl || ""}`,
+    );
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}`;
+};
+
+const journalClubCalendarUrl = makeGoogleCalendarUrl(upcomingJournalClub);
+const googleCalendarUrl =
+    "https://calendar.google.com/calendar/embed?src=rdrp.summit%40gmail.com&ctz=Europe%2FLondon";
+---
+
+<section class={`journal-section variant-${variant}`}>
+    <div class="container journal-grid">
+        <div class="journal-info">
+            {/* Variant: Hero Styles */}
+            {
+                variant === "hero" ? (
+                    <>
+                        <div class="journal-header-lockup">
+                            {showIcon && (
+                                <div class="journal-icon">
+                                    <img
+                                        src="/images/journal_club/journal_club.png"
+                                        alt="Journal Club Icon"
+                                        class="journal-icon-img"
+                                        loading="eager"
+                                    />
+                                </div>
+                            )}
+                            <div>
+                                <h2>Stay connected with the RdRp community</h2>
+                                <p class="subtitle hero-subtitle">
+                                    Join our RNA Virus Journal Club
+                                </p>
+                            </div>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div class="journal-header-lockup">
+                            {showIcon && (
+                                <div class="journal-icon">
+                                    <img
+                                        src="/images/journal_club/journal_club.png"
+                                        alt="Journal Club Icon"
+                                        class="journal-icon-img"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            )}
+                            <div>
+                                <h2>Journal Club</h2>
+                                <p class="subtitle">
+                                    Join our discussion on the latest RdRp
+                                    research.
+                                </p>
+                            </div>
+                        </div>
+                    </>
+                )
+            }
+
+            <div class="actions">
+                <a href={googleCalendarUrl} target="_blank" class="link-arrow"
+                    >Subscribe to Calendar &rarr;</a
+                >
+                <a href="/journal-club" class="link-arrow"
+                    >View Schedule &rarr;</a
+                >
+
+                {/* Additional CTA for Hero */}
+                {
+                    variant === "hero" && (
+                        <a
+                            href="https://forms.gle/your-nomination-form"
+                            target="_blank"
+                            class="link-arrow secondary-link"
+                        >
+                            Nominate Speaker &rarr;
+                        </a>
+                    )
+                }
+            </div>
+        </div>
+
+        <div class="next-meeting-card">
+            {
+                upcomingJournalClub ? (
+                    <>
+                        <span class="badge">Next Meeting</span>
+                        <h3 class="paper-title">
+                            {upcomingJournalClub.data.title}
+                        </h3>
+                        <div class="meeting-meta">
+                            {upcomingJournalClub.data.speaker && (
+                                <p>
+                                    <strong>Speaker:</strong>{" "}
+                                    {upcomingJournalClub.data.speaker}
+                                </p>
+                            )}
+                            <p>
+                                <strong>Date:</strong>{" "}
+                                {new Date(
+                                    upcomingJournalClub.data.date,
+                                ).toLocaleDateString("en-US", {
+                                    weekday: "long",
+                                    month: "long",
+                                    day: "numeric",
+                                })}
+                            </p>
+                        </div>
+                        <div class="card-actions">
+                            <a
+                                href={journalClubCalendarUrl}
+                                target="_blank"
+                                class="button small"
+                            >
+                                Add to Calendar
+                            </a>
+                            {upcomingJournalClub.data.paperUrl && (
+                                <a
+                                    href={upcomingJournalClub.data.paperUrl}
+                                    target="_blank"
+                                    class="button small secondary"
+                                >
+                                    Read Paper
+                                </a>
+                            )}
+                        </div>
+                    </>
+                ) : (
+                    <div class="empty-state">
+                        <h3>No upcoming meetings scheduled</h3>
+                        <p>Check back later for updates.</p>
+                    </div>
+                )
+            }
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Global Reused */
+    .container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 24px;
+        border-radius: 980px;
+        font-size: 16px;
+        font-weight: 500;
+        text-align: center;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        cursor: pointer;
+        line-height: 1;
+    }
+
+    .button.small {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    .button.outline {
+        border: 1px solid #ddd;
+        color: var(--c-text);
+    }
+    .button.outline:hover {
+        border-color: var(--c-link);
+        color: var(--c-link);
+    }
+
+    .button.secondary {
+        background-color: transparent;
+        color: var(--c-link);
+        border: 1px solid var(--c-link);
+    }
+    .button.secondary:hover {
+        background-color: rgba(0, 112, 243, 0.05);
+    }
+
+    /* Journal Club Section */
+    .journal-section {
+        padding: 60px 0;
+        background-color: #fafbfc;
+        border-top: 1px solid rgba(0, 0, 0, 0.03);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        margin-bottom: 60px;
+    }
+
+    /* Variant: Hero */
+    .journal-section.variant-hero {
+        background: linear-gradient(
+            180deg,
+            rgba(240, 248, 255, 0.6) 0%,
+            #fafbfc 100%
+        );
+        padding: 80px 0;
+    }
+    .journal-section.variant-hero h2 {
+        font-size: 2.5rem;
+        line-height: 1.2;
+        color: #111;
+    }
+    .hero-subtitle {
+        font-size: 1.25rem !important;
+        color: #555;
+        margin-bottom: 1.5rem;
+        font-style: italic;
+    }
+
+    .journal-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: center;
+    }
+
+    @media (max-width: 768px) {
+        .journal-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+    }
+
+    .journal-info h2 {
+        font-size: 32px;
+        margin-bottom: 12px;
+    }
+
+    .journal-header-lockup {
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+
+    .journal-icon {
+        flex-shrink: 0;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .journal-icon-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .journal-section.variant-hero .journal-icon {
+        width: 100px;
+        height: 100px;
+        /* Removed background/shadow for transparent PNG look, or keep if user wants a box. 
+           User asked for "appropriate size", usually implied seamless if PNG. 
+           I'll assume clean look without box for now. */
+    }
+
+    .subtitle {
+        color: var(--c-text-secondary);
+        font-size: 18px;
+        margin-bottom: 0px; /* Reset, handled by lockup */
+        line-height: 1.5;
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .next-meeting-card {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(0, 0, 0, 0.03);
+    }
+
+    .badge {
+        display: inline-block;
+        background-color: #f3e8ff;
+        color: #7928ca;
+        padding: 4px 10px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+    }
+
+    .paper-title {
+        font-size: 20px;
+        margin-bottom: 16px;
+        line-height: 1.4;
+    }
+
+    .meeting-meta {
+        margin-bottom: 24px;
+        font-size: 15px;
+        color: #555;
+    }
+
+    .meeting-meta p {
+        margin: 4px 0;
+    }
+
+    .card-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .link-arrow {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--c-link);
+        text-decoration: none;
+    }
+    .link-arrow:hover {
+        text-decoration: underline;
+    }
+
+    .secondary-link {
+        color: #666;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 1rem;
+        color: #666;
+    }
+</style>

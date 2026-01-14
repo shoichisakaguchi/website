@@ -1,0 +1,1329 @@
+---
+import { getEntry } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+    item: CollectionEntry<"summits">;
+    variant?: "home" | "summit";
+}
+
+const { item, variant = "summit" } = Astro.props;
+const { Content } = await item.render();
+
+type Organizer = CollectionEntry<"people">["data"] & {
+    displayRole?: string;
+    section?: string;
+    country?: string;
+};
+
+// Resolve organizers
+let organizers: Organizer[] = [];
+if (item.data.organizers) {
+    const resolvedOrganizers = await Promise.all(
+        item.data.organizers.map(async (org: any) => {
+            try {
+                const personEntry = await getEntry("people", org.person);
+                if (!personEntry) return null;
+
+                // Override affiliation if present in summit data
+                const affiliation =
+                    org.affiliation || personEntry.data.affiliation;
+
+                return {
+                    ...personEntry.data,
+                    affiliation,
+                    displayRole: org.role,
+                    section: org.section,
+                } as Organizer;
+            } catch (e) {
+                return null;
+            }
+        }),
+    );
+    // Filter out nulls
+    organizers = resolvedOrganizers.filter(
+        (org): org is Organizer => org !== null,
+    );
+}
+
+// Helper to check if optional sections have content
+const hasTravelGrant =
+    item.data.travelGrant &&
+    (item.data.travelGrant.amount ||
+        item.data.travelGrant.currency ||
+        item.data.travelGrant.eligibility ||
+        item.data.travelGrant.applicationUrl ||
+        item.data.travelGrant.notes);
+
+const hasArchiveResources =
+    item.data.archiveResources &&
+    (item.data.archiveResources.recordingsUrl ||
+        item.data.archiveResources.slidesUrl ||
+        item.data.archiveResources.photoGalleryUrl ||
+        item.data.archiveResources.reportUrl);
+
+// Logic: Minimize display if Archived AND on Homepage
+const isArchivedHome = variant === "home" && item.data.phase === "Archived";
+
+// Venue & Map Logic
+// Hide map if minimized (archived on home)
+const showVenue =
+    !isArchivedHome &&
+    (variant === "summit" || item.data.format !== "Online") &&
+    (item.data.venue || item.data.city || item.data.country);
+
+const mapQuery = [item.data.venue, item.data.city, item.data.country]
+    .filter(Boolean)
+    .join(", ");
+const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
+---
+
+<div
+    class={`summit-detail variant-${variant} ${isArchivedHome ? "minimized" : ""}`}
+>
+    <div class="header-wrapper">
+        <div class="container header-container">
+            {
+                variant === "summit" && (
+                    <div class="back-link">
+                        <a href="/summits">← Back to Summits</a>
+                    </div>
+                )
+            }
+
+            <header class="post-header">
+                {
+                    !isArchivedHome && item.data.heroImage && (
+                        <div class="hero-image-wrapper">
+                            <img
+                                src={item.data.heroImage}
+                                alt=""
+                                class="hero-image"
+                                loading="eager"
+                            />
+                        </div>
+                    )
+                }
+
+                {/* Phase Badge / Eyebrow */}
+                <div class="phase-wrapper">
+                    {
+                        item.data.phase && (
+                            <div
+                                class={`phase-badge ${item.data.phase.toLowerCase()}`}
+                            >
+                                {item.data.phase === "Planning" &&
+                                variant === "home"
+                                    ? "Planning Phase"
+                                    : item.data.phase}
+                            </div>
+                        )
+                    }
+                </div>
+
+                <h1 class="page-title">{item.data.title}</h1>
+                <div class="meta">
+                    <span class="year">{item.data.year}</span>
+                    {
+                        item.data.city || item.data.country ? (
+                            <span class="location">
+                                {[item.data.city, item.data.country]
+                                    .filter(Boolean)
+                                    .join(", ")}
+                            </span>
+                        ) : (
+                            item.data.location && (
+                                <span class="location">
+                                    {item.data.location}
+                                </span>
+                            )
+                        )
+                    }
+                    {
+                        item.data.format && (
+                            <span class="format">({item.data.format})</span>
+                        )
+                    }
+                </div>
+                {
+                    !isArchivedHome && item.data.satelliteOf && (
+                        <div class="satellite-info">
+                            Satellite event of{" "}
+                            {item.data.satelliteOf.url ? (
+                                <a
+                                    href={item.data.satelliteOf.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    {item.data.satelliteOf.name}
+                                </a>
+                            ) : (
+                                item.data.satelliteOf.name
+                            )}
+                        </div>
+                    )
+                }
+
+                {/* Key Links Buttons */}
+                <div class="header-actions">
+                    {/* Registration - Home variant emphasizes this */}
+                    {
+                        !isArchivedHome && item.data.links?.registration && (
+                            <a
+                                href={item.data.links.registration}
+                                class="button primary"
+                            >
+                                Register Now
+                            </a>
+                        )
+                    }
+
+                    {/* Abstract Submission */}
+                    {
+                        !isArchivedHome && item.data.links?.callForPapers && (
+                            <a
+                                href={item.data.links.callForPapers}
+                                class="button secondary"
+                            >
+                                Submit Abstract
+                            </a>
+                        )
+                    }
+
+                    {/* Slack - Summit variant or if explicitly relevant */}
+                    {
+                        variant === "summit" && item.data.links?.slack && (
+                            <a
+                                href={item.data.links.slack}
+                                class="button secondary"
+                            >
+                                Join Slack
+                            </a>
+                        )
+                    }
+
+                    {/* Minimized View Action */}
+                    {
+                        isArchivedHome && (
+                            <a
+                                href={`/summits/${item.slug}`}
+                                class="button primary"
+                            >
+                                View Summit Archive
+                            </a>
+                        )
+                    }
+                </div>
+                {/* Planning Note for Home */}
+                {
+                    variant === "home" && item.data.phase === "Planning" && (
+                        <p class="planning-note">
+                            The next edition is under development.
+                        </p>
+                    )
+                }
+            </header>
+        </div>
+    </div>
+
+    <div class="container content-wrapper">
+        {/* Intro / Context */}
+        {
+            item.data.intro && (
+                <div class="summit-intro">
+                    <p>{item.data.intro}</p>
+                </div>
+            )
+        }
+
+        {/* Venue Map Section - Moved after Intro */}
+        {
+            showVenue && (
+                <section class="venue-section">
+                    <div class="venue-info">
+                        <h2>Venue</h2>
+                        <p class="venue-address">
+                            {item.data.venue && (
+                                <strong>{item.data.venue}</strong>
+                            )}
+                            {[item.data.city, item.data.country].filter(Boolean)
+                                .length > 0 && <br />}
+                            {[item.data.city, item.data.country]
+                                .filter(Boolean)
+                                .join(", ")}
+                        </p>
+                    </div>
+                    <div class="map-container">
+                        <iframe
+                            width="100%"
+                            height="350"
+                            style="border:0"
+                            loading="lazy"
+                            allowfullscreen
+                            src={mapUrl}
+                        />
+                    </div>
+                </section>
+            )
+        }
+
+        {/* If Home Archived, stop rendering details here */}
+        {
+            !isArchivedHome && (
+                <>
+                    {/* Featured Invited Speakers */}
+                    {item.data.speakers && item.data.speakers.length > 0 && (
+                        <section class="speakers-section">
+                            <h2>Featured Invited Speakers</h2>
+                            <div class="speakers-grid">
+                                {item.data.speakers.map((speaker) => (
+                                    <div class="speaker-card">
+                                        {/* Headshot */}
+                                        {speaker.image && (
+                                            <img
+                                                src={speaker.image}
+                                                alt={speaker.name}
+                                                class="speaker-headshot"
+                                                loading="lazy"
+                                            />
+                                        )}
+                                        <div class="speaker-info">
+                                            <h4 class="speaker-name">
+                                                {speaker.link ? (
+                                                    <a
+                                                        href={speaker.link}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    >
+                                                        {speaker.name}
+                                                    </a>
+                                                ) : (
+                                                    speaker.name
+                                                )}
+                                            </h4>
+                                            {speaker.role && (
+                                                <p class="speaker-role">
+                                                    {speaker.role}
+                                                </p>
+                                            )}
+                                            {speaker.affiliation && (
+                                                <p class="speaker-affiliation">
+                                                    {speaker.affiliation}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Program (Archive) Section */}
+                    {(item.data.programArchive ||
+                        item.data.links?.detailedProgram) && (
+                        <section class="program-archive-section">
+                            <h2>
+                                Program{" "}
+                                {variant === "home" &&
+                                item.data.phase !== "Archived"
+                                    ? ""
+                                    : "(Archive)"}
+                            </h2>
+                            <p class="section-intro">
+                                {item.data.phase === "Archived"
+                                    ? "The program schedule and details for this summit are available below."
+                                    : "The preliminary program schedule."}
+                            </p>
+
+                            <div
+                                class={`program-content ${variant === "home" ? "collapsed" : ""}`}
+                            >
+                                {/* Option A: Link Button */}
+                                {(item.data.programArchive?.url ||
+                                    item.data.links?.detailedProgram) && (
+                                    <div class="program-action">
+                                        <a
+                                            href={
+                                                item.data.programArchive?.url ||
+                                                item.data.links?.detailedProgram
+                                            }
+                                            class="button primary"
+                                            target="_blank"
+                                        >
+                                            {item.data.programArchive?.label ||
+                                                "View Detailed Program"}
+                                        </a>
+                                    </div>
+                                )}
+
+                                {/* Option B: Items List */}
+                                {item.data.programArchive?.items &&
+                                    item.data.programArchive.items.length >
+                                        0 && (
+                                        <div class="program-list">
+                                            {item.data.programArchive.items.map(
+                                                (session: any) => (
+                                                    <div class="program-item">
+                                                        <div class="program-time">
+                                                            {session.time}
+                                                        </div>
+                                                        <div class="program-info">
+                                                            <div class="program-title">
+                                                                {session.link ? (
+                                                                    <a
+                                                                        href={
+                                                                            session.link
+                                                                        }
+                                                                        target="_blank"
+                                                                    >
+                                                                        {
+                                                                            session.title
+                                                                        }
+                                                                    </a>
+                                                                ) : (
+                                                                    session.title
+                                                                )}
+                                                            </div>
+                                                            {session.speakers && (
+                                                                <div class="program-speakers">
+                                                                    {
+                                                                        session.speakers
+                                                                    }
+                                                                </div>
+                                                            )}
+                                                            {session.note && (
+                                                                <div class="program-note">
+                                                                    {
+                                                                        session.note
+                                                                    }
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
+                                    )}
+
+                                {/* Option C: Placeholder */}
+                                {!item.data.programArchive?.url &&
+                                    !item.data.programArchive?.items?.length &&
+                                    !item.data.links?.detailedProgram && (
+                                        <p class="program-placeholder">
+                                            Program details will be added soon.
+                                        </p>
+                                    )}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Archive Resources (Recordings/Slides/Report/Photos) */}
+                    {hasArchiveResources && (
+                        <section class="archive-resources-section">
+                            <h2>Archive Resources</h2>
+                            <div class="archive-links">
+                                {item.data.archiveResources?.reportUrl && (
+                                    <a
+                                        href={
+                                            item.data.archiveResources.reportUrl
+                                        }
+                                        class="archive-link"
+                                    >
+                                        📄 Post-Summit Report
+                                    </a>
+                                )}
+                                {item.data.archiveResources?.recordingsUrl && (
+                                    <a
+                                        href={
+                                            item.data.archiveResources
+                                                .recordingsUrl
+                                        }
+                                        class="archive-link"
+                                    >
+                                        ▶️ Recordings
+                                    </a>
+                                )}
+                                {item.data.archiveResources?.slidesUrl && (
+                                    <a
+                                        href={
+                                            item.data.archiveResources.slidesUrl
+                                        }
+                                        class="archive-link"
+                                    >
+                                        📊 Slides
+                                    </a>
+                                )}
+                                {item.data.archiveResources
+                                    ?.photoGalleryUrl && (
+                                    <a
+                                        href={
+                                            item.data.archiveResources
+                                                .photoGalleryUrl
+                                        }
+                                        class="archive-link"
+                                    >
+                                        📸 Photo Gallery
+                                    </a>
+                                )}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Main Content Render */}
+                    <article class="main-content">
+                        <Content />
+                    </article>
+
+                    {/* Community Outcomes */}
+                    {item.data.communityOutcomes &&
+                        item.data.communityOutcomes.length > 0 && (
+                            <section class="outcomes-section">
+                                <h2>Community Outcomes</h2>
+                                <div class="outcomes-list">
+                                    {item.data.communityOutcomes.map(
+                                        (outcome) => (
+                                            <div class="outcome-item">
+                                                <span class="outcome-type">
+                                                    {outcome.type}
+                                                </span>
+                                                <div class="outcome-details">
+                                                    <h3 class="outcome-title">
+                                                        {outcome.url ? (
+                                                            <a
+                                                                href={
+                                                                    outcome.url
+                                                                }
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            >
+                                                                {outcome.title}
+                                                            </a>
+                                                        ) : (
+                                                            outcome.title
+                                                        )}
+                                                    </h3>
+                                                    {outcome.description && (
+                                                        <p class="outcome-desc">
+                                                            {
+                                                                outcome.description
+                                                            }
+                                                        </p>
+                                                    )}
+                                                    <div class="outcome-meta">
+                                                        {outcome.doi && (
+                                                            <span class="doi">
+                                                                DOI:{" "}
+                                                                {outcome.doi}
+                                                            </span>
+                                                        )}
+                                                        {outcome.date && (
+                                                            <span class="date">
+                                                                {new Date(
+                                                                    outcome.date,
+                                                                ).toLocaleDateString()}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ),
+                                    )}
+                                </div>
+                            </section>
+                        )}
+
+                    {/* Sponsors */}
+                    {item.data.sponsors && item.data.sponsors.length > 0 && (
+                        <section class="sponsors-section">
+                            <h2>Sponsors</h2>
+                            <div class="sponsors-grid">
+                                {item.data.sponsors.map((sponsor) => (
+                                    <a
+                                        href={sponsor.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="sponsor-card"
+                                    >
+                                        {sponsor.logo ? (
+                                            <img
+                                                src={sponsor.logo}
+                                                alt={sponsor.name}
+                                                class="sponsor-logo"
+                                            />
+                                        ) : (
+                                            <span class="sponsor-name">
+                                                {sponsor.name}
+                                            </span>
+                                        )}
+                                        {sponsor.supportType && (
+                                            <span class="support-type">
+                                                {sponsor.supportType}
+                                            </span>
+                                        )}
+                                    </a>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Travel Grants */}
+                    {hasTravelGrant && (
+                        <section class="grants-section">
+                            <h2>Travel Grants</h2>
+                            <div class="grant-card">
+                                {item.data.travelGrant?.amount &&
+                                    item.data.travelGrant?.currency && (
+                                        <p>
+                                            <strong>Amount:</strong>{" "}
+                                            {item.data.travelGrant.amount}{" "}
+                                            {item.data.travelGrant.currency}
+                                        </p>
+                                    )}
+                                {item.data.travelGrant?.eligibility && (
+                                    <p>
+                                        <strong>Eligibility:</strong>{" "}
+                                        {item.data.travelGrant.eligibility}
+                                    </p>
+                                )}
+                                {item.data.travelGrant?.notes && (
+                                    <p class="grant-notes">
+                                        {item.data.travelGrant.notes}
+                                    </p>
+                                )}
+                                {item.data.travelGrant?.applicationUrl && (
+                                    <a
+                                        href={
+                                            item.data.travelGrant.applicationUrl
+                                        }
+                                        class="button small"
+                                    >
+                                        Apply for Grant
+                                    </a>
+                                )}
+                            </div>
+                        </section>
+                    )}
+
+                    {organizers.length > 0 && (
+                        <section class="organizers-section">
+                            <h2>The Organizing Team</h2>
+                            <div class="organizers-grid">
+                                {organizers.map((org) => (
+                                    <div class="organizer-card">
+                                        {org.image && (
+                                            <img
+                                                src={org.image.src}
+                                                alt={org.name}
+                                                class="organizer-image"
+                                                loading="lazy"
+                                            />
+                                        )}
+                                        <h3 class="organizer-name">
+                                            {org.name}
+                                        </h3>
+                                        {org.displayRole && (
+                                            <p class="organizer-role">
+                                                {org.displayRole}
+                                            </p>
+                                        )}
+                                        {org.affiliation && (
+                                            <p class="organizer-affiliation">
+                                                {org.affiliation}
+                                            </p>
+                                        )}
+                                        {org.country && (
+                                            <p class="organizer-country">
+                                                {org.country}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+                </>
+            )
+        }
+
+        {/* Footer Link (CoC) & Phase Notice */}
+        {
+            (item.data.links?.codeOfConduct || item.data.phase) && (
+                <div class="footer-links">
+                    {item.data.links?.codeOfConduct && (
+                        <a
+                            href={item.data.links.codeOfConduct}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Code of Conduct
+                        </a>
+                    )}
+
+                    {/* Phase Warning */}
+                    {item.data.phase === "Archived" && (
+                        <p class="phase-notice">
+                            {isArchivedHome
+                                ? "Viewing archived summit summary."
+                                : "This page serves as an archival record of the meeting."}
+                        </p>
+                    )}
+                    {item.data.phase === "Live" &&
+                        !item.data.links?.codeOfConduct && (
+                            <p class="phase-notice">
+                                This page is the central hub for the meeting.
+                            </p>
+                        )}
+                    {item.data.phase === "Planning" && (
+                        <p class="phase-notice">
+                            This page will be updated as the program is
+                            confirmed.
+                        </p>
+                    )}
+                </div>
+            )
+        }
+    </div>
+</div>
+
+<style>
+    /* Local Container Logic */
+    .container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    /* Variant: Home - Rich Header */
+    .variant-home .header-wrapper {
+        background: linear-gradient(
+            180deg,
+            rgba(230, 246, 255, 0.5) 0%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        padding: 80px 0 40px;
+        margin-bottom: 40px;
+    }
+
+    .variant-home .post-header {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .variant-home .page-title {
+        font-size: 3rem;
+    }
+
+    /* Shared Header Styles */
+    .page-title {
+        margin-top: 20px;
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 800;
+    }
+
+    .post-header {
+        margin-top: 40px;
+        margin-bottom: 60px;
+        text-align: center;
+    }
+
+    .hero-image-wrapper {
+        margin-bottom: 30px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .hero-image {
+        width: 100%;
+        height: auto;
+        max-height: 450px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .meta {
+        color: var(--c-text-light, #666);
+        font-size: 1.2rem;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .content-wrapper {
+        font-size: 18px;
+        line-height: 1.7;
+        color: var(--c-text, #333);
+        padding-bottom: 4rem;
+    }
+
+    .back-link {
+        margin-top: 20px;
+        min-height: 24px;
+    }
+
+    .back-link a {
+        color: var(--c-text-light, #666);
+        text-decoration: none;
+        font-size: 0.9em;
+    }
+
+    .back-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* Text Content Constraints - Max Width 800px */
+    .summit-intro,
+    .main-content,
+    .venue-info,
+    .section-intro,
+    .program-list,
+    .grant-card {
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Content Styling */
+    .main-content :global(h2) {
+        margin-top: 2em;
+        font-size: 1.8em;
+        font-weight: 700;
+    }
+
+    .main-content :global(h3) {
+        margin-top: 1.5em;
+        font-size: 1.4em;
+        font-weight: 600;
+    }
+
+    .main-content :global(p) {
+        margin-bottom: 1.2em;
+    }
+
+    /* Venue Section */
+    .venue-section {
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+    .venue-section h2 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    .venue-address {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.4;
+    }
+    .map-container {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        max-width: 900px; /* Keep map wide if nice */
+        margin: 0 auto;
+    }
+
+    /* Speakers Section */
+    .speakers-section {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .speakers-section h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+        color: var(--c-text);
+    }
+
+    .speakers-grid {
+        display: grid;
+        grid-template-columns: 1fr; /* Mobile: 1 col */
+        gap: 2rem;
+    }
+
+    @media (min-width: 640px) {
+        .speakers-grid {
+            grid-template-columns: repeat(2, 1fr); /* Tablet: 2 cols */
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .speakers-grid {
+            grid-template-columns: repeat(3, 1fr); /* Desktop: 3 cols */
+        }
+    }
+
+    .speaker-card {
+        background: #f9f9f9;
+        padding: 1.5rem;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    .speaker-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .speaker-headshot {
+        width: 96px;
+        height: 96px;
+        border-radius: 0.5rem; /* Rounding only */
+        object-fit: cover;
+        aspect-ratio: 1/1;
+        margin-bottom: 1rem;
+        background-color: #ddd;
+    }
+
+    @media (min-width: 640px) {
+        .speaker-headshot {
+            width: 110px;
+            height: 110px;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .speaker-headshot {
+            width: 130px;
+            height: 130px;
+        }
+    }
+
+    /* Intro Section */
+    .summit-intro {
+        font-size: 1.25rem;
+        line-height: 1.6;
+        color: var(--c-text, #333);
+        text-align: left;
+        margin-bottom: 3rem;
+    }
+
+    /* Program & Archive Section */
+    .program-archive-section,
+    .archive-resources-section {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        text-align: center;
+    }
+
+    .section-intro {
+        /* Centered via global max-width 800px logic above */
+        color: #555;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Program List (Archive) */
+    .program-list {
+        text-align: left;
+        /* max-width 800px applied via global logic */
+        margin-top: 2rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .program-item {
+        display: grid;
+        grid-template-columns: 100px 1fr;
+        gap: 1.5rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .program-time {
+        font-weight: 600;
+        color: #666;
+        font-feature-settings: "tnum";
+        font-size: 0.95rem;
+    }
+
+    .program-title {
+        font-weight: 700;
+        font-size: 1.05rem;
+        margin-bottom: 0.25rem;
+        color: var(--c-text);
+    }
+
+    .program-title a {
+        color: inherit;
+        text-decoration: none;
+    }
+    .program-title a:hover {
+        text-decoration: underline;
+        color: var(--c-primary);
+    }
+
+    .program-speakers {
+        font-size: 0.95rem;
+        color: #444;
+    }
+
+    .program-note {
+        font-size: 0.85rem;
+        color: #888;
+        font-style: italic;
+        margin-top: 0.25rem;
+    }
+
+    @media (max-width: 600px) {
+        .program-item {
+            grid-template-columns: 1fr;
+            gap: 0.25rem;
+        }
+        .program-time {
+            font-size: 0.85rem;
+            color: var(--c-primary);
+        }
+    }
+
+    .archive-resources-section h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    /* Re-use Archive Link Styles */
+    .archive-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+    .archive-link {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+    .archive-link:hover {
+        border-color: var(--c-primary, #0066cc);
+        color: var(--c-primary, #0066cc);
+    }
+
+    .speaker-name {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+        color: var(--c-text);
+    }
+
+    .speaker-name a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .speaker-name a:hover {
+        text-decoration: underline;
+        color: var(--c-primary, #0066cc);
+    }
+
+    .speaker-role {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--c-primary, #0066cc);
+        margin-bottom: 0.25rem;
+        line-height: 1.3;
+    }
+
+    .speaker-affiliation {
+        display: block;
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 0;
+        font-style: italic;
+    }
+
+    /* Organizers Section */
+    .organizers-section {
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 1px solid #eee;
+    }
+
+    .organizers-section h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+    }
+
+    .organizers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 2rem;
+        text-align: center;
+    }
+
+    .organizer-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .organizer-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+        background-color: #f0f0f0;
+    }
+
+    .organizer-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .organizer-role {
+        font-size: 0.9rem;
+        color: var(--c-primary, #0066cc);
+        font-weight: 600;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .organizer-affiliation {
+        font-size: 0.85rem;
+        color: #666;
+        margin-top: 0;
+        line-height: 1.4;
+    }
+
+    .organizer-country {
+        font-size: 0.85rem;
+        color: #888;
+        margin-top: 0.1rem;
+    }
+
+    /* Header actions & Badges */
+    .phase-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+    }
+    .phase-badge.planning {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+    .phase-badge.live {
+        background: #dcfce7;
+        color: #15803d;
+    }
+    .phase-badge.archived {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .header-actions {
+        margin-top: 1.5rem;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+    .button {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+    .button.primary {
+        background: var(--c-primary, #0066cc);
+        color: white;
+    }
+    .button.primary:hover {
+        opacity: 0.9;
+    }
+    .button.secondary {
+        background: white;
+        border: 2px solid var(--c-primary, #0066cc);
+        color: var(--c-primary, #0066cc);
+    }
+    .button.secondary:hover {
+        background: #f0f9ff;
+    }
+
+    .planning-note {
+        margin-top: 1rem;
+        color: var(--c-text-secondary);
+    }
+
+    /* Outcomes */
+    .outcomes-section {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid #eee;
+    }
+    .outcomes-section h2 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-size: 2rem;
+    }
+    .outcomes-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .outcome-item {
+        border-left: 4px solid var(--c-primary, #0066cc);
+        padding-left: 1rem;
+    }
+    .outcome-type {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: #666;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+    }
+    .outcome-title {
+        font-size: 1.2rem;
+        margin: 0.25rem 0;
+        font-weight: 600;
+    }
+    .outcome-title a {
+        text-decoration: none;
+        color: inherit;
+    }
+    .outcome-title a:hover {
+        color: var(--c-primary, #0066cc);
+        text-decoration: underline;
+    }
+    .outcome-desc {
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 0.5rem;
+    }
+    .outcome-meta {
+        font-size: 0.85rem;
+        color: #888;
+        display: flex;
+        gap: 1rem;
+    }
+
+    /* Sponsors */
+    .sponsors-section {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid #eee;
+    }
+    .sponsors-section h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+    }
+    .sponsors-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 2rem;
+        align-items: center;
+        justify-content: center;
+    }
+    .sponsor-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #333;
+        padding: 1rem;
+        transition: transform 0.2s;
+    }
+    .sponsor-card:hover {
+        transform: translateY(-3px);
+    }
+    .sponsor-logo {
+        max-width: 100%;
+        max-height: 80px;
+        object-fit: contain;
+        filter: grayscale(100%);
+        transition: filter 0.3s;
+    }
+    .sponsor-card:hover .sponsor-logo {
+        filter: grayscale(0%);
+    }
+
+    /* Travel Grants */
+    .grants-section {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid #eee;
+    }
+    .grants-section h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+    }
+    .grant-card {
+        background: #f9f9f9;
+        border: 1px solid #eee;
+        padding: 2rem;
+        border-radius: 12px;
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+    }
+    .grant-card p {
+        margin-bottom: 1rem;
+    }
+    .grant-notes {
+        font-style: italic;
+        color: #666;
+    }
+
+    .footer-links {
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 1px solid #eee;
+        text-align: center;
+    }
+    .footer-links a {
+        color: #666;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    .footer-links a:hover {
+        text-decoration: underline;
+        color: var(--c-primary, #0066cc);
+    }
+
+    .phase-notice {
+        margin-top: 1rem;
+        font-style: italic;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    @media print {
+        /* Force visibility of hero elements */
+        .hero-image-wrapper,
+        .page-title,
+        .meta,
+        .post-header {
+            display: block !important;
+        }
+        /* Hide map */
+        .venue-section .map-container {
+            display: none !important;
+        }
+    }
+</style>

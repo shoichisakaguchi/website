@@ -42,7 +42,7 @@ const summits = defineCollection({
         description: z.string().optional(),
         intro: z.string().optional(),
         tags: z.array(z.string()).optional(),
-        phase: z.enum(['Planning', 'Live', 'Archived']).optional().default('Planning'),
+        phase: z.enum(['Planning', 'Preview', 'Live', 'Archived']).optional().default('Planning'),
         year: z.string().optional(),
         startDate: z.coerce.date().optional(),
         endDate: z.coerce.date().optional(),
@@ -122,7 +122,7 @@ const summit = defineCollection({
     type: 'data',
     schema: z.object({
         featuredSummit: z.string().optional(),
-        overridePhase: z.enum(['Auto', 'Planning', 'Live', 'Archived']).optional().default('Auto'),
+        overridePhase: z.enum(['Auto', 'Planning', 'Preview', 'Live', 'Archived']).optional().default('Auto'),
         topMessagePlanning: z.any().optional(),
         topMessageLive: z.any().optional(),
         topMessageArchived: z.any().optional(),

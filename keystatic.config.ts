@@ -112,6 +112,7 @@ export default config({
                     label: 'Phase',
                     options: [
                         { label: 'Planning', value: 'Planning' },
+                        { label: 'Preview', value: 'Preview' },
                         { label: 'Live', value: 'Live' },
                         { label: 'Archived', value: 'Archived' },
                     ],
@@ -285,6 +286,7 @@ export default config({
                     options: [
                         { label: 'Auto (Use Summit Phase)', value: 'Auto' },
                         { label: 'Force Planning', value: 'Planning' },
+                        { label: 'Force Preview', value: 'Preview' },
                         { label: 'Force Live', value: 'Live' },
                         { label: 'Force Archived', value: 'Archived' },
                     ],

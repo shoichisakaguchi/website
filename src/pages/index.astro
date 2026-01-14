@@ -1,415 +1,251 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import HomeAnnouncements from "../components/HomeAnnouncements.astro";
-import { getEntry, getCollection } from "astro:content";
-import { Image } from "astro:assets";
+import JournalClubHome from "../components/JournalClubHome.astro";
+import { getCollection, getEntry, type CollectionEntry } from "astro:content";
+import SummitDetail from "../components/SummitDetail.astro";
 
-export const prerender = true;
-
-// 1. Fetch Key Data
-// 1. Fetch Key Data
-const summitInfo = await getEntry("summit", "info");
-const featuredSummitSlug = summitInfo?.data?.featuredSummit;
-const featuredSummit = featuredSummitSlug
-	? await getEntry("summits", featuredSummitSlug)
-	: null;
-const summitData = featuredSummit?.data;
-
-// 2. Determine Phase & Content
-const overridePhase = summitInfo?.data?.overridePhase ?? "Auto";
-const autoPhase = summitData?.phase ?? "Planning";
-const currentPhase = overridePhase === "Auto" ? autoPhase : overridePhase;
-
+// 1. Determine "Active Summit" (Single Source of Truth)
 const allSummits = await getCollection("summits");
-const liveSummitEntry = allSummits.find(
-	(summit) => summit.data.phase === "Live",
-);
-const liveSummitData =
-	liveSummitEntry?.data ?? (currentPhase === "Live" ? summitData : null);
+const summitInfo = await getEntry("summit", "info");
 
-const getEditionLabel = (summit: any) => {
-	if (!summit) return null;
-	const year = summit.year ? String(summit.year) : "";
-	const location = summit.location
-		? summit.location.split(",")[0].trim()
-		: "";
-	const label = [year, location].filter(Boolean).join(" ");
-	return label || null;
-};
+let activeSummit: CollectionEntry<"summits"> | undefined;
 
-const rawOrganizers = liveSummitData?.organizers || [];
-const resolvedLiveOrganizers = await Promise.all(
-	rawOrganizers.map(async (org) => {
-		try {
-			const personEntry = await getEntry("people", org.person);
-			if (!personEntry) return null;
-			return {
-				...personEntry,
-				data: {
-					...personEntry.data,
-					role: org.role,
-					weight: org.weight ?? 50,
-				},
-			};
-		} catch (e) {
-			return null;
-		}
-	}),
-);
-const sortedLiveOrganizers = resolvedLiveOrganizers
-	.filter((o): o is NonNullable<typeof o> => o !== null)
-	.sort((a, b) => {
-		const wA = a.data.weight ?? 50;
-		const wB = b.data.weight ?? 50;
-		if (wA !== wB) return wA - wB;
-		return a.data.name.localeCompare(b.data.name);
-	});
-
-// Select the top message based on phase
-let topMessage = null;
-if (currentPhase === "Planning")
-	topMessage = summitInfo?.data?.topMessagePlanning;
-else if (currentPhase === "Live") topMessage = summitInfo?.data?.topMessageLive;
-else if (currentPhase === "Archived")
-	topMessage = summitInfo?.data?.topMessageArchived;
-
-// 3. Process Journal Club (Find next meeting)
-const allJournalClub = await getCollection("journal-club");
-const today = new Date();
-// Filter for future meetings (including today)
-const upcomingJournalClub = allJournalClub
-	.filter((item) => new Date(item.data.date) >= today)
-	.sort(
-		(a, b) =>
-			new Date(a.data.date).valueOf() - new Date(b.data.date).valueOf(),
-	)[0];
-
-// Helper for "Add to Calendar" (Google Calendar)
-const makeGoogleCalendarUrl = (item: any) => {
-	if (!item) return "#";
-	const date = new Date(item.data.date);
-	const start = date.toISOString().replace(/-|:|\.\d\d\d/g, "");
-	// Assume 1 hour duration
-	const endDate = new Date(date.getTime() + 60 * 60 * 1000);
-	const end = endDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
-
-	const title = encodeURIComponent(`RdRp Journal Club: ${item.data.title}`);
-	const details = encodeURIComponent(
-		`Speaker: ${item.data.speaker || "TBA"}\nPaper: ${item.data.paperUrl || ""}`,
+// Strategy 0: Explicit "Featured Summit" from Keystatic
+if (summitInfo?.data?.featuredSummit) {
+	activeSummit = allSummits.find(
+		(s) => s.slug === summitInfo.data.featuredSummit,
 	);
+}
 
-	return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}`;
-};
+// Strategy 1: Look for "Live"
+if (!activeSummit) {
+	activeSummit = allSummits.find((s) => s.data.phase === "Live");
+}
 
-const journalClubCalendarUrl = makeGoogleCalendarUrl(upcomingJournalClub);
+// Strategy 2: Look for "Preview"
+if (!activeSummit) {
+	activeSummit = allSummits.find((s) => s.data.phase === "Preview");
+}
 
-import { DocumentRenderer } from "@keystatic/core/renderer";
+// Strategy 3: Look for "Planning"
+if (!activeSummit) {
+	activeSummit = allSummits.find((s) => s.data.phase === "Planning");
+}
+
+// Strategy 4: Fallback to latest by date/year
+if (!activeSummit && allSummits.length > 0) {
+	activeSummit = allSummits.sort((a, b) => {
+		const dateA = a.data.startDate
+			? new Date(a.data.startDate).valueOf()
+			: 0;
+		const dateB = b.data.startDate
+			? new Date(b.data.startDate).valueOf()
+			: 0;
+		if (dateA !== dateB) return dateB - dateA;
+		// Fallback to year string comparison
+		return (b.data.year || "").localeCompare(a.data.year || "");
+	})[0];
+}
+
+// Apply Phase Override if present
+if (
+	activeSummit &&
+	summitInfo?.data?.overridePhase &&
+	summitInfo.data.overridePhase !== "Auto"
+) {
+	activeSummit = {
+		...activeSummit,
+		data: {
+			...activeSummit.data,
+			phase: summitInfo.data.overridePhase as any, // Type cast if needed
+		},
+	};
+}
+
+const currentPhase = activeSummit?.data.phase || "Planning";
 ---
 
 <Layout>
 	<div data-pagefind-body>
-		{/* HERO SECTION: SUMMIT */}
 		{
-			summitData && (
-				<section
-					class={`hero-summit phase-${currentPhase.toLowerCase()}`}
-				>
-					<div class="container">
-						<span class="eyebrow">
-							{currentPhase === "Archived"
-								? "Past Event"
-								: currentPhase === "Planning"
-									? "Planning Phase"
-									: "Upcoming Summit"}
-						</span>
-						<h1 class="summit-title">
-							{summitData.title ||
-								`RdRp Summit ${summitData.year}`}
-						</h1>
-
-						<div class="summit-message">
-							{topMessage && (
-								<div class="rich-text">
-									<DocumentRenderer document={topMessage} />
-								</div>
-							)}
-							{currentPhase === "Planning" && (
-								<p
-									class="planning-note"
-									style="margin-top: 1rem; color: var(--c-text-secondary);"
-								>
-									The next edition is under development. Join
-									Slack for live discussions.
-								</p>
-							)}
-						</div>
-
-						{/* Live / Archived Details: Show Dates & Venue */}
-						{currentPhase !== "Planning" && (
-							<div class="summit-info-grid">
-								{(summitData.startDate ||
-									summitData.location) && (
-									<div class="summit-details">
-										{summitData.startDate && (
-											<div class="detail-item">
-												<span class="icon">📅</span>
-												<span>
-													{new Date(
-														summitData.startDate,
-													).toLocaleDateString(
-														"en-US",
-														{
-															month: "long",
-															day: "numeric",
-														},
-													)}
-													{summitData.endDate &&
-														` – ${new Date(summitData.endDate).toLocaleDateString("en-US", { month: "long", day: "numeric" })}`}
-													{", "}
-													{summitData.year}
-												</span>
-											</div>
-										)}
-										{summitData.location && (
-											<div class="detail-item">
-												<span class="icon">📍</span>
-												<span>
-													{summitData.location}
-													{summitData.venue &&
-														` (${summitData.venue})`}
-												</span>
-											</div>
-										)}
-									</div>
-								)}
-
-								{/* Keynotes */}
-								{summitData.keynotes &&
-									summitData.keynotes.length > 0 && (
-										<div class="keynotes-section">
-											<h3>Keynote Speakers</h3>
-											<div class="keynotes-list">
-												{summitData.keynotes.map(
-													(speaker: any) => (
-														<div class="keynote-card">
-															{speaker.image && (
-																<img
-																	src={
-																		speaker.image
-																	}
-																	alt={
-																		speaker.name
-																	}
-																	class="keynote-img"
-																/>
-															)}
-															<div class="keynote-info">
-																<span class="keynote-name">
-																	{
-																		speaker.name
-																	}
-																</span>
-																<span class="keynote-affil">
-																	{
-																		speaker.affiliation
-																	}
-																</span>
-															</div>
-														</div>
-													),
-												)}
-											</div>
-										</div>
-									)}
+			/* 
+            PHASE: PLANNING
+            Goal: Enable contact with organizers.
+            Content: Hero (Preparation message), CTA (Contact), Link to Past Summits.
+        */
+		}
+		{
+			currentPhase === "Planning" && (
+				<>
+					<section class="hero-planning">
+						<div class="container hero-content">
+							<h1>We are preparing the next RdRp Summit.</h1>
+							<p class="subtitle">
+								Details such as date and venue will be announced
+								once confirmed.
+							</p>
+							<div class="cta-wrapper">
+								<a href="/contact" class="button primary">
+									Contact the organizers
+								</a>
 							</div>
-						)}
-
-						{/* CTA Buttons */}
-						<div class="cta-group">
-							{summitData.links?.registration &&
-								currentPhase === "Live" && (
-									<a
-										href={summitData.links.registration}
-										class="button primary"
-									>
-										Register Now
-									</a>
-								)}
-							{summitData.links?.slack && (
-								<a
-									href={summitData.links.slack}
-									class="button secondary"
-								>
-									Join Slack
-								</a>
-							)}
-							{currentPhase === "Archived" && (
-								<a href="/summits" class="button outline">
-									View Past Summits
-								</a>
-							)}
 						</div>
-					</div>
-				</section>
+					</section>
+					<JournalClubHome variant="standard" showIcon={true} />
+				</>
 			)
 		}
 
 		{
-			currentPhase === "Live" && sortedLiveOrganizers.length > 0 && (
-				<section class="organizers-section">
-					<div class="container">
-						<div class="organizers-header">
-							<div>
-								<span class="eyebrow">Organizing Team</span>
-								<h2 class="organizers-title">
-									{getEditionLabel(liveSummitData) ||
-										"Current Summit"}
-								</h2>
-							</div>
-							<a href="/people" class="link-arrow">
-								See all past organizers &rarr;
-							</a>
-						</div>
-						<div class="organizers-grid">
-							{sortedLiveOrganizers.map((person) => (
-								<article class="organizer-card">
-									<div class="organizer-photo">
-										{person.data.image ? (
-											<Image
-												src={person.data.image}
-												alt={person.data.name}
-												width={120}
-												height={120}
-												class="organizer-img"
-											/>
-										) : (
-											<div
-												class="organizer-img placeholder"
-												style="background: #eee; width: 100%; height: 100%;"
-											/>
-										)}
-									</div>
-									<p class="organizer-name">
-										{person.data.name}
-									</p>
-								</article>
-							))}
-						</div>
-					</div>
-				</section>
-			)
+			/* 
+            PHASE: PREVIEW
+            Goal: Announce upcoming event (save the date).
+            Content: "Save the date", Basic facts, Passive CTA.
+        */
 		}
-
-		{/* JOURNAL CLUB SECTION */}
-		<section class="journal-section">
-			<div class="container journal-grid">
-				<div class="journal-info">
-					<h2>Journal Club</h2>
-					<p class="subtitle">
-						Join our bi-weekly discussion on the latest RdRp
-						research.
-					</p>
-					<div class="calendar-note">
-						<p>
-							<span class="icon">🕒</span> Time is managed via Google
-							Calendar (automatically adjusted to your local timezone).
-						</p>
-					</div>
-
-					<div class="actions">
-						<a
-							href="https://slack.com/signin"
-							target="_blank"
-							class="button small outline">Join Slack</a
-						>
-						<a href="/journal-club" class="link-arrow"
-							>View Schedule &rarr;</a
-						>
-					</div>
-				</div>
-
-				<div class="next-meeting-card">
-					{
-						upcomingJournalClub ? (
-							<>
-								<span class="badge">Next Meeting</span>
-								<h3 class="paper-title">
-									{upcomingJournalClub.data.title}
-								</h3>
-								<div class="meeting-meta">
-									{upcomingJournalClub.data.speaker && (
-										<p>
-											<strong>Speaker:</strong>{" "}
-											{upcomingJournalClub.data.speaker}
-										</p>
-									)}
-									<p>
-										<strong>Date:</strong>{" "}
+		{
+			currentPhase === "Preview" && activeSummit && (
+				<>
+					<section class="hero-preview">
+						<div class="container hero-content">
+							<span class="eyebrow">Upcoming Event</span>
+							<h1>{activeSummit.data.title}</h1>
+							<div class="event-meta">
+								{activeSummit.data.startDate && (
+									<p class="date">
+										Save the Date:{" "}
 										{new Date(
-											upcomingJournalClub.data.date,
-										).toLocaleDateString("en-US", {
-											weekday: "long",
-											month: "long",
-											day: "numeric",
-										})}
+											activeSummit.data.startDate,
+										).toLocaleDateString()}
 									</p>
-								</div>
-								<div class="card-actions">
-									<a
-										href={journalClubCalendarUrl}
-										target="_blank"
-										class="button small"
-									>
-										Add to Calendar
-									</a>
-									{upcomingJournalClub.data.paperUrl && (
-										<a
-											href={
-												upcomingJournalClub.data
-													.paperUrl
-											}
-											target="_blank"
-											class="button small secondary"
-										>
-											Read Paper
-										</a>
-									)}
-								</div>
-							</>
-						) : (
-							<div class="empty-state">
-								<h3>No upcoming meetings scheduled</h3>
-								<p>Check back later for updates.</p>
+								)}
+								{(activeSummit.data.city ||
+									activeSummit.data.country) && (
+									<p class="location">
+										{[
+											activeSummit.data.city,
+											activeSummit.data.country,
+										]
+											.filter(Boolean)
+											.join(", ")}
+									</p>
+								)}
 							</div>
-						)
-					}
-				</div>
-			</div>
-		</section>
+							{/* Passive CTA if a detail page exists/is desired, or just omit */}
+							<div class="cta-wrapper">
+								<span class="info-text">
+									More details coming soon.
+								</span>
+							</div>
+						</div>
+					</section>
+					<JournalClubHome variant="standard" showIcon={true} />
+				</>
+			)
+		}
 
-		{/* ANNOUNCEMENTS & FEATURES */}
+		{
+			/* 
+            PHASE: LIVE
+            Goal: Drive registration / participation.
+            Content: SummitDetail (Full) + Journal Club (Standard).
+        */
+		}
+		{
+			currentPhase === "Live" && activeSummit && (
+				<>
+					<SummitDetail item={activeSummit} variant="home" />
+					<JournalClubHome variant="standard" showIcon={false} />
+				</>
+			)
+		}
+
+		{
+			/* 
+            PHASE: ARCHIVED
+            Goal: Access to past outcomes.
+            Content: Journal Club (Hero) + Past Summit (Detail).
+        */
+		}
+		{
+			currentPhase === "Archived" && activeSummit && (
+				<>
+					<JournalClubHome variant="hero" showIcon={true} />
+
+					<section class="past-summits-section">
+						<div class="container section-header">
+							<h2>Past RdRp Summits</h2>
+							<p>
+								Explore talks, speakers, and outcomes from
+								previous meetings.
+							</p>
+						</div>
+						<SummitDetail item={activeSummit} variant="home" />
+					</section>
+				</>
+			)
+		}
+
+		{
+			/* 
+           COMMON SECTIONS 
+           (Announcements & Footer Features are generally safe to show, 
+           but strictly for 'Planning', we might want to be minimal. 
+           However, 'HomeAnnouncements' might contain relevant news even in Planning.
+           Promised "Optional: Small section linking to Past Summits" for Planning.
+        */
+		}
+
+		{
+			/* Show Announcements generally, unless strict minimal mode is requested? User said "Top Page Content (ONLY include...)" for Planning. 
+            I will render Announcements but maybe below the fold. 
+        */
+		}
 		<HomeAnnouncements />
+
+		{
+			/* For Planning Phase, add specific "Past Summits" link/section if not already covered */
+		}
+		{
+			currentPhase === "Planning" && (
+				<section class="planning-history">
+					<div class="container">
+						<h2>Previous Summits</h2>
+						<p>
+							Explore the outcomes and archives from our past
+							meetings.
+						</p>
+						<a href="/summits" class="link-arrow">
+							View Past Summits &rarr;
+						</a>
+					</div>
+				</section>
+			)
+		}
 
 		<section class="container features">
 			<div class="feature-grid">
 				<div class="feature-card">
 					<h3>About</h3>
 					<p>Discover our mission to map the RNA virosphere.</p>
-					<a href="/about" class="link-arrow">Read more &rarr;</a>
+					<a href="/about" class="link-arrow"> Read more &rarr; </a>
 				</div>
 				<div class="feature-card">
 					<h3>Summits</h3>
 					<p>
 						Archive of international RdRp summits and proceedings.
 					</p>
-					<a href="/summits" class="link-arrow"
-						>Browse archive &rarr;</a
-					>
+					<a href="/summits" class="link-arrow">
+						Browse archive &rarr;
+					</a>
 				</div>
 				<div class="feature-card">
 					<h3>Contact</h3>
 					<p>Get in touch with the RdRp Summit team.</p>
-					<a href="/contact" class="link-arrow">Contact us &rarr;</a>
+					<a href="/contact" class="link-arrow">
+						Contact us &rarr;
+					</a>
 				</div>
 			</div>
 		</section>
@@ -424,248 +260,101 @@ import { DocumentRenderer } from "@keystatic/core/renderer";
 		padding: 0 20px;
 	}
 
-	.button {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 12px 24px;
-		border-radius: 980px;
-		font-size: 16px;
-		font-weight: 500;
-		text-align: center;
-		transition: all 0.2s ease;
-		text-decoration: none;
-		cursor: pointer;
-		line-height: 1;
-	}
-
-	.button.primary {
-		background-color: var(--c-link);
-		color: white;
-		border: 1px solid var(--c-link);
-	}
-	.button.primary:hover {
-		background-color: var(--c-link-hover);
-		border-color: var(--c-link-hover);
-		transform: translateY(-1px);
-	}
-
-	.button.secondary {
-		background-color: transparent;
-		color: var(--c-link);
-		border: 1px solid var(--c-link);
-	}
-	.button.secondary:hover {
-		background-color: rgba(0, 112, 243, 0.05);
-	}
-
-	.button.small {
-		padding: 8px 16px;
-		font-size: 14px;
-	}
-	.button.outline {
-		border: 1px solid #ddd;
-		color: var(--c-text);
-	}
-	.button.outline:hover {
-		border-color: var(--c-link);
-		color: var(--c-link);
-	}
-
-	/* Summit Hero */
-	.hero-summit {
-		padding: 80px 0;
+	/* Hero Styles for Planning & Preview */
+	.hero-planning,
+	.hero-preview {
+		padding: 100px 0;
 		text-align: center;
 		background: linear-gradient(
 			180deg,
 			rgba(230, 246, 255, 0.5) 0%,
-			rgba(255, 255, 255, 0) 100%
+			white 100%
 		);
-		border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-		margin-bottom: 40px;
 	}
 
-	.eyebrow {
-		text-transform: uppercase;
-		letter-spacing: 0.1em;
-		font-size: 12px;
-		font-weight: 700;
-		color: var(--c-link);
-		margin-bottom: 12px;
-		display: block;
-	}
-
-	.summit-title {
-		font-size: 48px;
+	.hero-content h1 {
+		font-size: 2.5rem;
 		font-weight: 800;
-		letter-spacing: -0.02em;
-		margin-bottom: 24px;
-		line-height: 1.1;
-	}
-
-	.summit-details {
-		display: flex;
-		justify-content: center;
-		gap: 24px;
-		margin-bottom: 32px;
-		color: var(--c-text-secondary);
-		font-size: 18px;
-	}
-
-	.detail-item {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-	}
-
-	.cta-group {
-		display: flex;
-		gap: 16px;
-		justify-content: center;
-	}
-
-	/* Organizers Section */
-	.organizers-section {
-		padding: 40px 0 20px;
-		margin-top: -10px;
-		margin-bottom: 40px;
-	}
-
-	.organizers-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: flex-end;
-		gap: 20px;
-		flex-wrap: wrap;
-		margin-bottom: 24px;
-	}
-
-	.organizers-title {
-		font-size: 28px;
-		font-weight: 700;
-		margin: 0;
-	}
-
-	.organizers-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-		gap: 18px;
-	}
-
-	.organizer-card {
-		background: #fff;
-		border: 1px solid rgba(0, 0, 0, 0.05);
-		border-radius: 14px;
-		padding: 16px;
-		text-align: center;
-		box-shadow: 0 6px 14px rgba(0, 0, 0, 0.04);
-	}
-
-	.organizer-photo {
-		width: 96px;
-		height: 96px;
-		border-radius: 50%;
-		overflow: hidden;
-		margin: 0 auto 12px;
-		background: #eef1f5;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.organizer-img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	.organizer-name {
-		margin: 0;
-		font-size: 0.95em;
-		font-weight: 600;
+		margin-bottom: 20px;
 		color: var(--c-text);
 	}
 
-	/* Journal Club Section */
-	.journal-section {
-		padding: 60px 0;
-		background-color: #fafbfc;
-		border-top: 1px solid rgba(0, 0, 0, 0.03);
-		border-bottom: 1px solid rgba(0, 0, 0, 0.03);
-		margin-bottom: 60px;
-	}
-
-	.journal-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 60px;
-		align-items: center;
-	}
-
-	@media (max-width: 768px) {
-		.journal-grid {
-			grid-template-columns: 1fr;
-			gap: 40px;
-		}
-	}
-
-	.journal-info h2 {
-		font-size: 32px;
-		margin-bottom: 12px;
-	}
-
 	.subtitle {
+		font-size: 1.25rem;
 		color: var(--c-text-secondary);
-		font-size: 18px;
-		margin-bottom: 24px;
-		line-height: 1.5;
+		margin-bottom: 40px;
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
 	}
 
-	.actions {
-		display: flex;
-		align-items: center;
-		gap: 20px;
+	.cta-wrapper {
+		margin-top: 30px;
 	}
 
-	.next-meeting-card {
-		background: white;
-		padding: 30px;
-		border-radius: 16px;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-		border: 1px solid rgba(0, 0, 0, 0.03);
+	.button.primary {
+		background-color: var(--c-primary);
+		color: white;
+		padding: 12px 24px;
+		border-radius: 8px;
+		text-decoration: none;
+		font-weight: 600;
+		transition: opacity 0.2s;
+	}
+	.button.primary:hover {
+		opacity: 0.9;
 	}
 
-	.badge {
-		display: inline-block;
-		background-color: #f3e8ff;
-		color: #7928ca;
-		padding: 4px 10px;
-		border-radius: 99px;
-		font-size: 12px;
-		font-weight: 700;
+	/* Preview Specific */
+	.eyebrow {
 		text-transform: uppercase;
-		margin-bottom: 16px;
+		font-size: 0.9rem;
+		letter-spacing: 0.1em;
+		color: var(--c-primary);
+		font-weight: 700;
+		margin-bottom: 10px;
+		display: block;
+	}
+	.event-meta {
+		font-size: 1.2rem;
+		margin-bottom: 30px;
+		color: var(--c-text);
+	}
+	.info-text {
+		color: var(--c-text-secondary);
+		font-style: italic;
 	}
 
-	.paper-title {
-		font-size: 20px;
-		margin-bottom: 16px;
-		line-height: 1.4;
+	/* Past Summits Section Wrapper (Archived) */
+	.past-summits-section {
+		padding-top: 40px;
+	}
+	.past-summits-section .section-header {
+		text-align: center;
+		margin-bottom: 20px;
+	}
+	.past-summits-section h2 {
+		font-size: 2rem;
+		margin-bottom: 10px;
+	}
+	.past-summits-section p {
+		color: var(--c-text-secondary);
+		font-size: 1.1rem;
 	}
 
-	.meeting-meta {
-		margin-bottom: 24px;
-		font-size: 15px;
-		color: #555;
+	/* Planning History Section */
+	.planning-history {
+		text-align: center;
+		padding: 60px 0;
+		border-top: 1px solid rgba(0, 0, 0, 0.05);
 	}
-
-	.meeting-meta p {
-		margin: 4px 0;
+	.planning-history h2 {
+		font-size: 1.8rem;
+		margin-bottom: 0.5em;
 	}
-
-	.card-actions {
-		display: flex;
-		gap: 12px;
+	.planning-history p {
+		color: var(--c-text-secondary);
+		margin-bottom: 1.5em;
 	}
 
 	/* Features Grid (Bottom) */
