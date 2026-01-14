@@ -19,26 +19,54 @@ const upcomingJournalClub = allJournalClub
             new Date(a.data.date).valueOf() - new Date(b.data.date).valueOf(),
     )[0];
 
-// Helper for "Add to Calendar" (Google Calendar)
-const makeGoogleCalendarUrl = (item: any) => {
-    if (!item) return "#";
-    const date = new Date(item.data.date);
-    const start = date.toISOString().replace(/-|:|\.\d\d\d/g, "");
-    // Assume 1 hour duration
-    const endDate = new Date(date.getTime() + 60 * 60 * 1000);
-    const end = endDate.toISOString().replace(/-|:|\.\d\d\d/g, "");
+// Helper to get speaker display (two-line format)
+function getSpeakerInfo(data: typeof upcomingJournalClub.data) {
+    // New structured fields
+    if (data.speakerName) {
+        return {
+            name: data.speakerName,
+            affiliation: data.speakerAffiliation || null,
+        };
+    }
+    // Fallback to legacy field - try to parse "Name (Affiliation)"
+    if (data.speaker) {
+        const match = data.speaker.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+        if (match) {
+            return { name: match[1].trim(), affiliation: match[2].trim() };
+        }
+        return { name: data.speaker, affiliation: null };
+    }
+    return null;
+}
 
-    const title = encodeURIComponent(`RdRp Journal Club: ${item.data.title}`);
-    const details = encodeURIComponent(
-        `Speaker: ${item.data.speaker || "TBA"}\nPaper: ${item.data.paperUrl || ""}`,
-    );
+// Helper to get primary link
+function getPrimaryLink(data: typeof upcomingJournalClub.data) {
+    if (data.links && data.links.length > 0) {
+        const primary = data.links.find((l) => l.isPrimary) || data.links[0];
+        return { label: primary.label, url: primary.url };
+    }
+    // Fallback to legacy field
+    if (data.paperUrl) {
+        return { label: "Paper", url: data.paperUrl };
+    }
+    return null;
+}
 
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${details}`;
-};
+// Get event detail URL
+const eventDetailUrl = upcomingJournalClub
+    ? `/journal-club/${upcomingJournalClub.slug}`
+    : null;
 
-const journalClubCalendarUrl = makeGoogleCalendarUrl(upcomingJournalClub);
-const googleCalendarUrl =
-    "https://calendar.google.com/calendar/embed?src=rdrp.summit%40gmail.com&ctz=Europe%2FLondon";
+// Use calendarUrl from event data if available
+const calendarUrl = upcomingJournalClub?.data.calendarUrl || null;
+
+// Get speaker info and primary link for the upcoming event
+const speakerInfo = upcomingJournalClub
+    ? getSpeakerInfo(upcomingJournalClub.data)
+    : null;
+const primaryLink = upcomingJournalClub
+    ? getPrimaryLink(upcomingJournalClub.data)
+    : null;
 ---
 
 <section class={`journal-section variant-${variant}`}>
@@ -93,9 +121,6 @@ const googleCalendarUrl =
             }
 
             <div class="actions">
-                <a href={googleCalendarUrl} target="_blank" class="link-arrow"
-                    >Subscribe to Calendar &rarr;</a
-                >
                 <a href="/journal-club" class="link-arrow"
                     >View Schedule &rarr;</a
                 >
@@ -104,8 +129,9 @@ const googleCalendarUrl =
                 {
                     variant === "hero" && (
                         <a
-                            href="https://forms.gle/your-nomination-form"
+                            href="https://docs.google.com/forms/d/e/1FAIpQLSdjvzJGh4vtCcq76qP79CW2qniycLix_LMwIfVRdG2bbuuPNg/viewform?usp=dialog"
                             target="_blank"
+                            rel="noopener noreferrer"
                             class="link-arrow secondary-link"
                         >
                             Nominate Speaker &rarr;
@@ -119,19 +145,26 @@ const googleCalendarUrl =
             {
                 upcomingJournalClub ? (
                     <>
-                        <span class="badge">Next Meeting</span>
-                        <h3 class="paper-title">
-                            {upcomingJournalClub.data.title}
-                        </h3>
+                        <a href={eventDetailUrl} class="card-link">
+                            <span class="badge">Next Meeting</span>
+                            <h3 class="paper-title">
+                                {upcomingJournalClub.data.title}
+                            </h3>
+                        </a>
                         <div class="meeting-meta">
-                            {upcomingJournalClub.data.speaker && (
-                                <p>
-                                    <strong>Speaker:</strong>{" "}
-                                    {upcomingJournalClub.data.speaker}
-                                </p>
+                            {speakerInfo && (
+                                <div class="speaker-info">
+                                    <span class="speaker-name">
+                                        {speakerInfo.name}
+                                    </span>
+                                    {speakerInfo.affiliation && (
+                                        <span class="speaker-affiliation">
+                                            {speakerInfo.affiliation}
+                                        </span>
+                                    )}
+                                </div>
                             )}
-                            <p>
-                                <strong>Date:</strong>{" "}
+                            <p class="meeting-date">
                                 {new Date(
                                     upcomingJournalClub.data.date,
                                 ).toLocaleDateString("en-US", {
@@ -142,22 +175,29 @@ const googleCalendarUrl =
                             </p>
                         </div>
                         <div class="card-actions">
-                            <a
-                                href={journalClubCalendarUrl}
-                                target="_blank"
-                                class="button small"
-                            >
-                                Add to Calendar
-                            </a>
-                            {upcomingJournalClub.data.paperUrl && (
+                            {calendarUrl && (
                                 <a
-                                    href={upcomingJournalClub.data.paperUrl}
+                                    href={calendarUrl}
                                     target="_blank"
-                                    class="button small secondary"
+                                    rel="noopener noreferrer"
+                                    class="button small"
                                 >
-                                    Read Paper
+                                    Add to Calendar
                                 </a>
                             )}
+                            {primaryLink && (
+                                <a
+                                    href={primaryLink.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="button small secondary"
+                                >
+                                    {primaryLink.label}
+                                </a>
+                            )}
+                            <a href={eventDetailUrl} class="link-arrow">
+                                View details &rarr;
+                            </a>
                         </div>
                     </>
                 ) : (
@@ -330,10 +370,26 @@ const googleCalendarUrl =
         margin-bottom: 16px;
     }
 
+    .card-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        transition: opacity 0.2s;
+    }
+
+    .card-link:hover {
+        opacity: 0.8;
+    }
+
+    .card-link:hover .paper-title {
+        color: var(--c-link);
+    }
+
     .paper-title {
         font-size: 20px;
         margin-bottom: 16px;
         line-height: 1.4;
+        transition: color 0.2s;
     }
 
     .meeting-meta {
@@ -346,9 +402,33 @@ const googleCalendarUrl =
         margin: 4px 0;
     }
 
+    .speaker-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        margin-bottom: 8px;
+    }
+
+    .speaker-name {
+        font-weight: 600;
+        color: var(--c-text);
+    }
+
+    .speaker-affiliation {
+        font-size: 0.9em;
+        color: var(--c-text-secondary);
+    }
+
+    .meeting-date {
+        margin: 0;
+        color: var(--c-text-secondary);
+    }
+
     .card-actions {
         display: flex;
         gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
     }
 
     .link-arrow {

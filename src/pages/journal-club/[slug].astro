@@ -16,14 +16,23 @@ const { item } = Astro.props;
 const { Content } = await item.render();
 const { data } = item;
 
-// Helper to get speaker display string
-function getSpeakerDisplay(): string {
+// Helper to get speaker info (structured for two-line display)
+function getSpeakerInfo(): { name: string; affiliation: string | null } | null {
     if (data.speakerName) {
-        return data.speakerAffiliation
-            ? `${data.speakerName} (${data.speakerAffiliation})`
-            : data.speakerName;
+        return {
+            name: data.speakerName,
+            affiliation: data.speakerAffiliation || null,
+        };
     }
-    return data.speaker || '';
+    // Fallback to legacy field - try to parse "Name (Affiliation)"
+    if (data.speaker) {
+        const match = data.speaker.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+        if (match) {
+            return { name: match[1].trim(), affiliation: match[2].trim() };
+        }
+        return { name: data.speaker, affiliation: null };
+    }
+    return null;
 }
 
 // Get all links (new format or legacy)
@@ -37,7 +46,7 @@ function getAllLinks(): { label: string; url: string; isPrimary: boolean }[] {
     return [];
 }
 
-const speakerDisplay = getSpeakerDisplay();
+const speakerInfo = getSpeakerInfo();
 const allLinks = getAllLinks();
 ---
 
@@ -52,9 +61,14 @@ const allLinks = getAllLinks();
             </div>
             <h1 class="page-title">{item.data.title}</h1>
 
-            <div class="details">
-                {speakerDisplay && <div class="detail-item"><strong>Speaker:</strong> {speakerDisplay}</div>}
-            </div>
+            {speakerInfo && (
+                <div class="speaker-section">
+                    <span class="speaker-name">{speakerInfo.name}</span>
+                    {speakerInfo.affiliation && (
+                        <span class="speaker-affiliation">{speakerInfo.affiliation}</span>
+                    )}
+                </div>
+            )}
 
             {/* Links section */}
             {allLinks.length > 0 && (
@@ -131,17 +145,23 @@ const allLinks = getAllLinks();
         text-align: center;
     }
     
-    .details {
+    .speaker-section {
         display: flex;
-        justify-content: center;
-        gap: 20px;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
         margin-top: 20px;
-        font-size: 1.1em;
     }
 
-    .detail-item a {
-        color: var(--c-link, #0070f3);
-        text-decoration: none;
+    .speaker-name {
+        font-size: 1.2em;
+        font-weight: 600;
+        color: var(--c-text, #333);
+    }
+
+    .speaker-affiliation {
+        font-size: 1em;
+        color: var(--c-text-secondary, #666);
     }
 
     .links-section {

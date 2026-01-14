@@ -9,16 +9,24 @@ const sortedItems = items.sort(
     (a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf(),
 );
 
-// Helper to get speaker display string
-function getSpeakerDisplay(data: typeof sortedItems[0]['data']): string {
+// Helper to get speaker info (structured for two-line display)
+function getSpeakerInfo(data: typeof sortedItems[0]['data']): { name: string; affiliation: string | null } | null {
     // New structured fields
     if (data.speakerName) {
-        return data.speakerAffiliation
-            ? `${data.speakerName} (${data.speakerAffiliation})`
-            : data.speakerName;
+        return {
+            name: data.speakerName,
+            affiliation: data.speakerAffiliation || null,
+        };
     }
-    // Fallback to legacy field
-    return data.speaker || '-';
+    // Fallback to legacy field - try to parse "Name (Affiliation)"
+    if (data.speaker) {
+        const match = data.speaker.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+        if (match) {
+            return { name: match[1].trim(), affiliation: match[2].trim() };
+        }
+        return { name: data.speaker, affiliation: null };
+    }
+    return null;
 }
 
 // Helper to get primary link
@@ -86,6 +94,7 @@ function getPrimaryLink(data: typeof sortedItems[0]['data']): { label: string; u
                     <tbody>
                         {
                             sortedItems.map((item) => {
+                                const speakerInfo = getSpeakerInfo(item.data);
                                 const primaryLink = getPrimaryLink(item.data);
                                 return (
                                     <tr>
@@ -101,7 +110,16 @@ function getPrimaryLink(data: typeof sortedItems[0]['data']): { label: string; u
                                             </a>
                                         </td>
                                         <td class="col-speaker">
-                                            {getSpeakerDisplay(item.data)}
+                                            {speakerInfo ? (
+                                                <div class="speaker-cell">
+                                                    <span class="speaker-name">{speakerInfo.name}</span>
+                                                    {speakerInfo.affiliation && (
+                                                        <span class="speaker-affiliation">{speakerInfo.affiliation}</span>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                "-"
+                                            )}
                                         </td>
                                         <td class="col-link">
                                             {primaryLink ? (
@@ -128,7 +146,7 @@ function getPrimaryLink(data: typeof sortedItems[0]['data']): { label: string; u
             <div class="journal-list-mobile">
                 {
                     sortedItems.map((item) => {
-                        const speakerDisplay = getSpeakerDisplay(item.data);
+                        const speakerInfo = getSpeakerInfo(item.data);
                         const primaryLink = getPrimaryLink(item.data);
                         return (
                             <div class="journal-item">
@@ -140,9 +158,12 @@ function getPrimaryLink(data: typeof sortedItems[0]['data']): { label: string; u
                                         {item.data.title}
                                     </a>
                                 </h3>
-                                {speakerDisplay !== '-' && (
+                                {speakerInfo && (
                                     <div class="item-speaker">
-                                        Speaker: {speakerDisplay}
+                                        <span class="speaker-name">{speakerInfo.name}</span>
+                                        {speakerInfo.affiliation && (
+                                            <span class="speaker-affiliation">{speakerInfo.affiliation}</span>
+                                        )}
                                     </div>
                                 )}
                                 {primaryLink && (
@@ -254,11 +275,27 @@ function getPrimaryLink(data: typeof sortedItems[0]['data']): { label: string; u
         width: 120px;
     }
     .col-speaker {
-        width: 150px;
+        width: 180px;
     }
     .col-link {
         width: 100px;
         text-align: right !important;
+    }
+
+    .speaker-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .speaker-cell .speaker-name {
+        font-weight: 500;
+        color: var(--c-text, #333);
+    }
+
+    .speaker-cell .speaker-affiliation {
+        font-size: 0.85em;
+        color: var(--c-text-secondary, #666);
     }
 
     .topic-link {
@@ -306,8 +343,21 @@ function getPrimaryLink(data: typeof sortedItems[0]['data']): { label: string; u
     }
 
     .item-speaker {
-        font-size: 0.95em;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
         margin-bottom: 8px;
+    }
+
+    .item-speaker .speaker-name {
+        font-size: 0.95em;
+        font-weight: 500;
+        color: var(--c-text, #333);
+    }
+
+    .item-speaker .speaker-affiliation {
+        font-size: 0.85em;
+        color: var(--c-text-secondary, #666);
     }
 
     .item-paper-link {
