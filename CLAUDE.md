@@ -251,6 +251,15 @@ When you encounter and resolve a non-trivial error (especially related to build,
   - **Solution**: Add `export const prerender = true;` to `src/pages/index.astro` to enable static prerendering at build time.
   - **Context**: All pages should be prerendered unless they explicitly need SSR functionality (e.g., API routes with dynamic data). This ensures consistent behavior across environments.
 
+- **Error**: SSR pages (e.g., `/keystatic`) show `[object Object]` on Cloudflare Pages.
+  - **Symptom**: Any SSR-rendered page displays `[object Object]` instead of content. Prerendered pages work fine.
+  - **Root Cause**: The `enable_nodejs_process_v2` flag became default on 2025-09-15. Combined with `nodejs_compat`, it causes SSR rendering to fail.
+  - **Solution**: Add `disable_nodejs_process_v2` to `wrangler.toml`:
+    ```toml
+    compatibility_flags = [ "nodejs_compat", "disable_nodejs_process_v2" ]
+    ```
+  - **Context**: See [withastro/astro#14511](https://github.com/withastro/astro/issues/14511). Alternative fix: update Wrangler to ≥4.42.0.
+
 ### Keystatic Integration
 - **Error**: Route collision with `/keystatic/[...params]` or "Keystatic is not exported".
   - **Solution**: Delete `src/pages/keystatic/[...path].astro`. The integration handles routing automatically.
