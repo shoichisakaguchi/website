@@ -396,7 +396,7 @@ const hasEventEnded = effectiveStartDateTimeUtc
     font-size: 1.5em;
     font-weight: 600;
   }
-  
+
   article :global(h3) {
       margin-top: 1.5em;
       font-size: 1.25em;
@@ -406,9 +406,13 @@ const hasEventEnded = effectiveStartDateTimeUtc
   article :global(p) {
     margin-bottom: 1em;
   }
-  
+
   article :global(ul), article :global(ol) {
     margin-bottom: 1em;
     padding-left: 2em;
   }
+
+  /* Note: Legacy entries may have duplicate sections in body content */
+  /* Ideally, these should be cleaned up when editing old entries */
+  /* The template prioritizes structured frontmatter data over body content */
 </style>

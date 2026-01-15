@@ -9,6 +9,13 @@ export const prerender = true;
 
 // 1. Determine "Active Summit" (Single Source of Truth)
 const allSummits = await getCollection("summits");
+
+// Sort summits by year (descending) for the simple list
+const sortedSummits = [...allSummits].sort((a, b) => {
+	const yearA = parseInt(a.data.year || "0");
+	const yearB = parseInt(b.data.year || "0");
+	return yearB - yearA;
+});
 const summitInfo = await getEntry("summit", "info");
 
 let activeSummit: CollectionEntry<"summits"> | undefined;
@@ -70,37 +77,36 @@ const currentPhase = activeSummit?.data.phase || "Planning";
 
 <Layout>
 	<div data-pagefind-body>
+		{/* About RdRp Summit Section - Shown at top for all phases */}
+		<section class="about-summary">
+			<div class="container">
+				<h2>About RdRp Summit</h2>
+				<p>
+					The RdRp Summit is a global research community focused on RNA-dependent RNA polymerase (RdRp),
+					a key enzyme shared by all RNA viruses. We bring together researchers to advance the discovery,
+					classification, and analysis of RNA viruses through open discussion, shared data, and community-driven standards.
+				</p>
+				<a href="/about" class="link-arrow">Read more &rarr;</a>
+			</div>
+		</section>
+
 		{
-			/* 
+			/*
             PHASE: PLANNING
             Goal: Enable contact with organizers.
-            Content: Hero (Preparation message), CTA (Contact), Link to Past Summits.
+            Content: About summary (above), Journal Club (hero - to drive participation), Past Summits list.
         */
 		}
 		{
 			currentPhase === "Planning" && (
 				<>
-					<section class="hero-planning">
-						<div class="container hero-content">
-							<h1>We are preparing the next RdRp Summit.</h1>
-							<p class="subtitle">
-								Details such as date and venue will be announced
-								once confirmed.
-							</p>
-							<div class="cta-wrapper">
-								<a href="/contact" class="button primary">
-									Contact the organizers
-								</a>
-							</div>
-						</div>
-					</section>
-					<JournalClubHome variant="standard" showIcon={true} />
+					<JournalClubHome variant="hero" showIcon={true} hideActions={true} />
 				</>
 			)
 		}
 
 		{
-			/* 
+			/*
             PHASE: PREVIEW
             Goal: Announce upcoming event (save the date).
             Content: "Save the date", Basic facts, Passive CTA.
@@ -142,115 +148,73 @@ const currentPhase = activeSummit?.data.phase || "Planning";
 							</div>
 						</div>
 					</section>
-					<JournalClubHome variant="standard" showIcon={true} />
+					<JournalClubHome variant="hero" showIcon={true} hideActions={true} />
 				</>
 			)
 		}
 
 		{
-			/* 
+			/*
             PHASE: LIVE
             Goal: Drive registration / participation.
-            Content: SummitDetail (Full) + Journal Club (Standard).
+            Content: SummitDetail (Full) + Journal Club (hero).
         */
 		}
 		{
 			currentPhase === "Live" && !!activeSummit && (
 				<>
 					<SummitDetail item={activeSummit} variant="home" />
-					<JournalClubHome variant="standard" showIcon={false} />
+					<JournalClubHome variant="hero" showIcon={true} hideActions={true} />
 				</>
 			)
 		}
 
 		{
-			/* 
+			/*
             PHASE: ARCHIVED
             Goal: Access to past outcomes.
-            Content: Journal Club (Hero) + Past Summit (Detail).
+            Content: Journal Club (Hero) + Past Summits (simple list).
         */
 		}
 		{
 			currentPhase === "Archived" && !!activeSummit && (
 				<>
-					<JournalClubHome variant="hero" showIcon={true} />
-
-					<section class="past-summits-section">
-						<div class="container section-header">
-							<h2>Past RdRp Summits</h2>
-							<p>
-								Explore talks, speakers, and outcomes from
-								previous meetings.
-							</p>
-						</div>
-						<SummitDetail item={activeSummit} variant="home" />
-					</section>
+					<JournalClubHome variant="hero" showIcon={true} hideActions={true} />
 				</>
 			)
 		}
 
-		{
-			/* 
-           COMMON SECTIONS 
-           (Announcements & Footer Features are generally safe to show, 
-           but strictly for 'Planning', we might want to be minimal. 
-           However, 'HomeAnnouncements' might contain relevant news even in Planning.
-           Promised "Optional: Small section linking to Past Summits" for Planning.
-        */
-		}
-
-		{
-			/* Show Announcements generally, unless strict minimal mode is requested? User said "Top Page Content (ONLY include...)" for Planning. 
-            I will render Announcements but maybe below the fold. 
-        */
-		}
+		{/* COMMON SECTIONS */}
 		<HomeAnnouncements />
 
-		{
-			/* For Planning Phase, add specific "Past Summits" link/section if not already covered */
-		}
-		{
-			currentPhase === "Planning" && (
-				<section class="planning-history">
-					<div class="container">
-						<h2>Previous Summits</h2>
-						<p>
-							Explore the outcomes and archives from our past
-							meetings.
-						</p>
-						<a href="/summits" class="link-arrow">
-							View Past Summits &rarr;
+		{/* Past RdRp Summits - Simple list for all phases */}
+		<section class="past-summits-list">
+			<div class="container">
+				<h2>Past RdRp Summits</h2>
+				<div class="summits-grid">
+					{sortedSummits.map((summit) => (
+						<a href={`/summits/${summit.slug}`} class="summit-item">
+							<span class="summit-year">{summit.data.year}</span>
+							<span class="summit-title">{summit.data.title}</span>
+							{(summit.data.city || summit.data.country) && (
+								<span class="summit-location">
+									{[summit.data.city, summit.data.country]
+										.filter(Boolean)
+										.join(", ")}
+								</span>
+							)}
+							<span class={`summit-phase ${summit.data.phase?.toLowerCase()}`}>
+								{summit.data.phase}
+							</span>
 						</a>
-					</div>
-				</section>
-			)
-		}
-
-		<section class="container features">
-			<div class="feature-grid">
-				<div class="feature-card">
-					<h3>About</h3>
-					<p>Discover our mission to map the RNA virosphere.</p>
-					<a href="/about" class="link-arrow"> Read more &rarr; </a>
+					))}
 				</div>
-				<div class="feature-card">
-					<h3>Summits</h3>
-					<p>
-						Archive of international RdRp summits and proceedings.
-					</p>
-					<a href="/summits" class="link-arrow">
-						Browse archive &rarr;
-					</a>
-				</div>
-				<div class="feature-card">
-					<h3>Contact</h3>
-					<p>Get in touch with the RdRp Summit team.</p>
-					<a href="/contact" class="link-arrow">
-						Contact us &rarr;
-					</a>
-				</div>
+				<a href="/summits" class="link-arrow browse-all">
+					Browse all summits &rarr;
+				</a>
 			</div>
 		</section>
+
 	</div>
 </Layout>
 
@@ -344,59 +308,113 @@ const currentPhase = activeSummit?.data.phase || "Planning";
 		font-size: 1.1rem;
 	}
 
-	/* Planning History Section */
-	.planning-history {
+	/* About Summary Section */
+	.about-summary {
+		text-align: center;
+		padding: 60px 0 40px;
+		background: linear-gradient(
+			180deg,
+			rgba(230, 246, 255, 0.5) 0%,
+			white 100%
+		);
+	}
+	.about-summary h2 {
+		font-size: 2rem;
+		margin-bottom: 1rem;
+		font-weight: 700;
+	}
+	.about-summary p {
+		color: var(--c-text-secondary);
+		font-size: 1.1rem;
+		line-height: 1.7;
+		max-width: 700px;
+		margin: 0 auto 1.5rem;
+	}
+
+	/* Past Summits List Section */
+	.past-summits-list {
 		text-align: center;
 		padding: 60px 0;
+		background-color: #f9fafb;
 		border-top: 1px solid rgba(0, 0, 0, 0.05);
+		border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 	}
-	.planning-history h2 {
+	.past-summits-list h2 {
 		font-size: 1.8rem;
-		margin-bottom: 0.5em;
+		margin-bottom: 1.5rem;
 	}
-	.planning-history p {
-		color: var(--c-text-secondary);
-		margin-bottom: 1.5em;
+	.summits-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		max-width: 600px;
+		margin: 0 auto 1.5rem;
 	}
-
-	/* Features Grid (Bottom) */
-	.features {
-		padding-top: 20px;
-		padding-bottom: 60px;
-	}
-
-	.feature-grid {
+	.summit-item {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-		gap: 30px;
-	}
-
-	.feature-card {
+		grid-template-columns: auto 1fr auto auto;
+		align-items: center;
+		gap: 16px;
+		padding: 16px 20px;
 		background: white;
-		border-radius: 18px;
-		padding: 30px;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-		border: 1px solid rgba(0, 0, 0, 0.03);
-		transition:
-			transform 0.2s ease,
-			box-shadow 0.2s ease;
+		border-radius: 12px;
+		text-decoration: none;
+		color: inherit;
+		border: 1px solid rgba(0, 0, 0, 0.05);
+		transition: transform 0.2s, box-shadow 0.2s;
 	}
-
-	.feature-card:hover {
-		transform: translateY(-4px);
-		box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+	.summit-item:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 	}
-
-	.feature-card h3 {
-		font-size: 24px;
-		margin-bottom: 10px;
+	.summit-year {
+		font-weight: 700;
+		font-size: 1.1rem;
+		color: var(--c-primary);
 	}
-
-	.feature-card p {
+	.summit-title {
+		font-weight: 600;
+		text-align: left;
+	}
+	.summit-location {
+		font-size: 0.9rem;
 		color: var(--c-text-secondary);
-		font-size: 15px;
-		line-height: 1.5;
-		margin-bottom: 16px;
+	}
+	.summit-phase {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		font-weight: 600;
+		padding: 4px 8px;
+		border-radius: 4px;
+		background: #f3f4f6;
+		color: #374151;
+	}
+	.summit-phase.archived {
+		background: #f3f4f6;
+		color: #374151;
+	}
+	.summit-phase.planning {
+		background: #e0f2fe;
+		color: #0369a1;
+	}
+	.summit-phase.live {
+		background: #dcfce7;
+		color: #15803d;
+	}
+	.browse-all {
+		display: inline-block;
+		margin-top: 0.5rem;
+	}
+
+	@media (max-width: 640px) {
+		.summit-item {
+			grid-template-columns: 1fr;
+			text-align: center;
+			gap: 8px;
+		}
+		.summit-title {
+			text-align: center;
+		}
 	}
 
 	.link-arrow {

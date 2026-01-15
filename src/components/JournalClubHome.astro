@@ -4,9 +4,10 @@ import { getCollection } from "astro:content";
 interface Props {
     variant?: "standard" | "hero";
     showIcon?: boolean;
+    hideActions?: boolean;
 }
 
-const { variant = "standard", showIcon = false } = Astro.props;
+const { variant = "standard", showIcon = false, hideActions = false } = Astro.props;
 
 // Process Journal Club (Find next meeting)
 const allJournalClub = await getCollection("journal-club");
@@ -198,39 +199,39 @@ const primaryLink = upcomingJournalClub
                 )
             }
 
-            <div class="actions">
-                <a href="/journal-club" class="link-arrow"
-                    >View Schedule &rarr;</a
-                >
+            {!hideActions && (
+                <div class="actions">
+                    <a href="/journal-club" class="link-arrow"
+                        >View Schedule &rarr;</a
+                    >
 
-                {/* Additional CTA for Hero */}
-                {
-                    variant === "hero" && (
-                        <a
-                            href="https://docs.google.com/forms/d/e/1FAIpQLSdjvzJGh4vtCcq76qP79CW2qniycLix_LMwIfVRdG2bbuuPNg/viewform?usp=dialog"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="link-arrow secondary-link"
-                        >
-                            Nominate Speaker &rarr;
-                        </a>
-                    )
-                }
-            </div>
+                    {/* Additional CTA for Hero */}
+                    {
+                        variant === "hero" && (
+                            <a
+                                href="https://docs.google.com/forms/d/e/1FAIpQLSdjvzJGh4vtCcq76qP79CW2qniycLix_LMwIfVRdG2bbuuPNg/viewform?usp=dialog"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="link-arrow secondary-link"
+                            >
+                                Nominate Speaker &rarr;
+                            </a>
+                        )
+                    }
+                </div>
+            )}
         </div>
 
         <div class="next-meeting-card">
             {
                 upcomingJournalClub ? (
                     <>
-                        <a href={eventDetailUrl} class="card-link">
-                            <span class={`badge ${isLiveNow ? 'badge-live' : ''}`}>
-                                {isLiveNow ? 'Live Now' : 'Next Meeting'}
-                            </span>
-                            <h3 class="paper-title">
-                                {upcomingJournalClub.data.title}
-                            </h3>
-                        </a>
+                        <span class={`badge ${isLiveNow ? 'badge-live' : ''}`}>
+                            {isLiveNow ? 'Live Now' : 'Next Meeting'}
+                        </span>
+                        <h3 class="paper-title">
+                            {upcomingJournalClub.data.title}
+                        </h3>
                         <div class="meeting-meta">
                             {speakerInfo && (
                                 <div class="speaker-info">
@@ -256,29 +257,26 @@ const primaryLink = upcomingJournalClub
                         </div>
                         <div class="card-actions">
                             {calendarUrl && (
-                                <a
-                                    href={calendarUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="button small"
-                                >
-                                    Add to Calendar
-                                </a>
-                            )}
-                            {primaryLink && (
-                                <a
-                                    href={primaryLink.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="button small secondary"
-                                >
-                                    {primaryLink.label}
-                                </a>
+                                <>
+                                    <a
+                                        href={calendarUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="button small primary-cal"
+                                    >
+                                        Add to Google Calendar
+                                    </a>
+                                </>
                             )}
                             <a href={eventDetailUrl} class="link-arrow">
                                 View details &rarr;
                             </a>
                         </div>
+                        {calendarUrl && (
+                            <p class="calendar-hint">
+                                Timezones are handled automatically in Google Calendar.
+                            </p>
+                        )}
                     </>
                 ) : (
                     <div class="empty-state">
@@ -334,6 +332,15 @@ const primaryLink = upcomingJournalClub
     }
     .button.secondary:hover {
         background-color: rgba(0, 112, 243, 0.05);
+    }
+
+    .button.primary-cal {
+        background-color: var(--c-primary, #0070f3);
+        color: white;
+        border: none;
+    }
+    .button.primary-cal:hover {
+        opacity: 0.9;
     }
 
     /* Journal Club Section */
@@ -465,26 +472,10 @@ const primaryLink = upcomingJournalClub
         }
     }
 
-    .card-link {
-        display: block;
-        text-decoration: none;
-        color: inherit;
-        transition: opacity 0.2s;
-    }
-
-    .card-link:hover {
-        opacity: 0.8;
-    }
-
-    .card-link:hover .paper-title {
-        color: var(--c-link);
-    }
-
     .paper-title {
         font-size: 20px;
         margin-bottom: 16px;
         line-height: 1.4;
-        transition: color 0.2s;
     }
 
     .meeting-meta {
@@ -524,6 +515,14 @@ const primaryLink = upcomingJournalClub
         gap: 12px;
         align-items: center;
         flex-wrap: wrap;
+    }
+
+    .calendar-hint {
+        font-size: 0.8rem;
+        color: var(--c-text-secondary, #666);
+        margin-top: 12px;
+        margin-bottom: 0;
+        font-style: italic;
     }
 
     .link-arrow {
