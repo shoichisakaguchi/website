@@ -33,6 +33,12 @@ const journalClub = defineCollection({
         // New structured speaker fields
         speakerName: z.string().optional(),
         speakerAffiliation: z.string().optional(),
+        // User-friendly time input fields
+        localDate: z.coerce.date().optional(),
+        localTime: z.string().optional().or(z.literal('')),
+        eventTz: z.string().optional().default('Asia/Tokyo'),
+        // Advanced/backward compatibility
+        startDateTimeUtc: z.string().optional().or(z.literal('')),
         // New generalized links array
         links: z.array(z.object({
             label: z.string(),

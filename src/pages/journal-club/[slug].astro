@@ -48,6 +48,88 @@ function getAllLinks(): { label: string; url: string; isPrimary: boolean }[] {
 
 const speakerInfo = getSpeakerInfo();
 const allLinks = getAllLinks();
+
+// Helper to get UTC datetime from local or existing UTC field
+function getStartDateTimeUtc(): string | null {
+    // Prefer existing UTC field for backward compatibility
+    if (data.startDateTimeUtc && data.startDateTimeUtc.trim()) {
+        return data.startDateTimeUtc.trim();
+    }
+
+    // Convert from local date/time if available
+    if (data.localDate && data.localTime && data.localTime.trim()) {
+        const tz = data.eventTz || 'Asia/Tokyo';
+        const dateStr = data.localDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        const timeStr = data.localTime.trim(); // HH:mm
+
+        try {
+            // Technique: Create a "fake" local date, then adjust for timezone offset
+            // Based on: https://stackoverflow.com/a/54127122
+            const fakeLocalDate = new Date(`${dateStr}T${timeStr}:00`);
+
+            // Get what this date looks like in the target timezone
+            const tzDateString = fakeLocalDate.toLocaleString('en-US', { timeZone: tz });
+            const tzDate = new Date(tzDateString);
+
+            // Calculate the difference
+            const diff = fakeLocalDate.getTime() - tzDate.getTime();
+
+            // Apply the difference to get the correct UTC time
+            const correctUTC = new Date(fakeLocalDate.getTime() + diff);
+            return correctUTC.toISOString();
+        } catch (e) {
+            console.error('Failed to convert local time to UTC:', e);
+        }
+    }
+
+    return null;
+}
+
+const effectiveStartDateTimeUtc = getStartDateTimeUtc();
+
+// Timezone display helper
+const TIMEZONES = [
+    { name: 'America/Toronto', label: 'Eastern Time (Toronto)' },
+    { name: 'America/Santiago', label: 'Chile (Santiago)' },
+    { name: 'Europe/Paris', label: 'Central European (Paris)' },
+    { name: 'Europe/Vilnius', label: 'Eastern European (Vilnius)' },
+    { name: 'Asia/Tokyo', label: 'Japan (Tokyo)' },
+    { name: 'Australia/Sydney', label: 'Australian Eastern (Sydney)' },
+];
+
+function formatTimeInTimezone(utcIsoString: string, timezone: string): string {
+    try {
+        const date = new Date(utcIsoString);
+        const formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone: timezone,
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        });
+        return formatter.format(date);
+    } catch (e) {
+        return 'Invalid date';
+    }
+}
+
+// Format date for header
+function formatHeaderDate(date: Date): string {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    });
+    return formatter.format(date);
+}
+
+// Check if event has ended (for auto-hiding Zoom link)
+const hasEventEnded = effectiveStartDateTimeUtc
+    ? new Date().getTime() > new Date(effectiveStartDateTimeUtc).getTime() + 2 * 60 * 60 * 1000 // Event end = start + 2 hours
+    : false;
 ---
 
 <Layout title={item.data.title}>
@@ -55,9 +137,11 @@ const allLinks = getAllLinks();
 		<div class="back-link">
 			<a href="/journal-club">← Back to Journal Club</a>
 		</div>
+
+        {/* A. Header: Date, Title, Speaker */}
         <header class="post-header">
             <div class="meta">
-                <time>{item.data.date.toLocaleDateString()}</time>
+                <time>{formatHeaderDate(item.data.date)}</time>
             </div>
             <h1 class="page-title">{item.data.title}</h1>
 
@@ -69,56 +153,66 @@ const allLinks = getAllLinks();
                     )}
                 </div>
             )}
-
-            {/* Links section */}
-            {allLinks.length > 0 && (
-                <div class="links-section">
-                    {allLinks.map(link => (
-                        <a
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class={`link-button ${link.isPrimary ? 'primary' : ''}`}
-                        >
-                            {link.label} &nearr;
-                        </a>
-                    ))}
-                </div>
-            )}
-
-            {/* Action buttons */}
-            <div class="action-buttons">
-                {data.calendarUrl && (
-                    <a
-                        href={data.calendarUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="action-button calendar-button"
-                    >
-                        Add to Calendar
-                    </a>
-                )}
-                {data.zoomUrl && data.showZoomLink && (
-                    <a
-                        href={data.zoomUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="action-button zoom-button"
-                    >
-                        Join Zoom
-                    </a>
-                )}
-                {data.zoomUrl && !data.showZoomLink && (
-                    <span class="zoom-note">Zoom link available via Slack</span>
-                )}
-            </div>
         </header>
 
+        {/* B. Actions: Code links, Add to Calendar, Zoom (consolidated) */}
+        <div class="actions-section">
+            {allLinks.map(link => (
+                <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="action-link"
+                >
+                    {link.label} &nearr;
+                </a>
+            ))}
+            {data.calendarUrl && (
+                <a
+                    href={data.calendarUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="action-button calendar-button"
+                >
+                    Add to Calendar
+                </a>
+            )}
+            {data.zoomUrl && data.showZoomLink && !hasEventEnded && (
+                <a
+                    href={data.zoomUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="action-button zoom-button"
+                >
+                    Join Zoom
+                </a>
+            )}
+            {data.zoomUrl && !data.showZoomLink && !hasEventEnded && (
+                <span class="zoom-note">Zoom link available via Slack</span>
+            )}
+        </div>
+
+        {/* C. Main Content */}
 		<div class="content-wrapper">
 			<article>
 				<Content />
 			</article>
 		</div>
+
+        {/* D. Event Times (reference section - bottom) */}
+        {effectiveStartDateTimeUtc && (
+            <aside class="event-times-section">
+                <h3 class="event-times-heading">Event Times</h3>
+                <ul class="timezone-list">
+                    {TIMEZONES.map(tz => (
+                        <li class="timezone-item">
+                            <span class="timezone-label">{tz.label}:</span>
+                            <span class="timezone-time">{formatTimeInTimezone(effectiveStartDateTimeUtc, tz.name)}</span>
+                        </li>
+                    ))}
+                </ul>
+            </aside>
+        )}
 	</div>
 </Layout>
 
@@ -136,15 +230,18 @@ const allLinks = getAllLinks();
     
     .post-header {
         margin-top: 40px;
-        margin-bottom: 40px;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #e5e7eb;
     }
 
     .meta {
         color: var(--c-text-light, #666);
         margin-bottom: 10px;
         text-align: center;
+        font-size: 0.95em;
     }
-    
+
     .speaker-section {
         display: flex;
         flex-direction: column;
@@ -154,57 +251,44 @@ const allLinks = getAllLinks();
     }
 
     .speaker-name {
-        font-size: 1.2em;
+        font-size: 1.1em;
         font-weight: 600;
         color: var(--c-text, #333);
     }
 
     .speaker-affiliation {
-        font-size: 1em;
+        font-size: 0.95em;
         color: var(--c-text-secondary, #666);
     }
 
-    .links-section {
+    /* Actions Section (consolidated) */
+    .actions-section {
         display: flex;
         justify-content: center;
         gap: 12px;
-        margin-top: 20px;
+        margin-bottom: 48px;
+        padding: 20px;
+        background-color: #f9fafb;
+        border-radius: 8px;
         flex-wrap: wrap;
+        align-items: center;
     }
 
-    .link-button {
+    .action-link {
         display: inline-block;
         padding: 8px 16px;
         border: 1px solid var(--c-link, #0070f3);
         border-radius: 6px;
         color: var(--c-link, #0070f3);
         text-decoration: none;
-        font-size: 0.95em;
+        font-size: 0.9em;
         transition: background-color 0.2s, color 0.2s;
     }
 
-    .link-button:hover {
+    .action-link:hover {
         background-color: var(--c-link, #0070f3);
         color: white;
         text-decoration: none;
-    }
-
-    .link-button.primary {
-        background-color: var(--c-link, #0070f3);
-        color: white;
-    }
-
-    .link-button.primary:hover {
-        opacity: 0.9;
-    }
-
-    .action-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        margin-top: 24px;
-        flex-wrap: wrap;
-        align-items: center;
     }
 
     .action-button {
@@ -213,7 +297,7 @@ const allLinks = getAllLinks();
         border-radius: 999px;
         text-decoration: none;
         font-weight: 500;
-        font-size: 0.95em;
+        font-size: 0.9em;
         transition: opacity 0.2s;
     }
 
@@ -242,7 +326,55 @@ const allLinks = getAllLinks();
 		font-size: 18px;
 		line-height: 1.6;
 		color: var(--c-text, #333);
+        margin-bottom: 60px;
 	}
+
+    /* Event Times Section (bottom reference) */
+    .event-times-section {
+        margin-top: 48px;
+        padding: 24px;
+        background-color: #f9fafb;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .event-times-heading {
+        font-size: 1.1em;
+        font-weight: 600;
+        margin-bottom: 16px;
+        margin-top: 0;
+        color: var(--c-text-secondary, #666);
+    }
+
+    .timezone-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .timezone-item {
+        font-size: 0.9em;
+        color: var(--c-text, #333);
+        padding: 10px 0;
+        line-height: 1.6;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .timezone-item:last-child {
+        border-bottom: none;
+    }
+
+    .timezone-label {
+        font-weight: 500;
+        color: var(--c-text-secondary, #666);
+        display: inline-block;
+        min-width: 200px;
+    }
+
+    .timezone-time {
+        color: var(--c-text, #333);
+        font-variant-numeric: tabular-nums;
+    }
 
 	.back-link {
 		margin-top: 40px;

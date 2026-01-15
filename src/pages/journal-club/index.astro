@@ -42,6 +42,16 @@ function getPrimaryLink(data: typeof sortedItems[0]['data']): { label: string; u
     }
     return null;
 }
+
+// Format date consistently
+function formatDate(date: Date): string {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    });
+    return formatter.format(date);
+}
 ---
 
 <Layout>
@@ -99,7 +109,7 @@ function getPrimaryLink(data: typeof sortedItems[0]['data']): { label: string; u
                                 return (
                                     <tr>
                                         <td class="col-date">
-                                            {item.data.date.toLocaleDateString()}
+                                            {formatDate(item.data.date)}
                                         </td>
                                         <td class="col-topic">
                                             <a
@@ -151,7 +161,7 @@ function getPrimaryLink(data: typeof sortedItems[0]['data']): { label: string; u
                         return (
                             <div class="journal-item">
                                 <div class="item-date">
-                                    {item.data.date.toLocaleDateString()}
+                                    {formatDate(item.data.date)}
                                 </div>
                                 <h3 class="item-title">
                                     <a href={`/journal-club/${item.slug}`}>

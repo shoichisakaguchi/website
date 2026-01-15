@@ -80,6 +80,40 @@ export default config({
                 isPinned: fields.checkbox({ label: 'Pin to top', defaultValue: false }),
                 speakerName: fields.text({ label: 'Speaker Name' }),
                 speakerAffiliation: fields.text({ label: 'Speaker Affiliation' }),
+                // User-friendly time input fields (recommended)
+                localDate: fields.date({
+                    label: 'Local Date',
+                    description: 'Event date in the event\'s local timezone.'
+                }),
+                localTime: fields.text({
+                    label: 'Local Time',
+                    description: 'HH:mm (e.g. 22:00). Use 24-hour format.',
+                    validation: {
+                        match: {
+                            pattern: '^([01]\\d|2[0-3]):[0-5]\\d$',
+                            message: 'Please use 24-hour time format HH:mm (e.g. 22:00)',
+                        },
+                    },
+                }),
+                eventTz: fields.select({
+                    label: 'Event Timezone (IANA)',
+                    description: 'Timezone where the event is primarily coordinated (DST-aware). The site will convert Local Date/Time + Timezone into UTC for sorting/upcoming logic.',
+                    options: [
+                        { label: 'Asia/Tokyo (Japan)', value: 'Asia/Tokyo' },
+                        { label: 'America/Toronto (Eastern Time)', value: 'America/Toronto' },
+                        { label: 'America/Santiago (Chile)', value: 'America/Santiago' },
+                        { label: 'Europe/Paris (Central European)', value: 'Europe/Paris' },
+                        { label: 'Europe/Vilnius (Eastern European)', value: 'Europe/Vilnius' },
+                        { label: 'Australia/Sydney (Australian Eastern)', value: 'Australia/Sydney' },
+                        { label: 'UTC', value: 'UTC' },
+                    ],
+                    defaultValue: 'Asia/Tokyo',
+                }),
+                // Advanced field (backward compatibility)
+                startDateTimeUtc: fields.text({
+                    label: 'Start Date/Time (UTC) — auto',
+                    description: '⚠️ Prefer Local Date/Time + Timezone above. Only edit this if you know what you\'re doing. ISO 8601 like 2026-01-15T13:00:00Z.',
+                }),
                 links: fields.array(
                     fields.object({
                         label: fields.text({ label: 'Label', validation: { isRequired: true } }),

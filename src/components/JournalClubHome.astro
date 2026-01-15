@@ -10,14 +10,92 @@ const { variant = "standard", showIcon = false } = Astro.props;
 
 // Process Journal Club (Find next meeting)
 const allJournalClub = await getCollection("journal-club");
-const today = new Date();
-// Filter for future meetings (including today)
-const upcomingJournalClub = allJournalClub
-    .filter((item) => new Date(item.data.date) >= today)
-    .sort(
-        (a, b) =>
-            new Date(a.data.date).valueOf() - new Date(b.data.date).valueOf(),
-    )[0];
+const now = new Date();
+
+// Helper to convert local date/time to UTC
+function convertLocalToUtc(item: typeof allJournalClub[0]): string | null {
+    const data = item.data;
+
+    // Prefer existing UTC field for backward compatibility
+    if (data.startDateTimeUtc && data.startDateTimeUtc.trim()) {
+        return data.startDateTimeUtc.trim();
+    }
+
+    // Convert from local date/time if available
+    if (data.localDate && data.localTime && data.localTime.trim()) {
+        const tz = data.eventTz || 'Asia/Tokyo';
+        const dateStr = data.localDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        const timeStr = data.localTime.trim(); // HH:mm
+
+        try {
+            // Technique: Create a "fake" local date, then adjust for timezone offset
+            const fakeLocalDate = new Date(`${dateStr}T${timeStr}:00`);
+
+            // Get what this date looks like in the target timezone
+            const tzDateString = fakeLocalDate.toLocaleString('en-US', { timeZone: tz });
+            const tzDate = new Date(tzDateString);
+
+            // Calculate the difference
+            const diff = fakeLocalDate.getTime() - tzDate.getTime();
+
+            // Apply the difference to get the correct UTC time
+            const correctUTC = new Date(fakeLocalDate.getTime() + diff);
+            return correctUTC.toISOString();
+        } catch (e) {
+            console.error('Failed to convert local time to UTC:', e);
+        }
+    }
+
+    return null;
+}
+
+// Helper to get event start and end times
+function getEventTimes(item: typeof allJournalClub[0]) {
+    const data = item.data;
+
+    // Try to get UTC time from either field
+    const utcString = convertLocalToUtc(item);
+    if (utcString) {
+        const start = new Date(utcString);
+        const end = new Date(start.getTime() + 2 * 60 * 60 * 1000); // +2 hours
+        return { start, end, hasTime: true };
+    }
+
+    // Fallback to date only (set to start of day in UTC)
+    const start = new Date(data.date);
+    start.setUTCHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setUTCHours(23, 59, 59, 999);
+    return { start, end, hasTime: false };
+}
+
+// Classify events into Upcoming, Live, and Archived
+const classifiedEvents = allJournalClub.map(item => {
+    const { start, end, hasTime } = getEventTimes(item);
+
+    let status: 'upcoming' | 'live' | 'archived';
+    if (now < start) {
+        status = 'upcoming';
+    } else if (now >= start && now < end) {
+        status = 'live';
+    } else {
+        status = 'archived';
+    }
+
+    return { item, start, end, hasTime, status };
+});
+
+// Find the next meeting: prioritize Live, then Upcoming
+const liveEvent = classifiedEvents
+    .filter(e => e.status === 'live')
+    .sort((a, b) => a.start.valueOf() - b.start.valueOf())[0];
+
+const nextUpcoming = classifiedEvents
+    .filter(e => e.status === 'upcoming')
+    .sort((a, b) => a.start.valueOf() - b.start.valueOf())[0];
+
+const upcomingJournalClub = liveEvent?.item || nextUpcoming?.item || null;
+const isLiveNow = !!liveEvent;
 
 // Helper to get speaker display (two-line format)
 function getSpeakerInfo(data: typeof upcomingJournalClub.data) {
@@ -146,7 +224,9 @@ const primaryLink = upcomingJournalClub
                 upcomingJournalClub ? (
                     <>
                         <a href={eventDetailUrl} class="card-link">
-                            <span class="badge">Next Meeting</span>
+                            <span class={`badge ${isLiveNow ? 'badge-live' : ''}`}>
+                                {isLiveNow ? 'Live Now' : 'Next Meeting'}
+                            </span>
                             <h3 class="paper-title">
                                 {upcomingJournalClub.data.title}
                             </h3>
@@ -368,6 +448,21 @@ const primaryLink = upcomingJournalClub
         font-weight: 700;
         text-transform: uppercase;
         margin-bottom: 16px;
+    }
+
+    .badge-live {
+        background-color: #dcfce7;
+        color: #166534;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.7;
+        }
     }
 
     .card-link {
