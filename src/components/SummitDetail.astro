@@ -125,28 +125,30 @@ const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&ou
                 <div class="meta">
                     <span class="year">{item.data.year}</span>
                     {
-                        item.data.city || item.data.country ? (
-                            <span class="location">
-                                {[item.data.city, item.data.country]
-                                    .filter(Boolean)
-                                    .join(", ")}
-                            </span>
-                        ) : (
-                            item.data.location && (
+                        item.data.phase !== "Planning" && (
+                            item.data.city || item.data.country ? (
                                 <span class="location">
-                                    {item.data.location}
+                                    {[item.data.city, item.data.country]
+                                        .filter(Boolean)
+                                        .join(", ")}
                                 </span>
+                            ) : (
+                                item.data.location && (
+                                    <span class="location">
+                                        {item.data.location}
+                                    </span>
+                                )
                             )
                         )
                     }
                     {
-                        item.data.format && (
+                        item.data.format && item.data.phase !== "Planning" && (
                             <span class="format">({item.data.format})</span>
                         )
                     }
                 </div>
                 {
-                    !isArchivedHome && item.data.satelliteOf && (
+                    !isArchivedHome && item.data.satelliteOf && (item.data.satelliteOf.name || item.data.satelliteOf.url) && (
                         <div class="satellite-info">
                             Satellite event of{" "}
                             {item.data.satelliteOf.url ? (
@@ -155,7 +157,7 @@ const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&ou
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
-                                    {item.data.satelliteOf.name}
+                                    {item.data.satelliteOf.name || item.data.satelliteOf.url}
                                 </a>
                             ) : (
                                 item.data.satelliteOf.name
@@ -319,20 +321,17 @@ const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&ou
                     )}
 
                     {/* Program (Archive) Section */}
-                    {(item.data.programArchive ||
+                    {item.data.phase !== "Planning" && (item.data.programArchive ||
                         item.data.links?.detailedProgram) && (
                         <section class="program-archive-section">
                             <h2>
-                                Program{" "}
-                                {variant === "home" &&
-                                item.data.phase !== "Archived"
-                                    ? ""
-                                    : "(Archive)"}
+                                Program
+                                {item.data.phase === "Archived" && " (Archive)"}
                             </h2>
                             <p class="section-intro">
                                 {item.data.phase === "Archived"
                                     ? "The program schedule and details for this summit are available below."
-                                    : "The preliminary program schedule."}
+                                    : "Program details will be added as planning progresses."}
                             </p>
 
                             <div
@@ -675,8 +674,7 @@ const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&ou
                         )}
                     {item.data.phase === "Planning" && (
                         <p class="phase-notice">
-                            This page will be updated as the program is
-                            confirmed.
+                            This page will be updated as details are finalized.
                         </p>
                     )}
                 </div>
