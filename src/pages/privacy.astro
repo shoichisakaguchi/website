@@ -1,0 +1,134 @@
+---
+import Layout from '../layouts/Layout.astro';
+export const prerender = true;
+---
+
+<Layout title="Privacy Policy | RdRp Summit">
+	<div class="container page-content">
+		<h1 class="page-title">Privacy Policy</h1>
+		<div class="content-wrapper">
+			<p class="last-updated">Last updated: January 2026</p>
+
+			<p class="intro">
+				The RdRp Summit community ("we," "us," or "our") operates the rdrp.io website.
+				This page explains our practices regarding information collection and use.
+			</p>
+
+			<hr class="divider" />
+
+			<h2>Information We Collect</h2>
+			<p>
+				We may collect limited information when you interact with our website:
+			</p>
+			<ul>
+				<li><strong>Contact information:</strong> If you contact us via our forms or register for events, we may collect your name and email address.</li>
+				<li><strong>Event-related information:</strong> When registering for summits or journal club meetings, we may collect professional affiliations and research interests.</li>
+				<li><strong>Technical data:</strong> Our hosting provider (Cloudflare) may automatically collect standard web server logs including IP addresses and browser information for security and performance purposes.</li>
+			</ul>
+
+			<h2>How We Use Your Information</h2>
+			<p>
+				We use collected information solely for:
+			</p>
+			<ul>
+				<li>Facilitating community communication and event coordination</li>
+				<li>Sending event announcements and updates (with your consent)</li>
+				<li>Responding to your inquiries</li>
+				<li>Improving website functionality</li>
+			</ul>
+
+			<h2>Third-Party Services</h2>
+			<p>
+				Our website and community activities may use the following third-party services:
+			</p>
+			<ul>
+				<li><strong>Cloudflare:</strong> Website hosting and security</li>
+				<li><strong>Google Calendar:</strong> Event scheduling and calendar invitations</li>
+				<li><strong>Zoom:</strong> Virtual meetings and webinars</li>
+				<li><strong>Slack:</strong> Community communication</li>
+			</ul>
+			<p>
+				Each service has its own privacy policy. We encourage you to review them if you use these platforms.
+			</p>
+
+			<h2>Data Sharing</h2>
+			<p>
+				We do not sell, trade, or rent your personal information to third parties.
+				We do not use your data for commercial purposes. Information may only be shared:
+			</p>
+			<ul>
+				<li>With your explicit consent</li>
+				<li>To comply with legal obligations</li>
+				<li>With service providers who assist in operating our community activities (under confidentiality agreements)</li>
+			</ul>
+
+			<h2>Data Retention</h2>
+			<p>
+				We retain personal information only as long as necessary for the purposes outlined above
+				or as required by law. You may request deletion of your data at any time.
+			</p>
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.page-content {
+		max-width: 720px;
+		margin: 0 auto;
+	}
+
+	.page-title {
+		margin-top: 40px;
+		margin-bottom: 20px;
+		text-align: center;
+	}
+
+	.last-updated {
+		text-align: center;
+		color: var(--c-text-secondary);
+		font-size: 14px;
+		margin-bottom: 30px;
+	}
+
+	.content-wrapper {
+		font-size: 17px;
+		line-height: 1.7;
+		color: #333;
+	}
+
+	.intro {
+		font-weight: 500;
+		color: var(--c-text);
+		margin-bottom: 30px;
+	}
+
+	.divider {
+		border: 0;
+		border-top: 1px solid var(--c-divider);
+		margin: 30px 0;
+	}
+
+	h2 {
+		margin-top: 30px;
+		margin-bottom: 15px;
+		font-size: 22px;
+	}
+
+	ul {
+		margin: 15px 0;
+		padding-left: 25px;
+	}
+
+	li {
+		margin-bottom: 10px;
+	}
+
+	a {
+		color: var(--c-link);
+		text-decoration: none;
+	}
+
+	a:hover {
+		text-decoration: underline;
+	}
+</style>

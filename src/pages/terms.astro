@@ -1,0 +1,149 @@
+---
+import Layout from "../layouts/Layout.astro";
+export const prerender = true;
+---
+
+<Layout title="Terms of Use | RdRp Summit">
+	<div class="container page-content">
+		<h1 class="page-title">Terms of Use</h1>
+		<div class="content-wrapper">
+			<p class="last-updated">Last updated: January 2026</p>
+
+			<p class="intro">
+				Welcome to rdrp.io. By accessing or using this website, you
+				agree to these Terms of Use.
+			</p>
+
+			<hr class="divider" />
+
+			<h2>Purpose of This Website</h2>
+			<p>
+				This website is operated by the RdRp Summit community for
+				academic and non-profit purposes. It serves as a resource for
+				researchers interested in RNA-dependent RNA polymerase (RdRp)
+				and related fields.
+			</p>
+
+			<h2>Content and Changes</h2>
+			<p>
+				We strive to provide accurate and up-to-date information.
+				However, content on this website may change without prior
+				notice. We do not guarantee the completeness or accuracy of any
+				information provided.
+			</p>
+
+			<h2>Intellectual Property</h2>
+			<p>
+				Presentation materials, abstracts, and other content contributed
+				by speakers and researchers remain the intellectual property of
+				their respective authors. Responsibility for the accuracy and
+				originality of such materials lies with the individual
+				contributors.
+			</p>
+			<p>
+				General website content is provided by the RdRp Summit
+				community. If you wish to use or reproduce any content, please
+				obtain permission from the respective rights holder or the RdRp Summit organizing committee.
+			</p>
+
+			<h2>User Conduct</h2>
+			<p>
+				When participating in community activities or using this
+				website, we ask that you:
+			</p>
+			<ul>
+				<li>Respect other community members and their work</li>
+				<li>
+					Provide accurate information when registering for events
+				</li>
+				<li>
+					Refrain from any activities that could disrupt the website
+					or community functions
+				</li>
+			</ul>
+
+			<h2>Limitation of Liability</h2>
+			<p>
+				This website and its content are provided "as is" without
+				warranties of any kind. The RdRp Summit organizing committee and
+				contributors shall not be held liable for any damages arising
+				from the use of this website, including but not limited to:
+			</p>
+			<ul>
+				<li>Errors or omissions in content</li>
+				<li>Technical issues or service interruptions</li>
+				<li>
+					Actions taken based on information provided on this website
+				</li>
+			</ul>
+
+			<h2>External Links</h2>
+			<p>
+				This website may contain links to external websites. We are not
+				responsible for the content or privacy practices of those sites.
+			</p>
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.page-content {
+		max-width: 720px;
+		margin: 0 auto;
+	}
+
+	.page-title {
+		margin-top: 40px;
+		margin-bottom: 20px;
+		text-align: center;
+	}
+
+	.last-updated {
+		text-align: center;
+		color: var(--c-text-secondary);
+		font-size: 14px;
+		margin-bottom: 30px;
+	}
+
+	.content-wrapper {
+		font-size: 17px;
+		line-height: 1.7;
+		color: #333;
+	}
+
+	.intro {
+		font-weight: 500;
+		color: var(--c-text);
+		margin-bottom: 30px;
+	}
+
+	.divider {
+		border: 0;
+		border-top: 1px solid var(--c-divider);
+		margin: 30px 0;
+	}
+
+	h2 {
+		margin-top: 30px;
+		margin-bottom: 15px;
+		font-size: 22px;
+	}
+
+	ul {
+		margin: 15px 0;
+		padding-left: 25px;
+	}
+
+	li {
+		margin-bottom: 10px;
+	}
+
+	a {
+		color: var(--c-link);
+		text-decoration: none;
+	}
+
+	a:hover {
+		text-decoration: underline;
+	}
+</style>

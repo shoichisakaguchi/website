@@ -7,14 +7,18 @@ interface Props {
     hideActions?: boolean;
 }
 
-const { variant = "standard", showIcon = false, hideActions = false } = Astro.props;
+const {
+    variant = "standard",
+    showIcon = false,
+    hideActions = false,
+} = Astro.props;
 
 // Process Journal Club (Find next meeting)
 const allJournalClub = await getCollection("journal-club");
 const now = new Date();
 
 // Helper to convert local date/time to UTC
-function convertLocalToUtc(item: typeof allJournalClub[0]): string | null {
+function convertLocalToUtc(item: (typeof allJournalClub)[0]): string | null {
     const data = item.data;
 
     // Prefer existing UTC field for backward compatibility
@@ -24,8 +28,8 @@ function convertLocalToUtc(item: typeof allJournalClub[0]): string | null {
 
     // Convert from local date/time if available
     if (data.localDate && data.localTime && data.localTime.trim()) {
-        const tz = data.eventTz || 'Asia/Tokyo';
-        const dateStr = data.localDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        const tz = data.eventTz || "Asia/Tokyo";
+        const dateStr = data.localDate.toISOString().split("T")[0]; // YYYY-MM-DD
         const timeStr = data.localTime.trim(); // HH:mm
 
         try {
@@ -33,7 +37,9 @@ function convertLocalToUtc(item: typeof allJournalClub[0]): string | null {
             const fakeLocalDate = new Date(`${dateStr}T${timeStr}:00`);
 
             // Get what this date looks like in the target timezone
-            const tzDateString = fakeLocalDate.toLocaleString('en-US', { timeZone: tz });
+            const tzDateString = fakeLocalDate.toLocaleString("en-US", {
+                timeZone: tz,
+            });
             const tzDate = new Date(tzDateString);
 
             // Calculate the difference
@@ -43,7 +49,7 @@ function convertLocalToUtc(item: typeof allJournalClub[0]): string | null {
             const correctUTC = new Date(fakeLocalDate.getTime() + diff);
             return correctUTC.toISOString();
         } catch (e) {
-            console.error('Failed to convert local time to UTC:', e);
+            console.error("Failed to convert local time to UTC:", e);
         }
     }
 
@@ -51,7 +57,7 @@ function convertLocalToUtc(item: typeof allJournalClub[0]): string | null {
 }
 
 // Helper to get event start and end times
-function getEventTimes(item: typeof allJournalClub[0]) {
+function getEventTimes(item: (typeof allJournalClub)[0]) {
     const data = item.data;
 
     // Try to get UTC time from either field
@@ -71,16 +77,16 @@ function getEventTimes(item: typeof allJournalClub[0]) {
 }
 
 // Classify events into Upcoming, Live, and Archived
-const classifiedEvents = allJournalClub.map(item => {
+const classifiedEvents = allJournalClub.map((item) => {
     const { start, end, hasTime } = getEventTimes(item);
 
-    let status: 'upcoming' | 'live' | 'archived';
+    let status: "upcoming" | "live" | "archived";
     if (now < start) {
-        status = 'upcoming';
+        status = "upcoming";
     } else if (now >= start && now < end) {
-        status = 'live';
+        status = "live";
     } else {
-        status = 'archived';
+        status = "archived";
     }
 
     return { item, start, end, hasTime, status };
@@ -88,11 +94,11 @@ const classifiedEvents = allJournalClub.map(item => {
 
 // Find the next meeting: prioritize Live, then Upcoming
 const liveEvent = classifiedEvents
-    .filter(e => e.status === 'live')
+    .filter((e) => e.status === "live")
     .sort((a, b) => a.start.valueOf() - b.start.valueOf())[0];
 
 const nextUpcoming = classifiedEvents
-    .filter(e => e.status === 'upcoming')
+    .filter((e) => e.status === "upcoming")
     .sort((a, b) => a.start.valueOf() - b.start.valueOf())[0];
 
 const upcomingJournalClub = liveEvent?.item || nextUpcoming?.item || null;
@@ -199,15 +205,15 @@ const primaryLink = upcomingJournalClub
                 )
             }
 
-            {!hideActions && (
-                <div class="actions">
-                    <a href="/journal-club" class="link-arrow"
-                        >View Schedule &rarr;</a
-                    >
+            {
+                !hideActions && (
+                    <div class="actions">
+                        <a href="/journal-club" class="link-arrow">
+                            View Schedule &rarr;
+                        </a>
 
-                    {/* Additional CTA for Hero */}
-                    {
-                        variant === "hero" && (
+                        {/* Additional CTA for Hero */}
+                        {variant === "hero" && (
                             <a
                                 href="https://docs.google.com/forms/d/e/1FAIpQLSdjvzJGh4vtCcq76qP79CW2qniycLix_LMwIfVRdG2bbuuPNg/viewform?usp=dialog"
                                 target="_blank"
@@ -216,18 +222,18 @@ const primaryLink = upcomingJournalClub
                             >
                                 Nominate Speaker &rarr;
                             </a>
-                        )
-                    }
-                </div>
-            )}
+                        )}
+                    </div>
+                )
+            }
         </div>
 
         <div class="next-meeting-card">
             {
                 upcomingJournalClub ? (
                     <>
-                        <span class={`badge ${isLiveNow ? 'badge-live' : ''}`}>
-                            {isLiveNow ? 'Live Now' : 'Next Meeting'}
+                        <span class={`badge ${isLiveNow ? "badge-live" : ""}`}>
+                            {isLiveNow ? "Live Now" : "Next Meeting"}
                         </span>
                         <h3 class="paper-title">
                             {upcomingJournalClub.data.title}
@@ -274,14 +280,18 @@ const primaryLink = upcomingJournalClub
                         </div>
                         {calendarUrl && (
                             <p class="calendar-hint">
-                                Timezones are handled automatically in Google Calendar.
+                                Timezones are handled automatically in Google
+                                Calendar.
                             </p>
                         )}
                     </>
                 ) : (
                     <div class="empty-state">
                         <h3>No upcoming meetings scheduled</h3>
-                        <p>Check back later for updates.</p>
+                        <p>No upcoming meetings are scheduled at the moment.</p>
+                        <a href="/journal-club" class="link-arrow">
+                            Browse past Journal Clubs &rarr;
+                        </a>
                     </div>
                 )
             }
@@ -464,7 +474,8 @@ const primaryLink = upcomingJournalClub
     }
 
     @keyframes pulse {
-        0%, 100% {
+        0%,
+        100% {
             opacity: 1;
         }
         50% {
