@@ -135,6 +135,7 @@ const summits = defineCollection({
             link: z.string().url().optional().or(z.literal('')),
             image: z.string().optional(),
         })).optional(),
+        registrationFees: z.string().optional(),
     }),
 });
 

@@ -1,6 +1,7 @@
 ---
 import { getEntry } from "astro:content";
 import type { CollectionEntry } from "astro:content";
+import { marked } from "marked";
 
 interface Props {
     item: CollectionEntry<"summits">;
@@ -76,6 +77,11 @@ const mapQuery = [item.data.venue, item.data.city, item.data.country]
     .filter(Boolean)
     .join(", ");
 const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
+
+// Render registration fees markdown if present
+const registrationFeesHtml = item.data.registrationFees?.trim()
+    ? await marked.parse(item.data.registrationFees)
+    : null;
 ---
 
 <div
@@ -317,6 +323,14 @@ const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&ou
                                     </div>
                                 ))}
                             </div>
+                        </section>
+                    )}
+
+                    {/* Registration Fees Section */}
+                    {registrationFeesHtml && (
+                        <section class="registration-fees-section">
+                            <h2>Registration Fees</h2>
+                            <div class="registration-fees-content" set:html={registrationFeesHtml} />
                         </section>
                     )}
 
@@ -1045,6 +1059,80 @@ const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&ou
         color: #666;
         margin-top: 0;
         font-style: italic;
+    }
+
+    /* Registration Fees Section */
+    .registration-fees-section {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .registration-fees-section h2 {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+        color: var(--c-text);
+    }
+
+    .registration-fees-content {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .registration-fees-content :global(h3) {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--c-text);
+    }
+
+    .registration-fees-content :global(p) {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .registration-fees-content :global(ul) {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+    }
+
+    .registration-fees-content :global(li) {
+        margin-bottom: 0.5rem;
+    }
+
+    .registration-fees-content :global(table) {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1.5rem 0;
+        font-size: 0.95rem;
+    }
+
+    .registration-fees-content :global(th),
+    .registration-fees-content :global(td) {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .registration-fees-content :global(th) {
+        background-color: #f9fafb;
+        font-weight: 600;
+        color: var(--c-text);
+    }
+
+    .registration-fees-content :global(tr:hover) {
+        background-color: #f9fafb;
+    }
+
+    .registration-fees-content :global(strong) {
+        font-weight: 600;
+    }
+
+    .registration-fees-content :global(em) {
+        font-style: italic;
+        color: #666;
     }
 
     /* Organizers Section */

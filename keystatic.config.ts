@@ -311,6 +311,11 @@ export default config({
                         itemLabel: (props) => props.fields.name.value,
                     }
                 ),
+                registrationFees: fields.text({
+                    label: 'Registration Fees',
+                    description: 'Supports Markdown including tables. Use standard Markdown table syntax.',
+                    multiline: true,
+                }),
                 summary: fields.document({
                     label: 'Summary / Description',
                     formatting: true,
