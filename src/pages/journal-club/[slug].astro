@@ -130,6 +130,22 @@ function formatHeaderDate(date: Date): string {
 const hasEventEnded = effectiveStartDateTimeUtc
     ? new Date().getTime() > new Date(effectiveStartDateTimeUtc).getTime() + 2 * 60 * 60 * 1000 // Event end = start + 2 hours
     : false;
+
+// Check if calendar link should be shown (event not yet ended)
+// Event duration: ~60 minutes (30 min talk + 30 min discussion)
+// Fallback: use date field end-of-day if no time metadata available
+const isCalendarUpcoming = (() => {
+    const now = new Date().getTime();
+    if (effectiveStartDateTimeUtc) {
+        // Use precise time: event start + 60 minutes
+        return now < new Date(effectiveStartDateTimeUtc).getTime() + 60 * 60 * 1000;
+    }
+    // Fallback: use date field, event considered over at end of that day (23:59:59)
+    const eventDate = new Date(data.date);
+    const endOfDay = new Date(eventDate);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+    return now < endOfDay.getTime();
+})();
 ---
 
 <Layout title={item.data.title}>
@@ -167,7 +183,7 @@ const hasEventEnded = effectiveStartDateTimeUtc
                     {link.label} &nearr;
                 </a>
             ))}
-            {data.calendarUrl && (
+            {data.calendarUrl && isCalendarUpcoming && (
                 <a
                     href={data.calendarUrl}
                     target="_blank"
