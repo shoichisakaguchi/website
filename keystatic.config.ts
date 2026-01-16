@@ -74,6 +74,7 @@ export default config({
             slugField: 'title',
             path: 'src/content/journal-club/*',
             format: { contentField: 'content' },
+            previewUrl: '/journal-club/{slug}',
             schema: {
                 title: fields.slug({ name: { label: 'Paper Title/Topic' } }),
                 date: fields.date({ label: 'Date', validation: { isRequired: true } }),
@@ -142,22 +143,22 @@ export default config({
             slugField: 'title',
             path: 'src/content/summits/*',
             format: { contentField: 'summary' },
+            previewUrl: '/summits/{slug}',
             schema: {
+                // ─────────────────────────────────────────────────────────────
+                // 1. Hero / Title / Meta
+                // ─────────────────────────────────────────────────────────────
                 title: fields.slug({ name: { label: 'Title' } }),
+                year: fields.text({ label: 'Year' }),
                 heroImage: fields.image({
                     label: 'Hero Image',
                     directory: 'public/images/summits/hero',
                     publicPath: '/images/summits/hero',
                 }),
                 description: fields.text({ label: 'Description (OGP/Card)', multiline: true }),
-                intro: fields.text({
-                    label: 'Intro / Context',
-                    description: 'A brief introduction or teaser text (top of page).',
-                    multiline: true,
-                }),
-                tags: fields.array(fields.text({ label: 'Tag' }), { label: 'Tags' }),
                 phase: fields.select({
-                    label: 'Phase',
+                    label: 'Phase (Editor Only)',
+                    description: 'Controls which sections are shown and how the page behaves.',
                     options: [
                         { label: 'Planning', value: 'Planning' },
                         { label: 'Preview', value: 'Preview' },
@@ -166,13 +167,30 @@ export default config({
                     ],
                     defaultValue: 'Planning',
                 }),
-                year: fields.text({ label: 'Year' }),
+                tags: fields.array(fields.text({ label: 'Tag' }), { label: 'Tags (Editor Only)' }),
                 startDate: fields.date({ label: 'Start Date' }),
                 endDate: fields.date({ label: 'End Date' }),
+                satelliteOf: fields.object({
+                    name: fields.text({ label: 'Parent Event Name' }),
+                    url: fields.url({ label: 'Parent Event URL' }),
+                }, { label: 'Satellite Event Of' }),
+
+                // ─────────────────────────────────────────────────────────────
+                // 2. Intro (What is this?)
+                // ─────────────────────────────────────────────────────────────
+                intro: fields.text({
+                    label: 'Intro / Context',
+                    description: 'A brief introduction or teaser text (top of page).',
+                    multiline: true,
+                }),
+
+                // ─────────────────────────────────────────────────────────────
+                // 3. Venue (+ map)
+                // ─────────────────────────────────────────────────────────────
                 location: fields.text({ label: 'Location Display String' }),
+                venue: fields.text({ label: 'Venue (Facility Name)' }),
                 city: fields.text({ label: 'City' }),
                 country: fields.text({ label: 'Country' }),
-                venue: fields.text({ label: 'Venue (Facility Name)' }),
                 format: fields.select({
                     label: 'Format',
                     options: [
@@ -182,64 +200,31 @@ export default config({
                     ],
                     defaultValue: 'On-site',
                 }),
-                satelliteOf: fields.object({
-                    name: fields.text({ label: 'Parent Event Name' }),
-                    url: fields.url({ label: 'Parent Event URL' }),
-                }, { label: 'Satellite Event Of' }),
-                organizers: fields.array(
+
+                // ─────────────────────────────────────────────────────────────
+                // 4. Featured Speakers
+                // ─────────────────────────────────────────────────────────────
+                speakers: fields.array(
                     fields.object({
-                        person: fields.relationship({
-                            label: 'Person',
-                            collection: 'people',
-                            validation: { isRequired: true }
+                        name: fields.text({ label: 'Name' }),
+                        affiliation: fields.text({ label: 'Affiliation' }),
+                        role: fields.text({ label: 'Role / Title' }),
+                        link: fields.url({ label: 'Link (Personal Page)' }),
+                        image: fields.image({
+                            label: 'Headshot',
+                            directory: 'public/images/speakers',
+                            publicPath: '/images/speakers',
                         }),
-                        role: fields.text({ label: 'Role' }),
-                        affiliation: fields.text({ label: 'Affiliation (Override)' }),
-                        section: fields.text({ label: 'Team / Section' }),
                     }),
                     {
-                        label: 'Organizers',
-                        itemLabel: (props) => {
-                            const personValue = props.fields.person.value;
-                            const name = (typeof personValue === 'string'
-                                ? personValue
-                                : (personValue as { slug?: string })?.slug) || 'Organizer';
-                            const role = props.fields.role.value;
-                            return role ? `${name} — ${role}` : name;
-                        },
-                    }
-                ),
-                links: fields.object({
-                    registration: fields.url({ label: 'Registration URL' }),
-                    callForPapers: fields.url({ label: 'Call for Papers URL' }),
-                    slack: fields.url({ label: 'Slack Invite URL' }),
-                    googleCalendar: fields.url({ label: 'Google Calendar URL' }),
-                    detailedProgram: fields.url({ label: 'Detailed Program URL' }),
-                    codeOfConduct: fields.url({ label: 'Code of Conduct URL' }),
-                }, { label: 'Key Links' }),
-                sponsors: fields.array(
-                    fields.object({
-                        name: fields.text({ label: 'Sponsor Name' }),
-                        url: fields.url({ label: 'Website URL' }),
-                        logo: fields.image({
-                            label: 'Logo',
-                            directory: 'public/images/summits/sponsors',
-                            publicPath: '/images/summits/sponsors',
-                        }),
-                        supportType: fields.text({ label: 'Support Type (e.g. Platinum, Travel)' }),
-                    }),
-                    {
-                        label: 'Sponsors',
+                        label: 'Featured Invited Speakers',
                         itemLabel: (props) => props.fields.name.value,
                     }
                 ),
-                travelGrant: fields.object({
-                    amount: fields.text({ label: 'Amount' }),
-                    currency: fields.text({ label: 'Currency' }),
-                    eligibility: fields.text({ label: 'Eligibility' }),
-                    applicationUrl: fields.url({ label: 'Application URL' }),
-                    notes: fields.text({ label: 'Notes', multiline: true }),
-                }, { label: 'Travel Grants' }),
+
+                // ─────────────────────────────────────────────────────────────
+                // 5. Program
+                // ─────────────────────────────────────────────────────────────
                 programArchive: fields.object({
                     label: fields.text({ label: 'Button Label', defaultValue: 'View Program' }),
                     url: fields.file({
@@ -267,6 +252,46 @@ export default config({
                     slidesUrl: fields.url({ label: 'Slides URL' }),
                     reportUrl: fields.url({ label: 'Report URL' }),
                 }, { label: 'Archive Resources' }),
+                links: fields.object({
+                    detailedProgram: fields.url({ label: 'Detailed Program URL' }),
+                    registration: fields.url({ label: 'Registration URL' }),
+                    callForPapers: fields.url({ label: 'Call for Papers URL' }),
+                    slack: fields.url({ label: 'Slack Invite URL' }),
+                    googleCalendar: fields.url({ label: 'Google Calendar URL' }),
+                    codeOfConduct: fields.url({ label: 'Code of Conduct URL' }),
+                }, { label: 'Key Links' }),
+
+                // ─────────────────────────────────────────────────────────────
+                // 6. Registration Fees
+                // ─────────────────────────────────────────────────────────────
+                registrationFees: fields.text({
+                    label: 'Registration Fees',
+                    description: 'Supports Markdown including tables. Use standard Markdown table syntax.',
+                    multiline: true,
+                }),
+                travelGrant: fields.object({
+                    amount: fields.text({ label: 'Amount' }),
+                    currency: fields.text({ label: 'Currency' }),
+                    eligibility: fields.text({ label: 'Eligibility' }),
+                    applicationUrl: fields.url({ label: 'Application URL' }),
+                    notes: fields.text({ label: 'Notes', multiline: true }),
+                }, { label: 'Travel Grants' }),
+
+                // ─────────────────────────────────────────────────────────────
+                // 7. Objectives & Outcomes (Content Field)
+                // ─────────────────────────────────────────────────────────────
+                summary: fields.document({
+                    label: 'Objectives & Outcomes',
+                    description: 'The main content section describing objectives, outcomes, and detailed information.',
+                    formatting: true,
+                    dividers: true,
+                    links: true,
+                    images: true,
+                }),
+
+                // ─────────────────────────────────────────────────────────────
+                // 8. Community Outcomes
+                // ─────────────────────────────────────────────────────────────
                 communityOutcomes: fields.array(
                     fields.object({
                         type: fields.select({
@@ -294,35 +319,53 @@ export default config({
                         itemLabel: (props) => props.fields.title.value,
                     }
                 ),
-                speakers: fields.array(
+
+                // ─────────────────────────────────────────────────────────────
+                // 9. Sponsors
+                // ─────────────────────────────────────────────────────────────
+                sponsors: fields.array(
                     fields.object({
-                        name: fields.text({ label: 'Name' }),
-                        affiliation: fields.text({ label: 'Affiliation' }),
-                        role: fields.text({ label: 'Role / Title' }),
-                        link: fields.url({ label: 'Link (Personal Page)' }),
-                        image: fields.image({
-                            label: 'Headshot',
-                            directory: 'public/images/speakers',
-                            publicPath: '/images/speakers',
+                        name: fields.text({ label: 'Sponsor Name' }),
+                        url: fields.url({ label: 'Website URL' }),
+                        logo: fields.image({
+                            label: 'Logo',
+                            directory: 'public/images/summits/sponsors',
+                            publicPath: '/images/summits/sponsors',
                         }),
+                        supportType: fields.text({ label: 'Support Type (e.g. Platinum, Travel)' }),
                     }),
                     {
-                        label: 'Featured Invited Speakers',
+                        label: 'Sponsors',
                         itemLabel: (props) => props.fields.name.value,
                     }
                 ),
-                registrationFees: fields.text({
-                    label: 'Registration Fees',
-                    description: 'Supports Markdown including tables. Use standard Markdown table syntax.',
-                    multiline: true,
-                }),
-                summary: fields.document({
-                    label: 'Summary / Description',
-                    formatting: true,
-                    dividers: true,
-                    links: true,
-                    images: true,
-                }),
+
+                // ─────────────────────────────────────────────────────────────
+                // 10. Organizing Team
+                // ─────────────────────────────────────────────────────────────
+                organizers: fields.array(
+                    fields.object({
+                        person: fields.relationship({
+                            label: 'Person',
+                            collection: 'people',
+                            validation: { isRequired: true }
+                        }),
+                        role: fields.text({ label: 'Role' }),
+                        affiliation: fields.text({ label: 'Affiliation (Override)' }),
+                        section: fields.text({ label: 'Team / Section' }),
+                    }),
+                    {
+                        label: 'Organizers',
+                        itemLabel: (props) => {
+                            const personValue = props.fields.person.value;
+                            const name = (typeof personValue === 'string'
+                                ? personValue
+                                : (personValue as { slug?: string })?.slug) || 'Organizer';
+                            const role = props.fields.role.value;
+                            return role ? `${name} — ${role}` : name;
+                        },
+                    }
+                ),
             },
         }),
     },
@@ -330,6 +373,7 @@ export default config({
         summit: singleton({
             label: 'Summit Info',
             path: 'src/content/summit/info',
+            previewUrl: '/',
             schema: {
                 featuredSummit: fields.relationship({
                     label: 'Featured Summit',

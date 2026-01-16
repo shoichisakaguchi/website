@@ -282,7 +282,7 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
         {
             !isArchivedHome && (
                 <>
-                    {/* Featured Speakers */}
+                    {/* 4. Featured Speakers */}
                     {item.data.speakers && item.data.speakers.length > 0 && (
                         <section class="speakers-section">
                             <h2>Featured Speakers</h2>
@@ -329,18 +329,7 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
                         </section>
                     )}
 
-                    {/* Registration Fees Section */}
-                    {registrationFeesHtml && (
-                        <section class="registration-fees-section">
-                            <h2>Registration Fees</h2>
-                            <div
-                                class="registration-fees-content"
-                                set:html={registrationFeesHtml}
-                            />
-                        </section>
-                    )}
-
-                    {/* Program (Archive) Section */}
+                    {/* 5. Program Section */}
                     {item.data.phase !== "Planning" &&
                         (item.data.programArchive ||
                             item.data.links?.detailedProgram) && (
@@ -443,7 +432,7 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
                             </section>
                         )}
 
-                    {/* Archive Resources (Recordings/Slides/Report/Photos) */}
+                    {/* Archive Resources (Recordings/Slides/Report/Photos) - kept with Program */}
                     {hasArchiveResources && (
                         <section class="archive-resources-section">
                             <h2>Archive Resources</h2>
@@ -495,12 +484,61 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
                         </section>
                     )}
 
-                    {/* Main Content Render */}
+                    {/* 6. Registration Fees Section */}
+                    {registrationFeesHtml && (
+                        <section class="registration-fees-section">
+                            <h2>Registration Fees</h2>
+                            <div
+                                class="registration-fees-content"
+                                set:html={registrationFeesHtml}
+                            />
+                        </section>
+                    )}
+
+                    {/* Travel Grants - kept with Registration Fees */}
+                    {hasTravelGrant && (
+                        <section class="grants-section">
+                            <h2>Travel Grants</h2>
+                            <div class="grant-card">
+                                {item.data.travelGrant?.amount &&
+                                    item.data.travelGrant?.currency && (
+                                        <p>
+                                            <strong>Amount:</strong>{" "}
+                                            {item.data.travelGrant.amount}{" "}
+                                            {item.data.travelGrant.currency}
+                                        </p>
+                                    )}
+                                {item.data.travelGrant?.eligibility && (
+                                    <p>
+                                        <strong>Eligibility:</strong>{" "}
+                                        {item.data.travelGrant.eligibility}
+                                    </p>
+                                )}
+                                {item.data.travelGrant?.notes && (
+                                    <p class="grant-notes">
+                                        {item.data.travelGrant.notes}
+                                    </p>
+                                )}
+                                {item.data.travelGrant?.applicationUrl && (
+                                    <a
+                                        href={
+                                            item.data.travelGrant.applicationUrl
+                                        }
+                                        class="button small"
+                                    >
+                                        Apply for Grant
+                                    </a>
+                                )}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* 7. Objectives & Outcomes (Main Content) */}
                     <article class="main-content">
                         <Content />
                     </article>
 
-                    {/* Community Outcomes */}
+                    {/* 8. Community Outcomes */}
                     {item.data.communityOutcomes &&
                         item.data.communityOutcomes.length > 0 && (
                             <section class="outcomes-section">
@@ -558,7 +596,7 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
                             </section>
                         )}
 
-                    {/* Sponsors */}
+                    {/* 9. Sponsors */}
                     {item.data.sponsors && item.data.sponsors.length > 0 && (
                         <section class="sponsors-section">
                             <h2>Sponsors</h2>
@@ -592,44 +630,7 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
                         </section>
                     )}
 
-                    {/* Travel Grants */}
-                    {hasTravelGrant && (
-                        <section class="grants-section">
-                            <h2>Travel Grants</h2>
-                            <div class="grant-card">
-                                {item.data.travelGrant?.amount &&
-                                    item.data.travelGrant?.currency && (
-                                        <p>
-                                            <strong>Amount:</strong>{" "}
-                                            {item.data.travelGrant.amount}{" "}
-                                            {item.data.travelGrant.currency}
-                                        </p>
-                                    )}
-                                {item.data.travelGrant?.eligibility && (
-                                    <p>
-                                        <strong>Eligibility:</strong>{" "}
-                                        {item.data.travelGrant.eligibility}
-                                    </p>
-                                )}
-                                {item.data.travelGrant?.notes && (
-                                    <p class="grant-notes">
-                                        {item.data.travelGrant.notes}
-                                    </p>
-                                )}
-                                {item.data.travelGrant?.applicationUrl && (
-                                    <a
-                                        href={
-                                            item.data.travelGrant.applicationUrl
-                                        }
-                                        class="button small"
-                                    >
-                                        Apply for Grant
-                                    </a>
-                                )}
-                            </div>
-                        </section>
-                    )}
-
+                    {/* 10. Organizing Team */}
                     {organizers.length > 0 && (
                         <section class="organizers-section">
                             <h2>The Organizing Team</h2>
