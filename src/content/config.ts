@@ -21,10 +21,12 @@ const people = defineCollection({
         z.object({
             name: z.string(),
             affiliation: z.string(),
+            country: z.string().optional().or(z.literal('')),
             image: image().optional(),
             blueskyId: z.string().optional().or(z.literal('')),
             xId: z.string().optional().or(z.literal('')),
             websiteUrl: z.string().url().optional().or(z.literal('')),
+            orcid: z.string().optional().or(z.literal('')),
         }),
 });
 

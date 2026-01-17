@@ -71,6 +71,16 @@ export default config({
                 blueskyId: fields.text({ label: 'Bluesky ID' }),
                 xId: fields.text({ label: 'X (Twitter) ID' }),
                 websiteUrl: fields.url({ label: 'Website URL' }),
+                orcid: fields.text({
+                    label: 'ORCID iD',
+                    description: 'Format: 0000-0000-0000-0000 (last digit can be X)',
+                    validation: {
+                        match: {
+                            pattern: '^\\d{4}-\\d{4}-\\d{4}-\\d{3}[0-9X]$',
+                            message: 'Please use ORCID format 0000-0000-0000-0000 (last digit can be X)',
+                        },
+                    },
+                }),
             },
         }),
         journalClub: collection({
