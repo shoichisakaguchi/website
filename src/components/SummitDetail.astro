@@ -2,6 +2,7 @@
 import { getEntry } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import { marked } from "marked";
+import { formatDate } from "../utils/date";
 
 interface Props {
     item: CollectionEntry<"summits">;
@@ -582,9 +583,7 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
                                                         )}
                                                         {outcome.date && (
                                                             <span class="date">
-                                                                {new Date(
-                                                                    outcome.date,
-                                                                ).toLocaleDateString()}
+                                                                {formatDate(new Date(outcome.date))}
                                                             </span>
                                                         )}
                                                     </div>

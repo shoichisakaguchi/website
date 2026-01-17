@@ -2,13 +2,16 @@ import { defineCollection, z } from 'astro:content';
 
 
 
-const announcements = defineCollection({
+const posts = defineCollection({
     schema: z.object({
         title: z.string(),
+        type: z.enum(['announcement', 'post']).optional().default('post'),
         publishedDate: z.coerce.date(),
-        eventDate: z.coerce.date().optional(),
-        category: z.enum(['News', 'Event', 'Journal Club', 'Community']).optional().default('News'),
-        isPinned: z.boolean().default(false),
+        author: z.string(),
+        excerpt: z.string().optional(),
+        tags: z.array(z.string()).optional(),
+        discussionUrl: z.string().url().optional().or(z.literal('')),
+        discussionLabel: z.string().optional(),
     }),
 });
 
@@ -151,7 +154,7 @@ const summit = defineCollection({
 });
 
 export const collections = {
-    announcements,
+    posts,
     people,
     'journal-club': journalClub,
     summits,

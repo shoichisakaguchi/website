@@ -1,0 +1,204 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { formatDate } from "../../utils/date";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+  return posts.map((item) => ({
+    params: { slug: item.slug },
+    props: { item },
+  }));
+}
+
+const { item } = Astro.props;
+const { Content } = await item.render();
+
+const discussionLabel = item.data.discussionLabel || "Open discussion doc";
+const hasTags = item.data.tags && item.data.tags.length > 0;
+const hasDiscussion = item.data.discussionUrl && item.data.discussionUrl !== "";
+---
+
+<Layout title={item.data.title}>
+  <div class="container page-content">
+    <div class="back-link">
+      <a href="/posts">&larr; Back to posts</a>
+    </div>
+    <header class="post-header">
+      <div class="meta">
+        <time>{formatDate(item.data.publishedDate)}</time>
+      </div>
+      <h1 class="page-title">{item.data.title}</h1>
+    </header>
+    <div class="content-wrapper">
+      <article>
+        <Content />
+      </article>
+
+      <footer class="post-footer">
+        <div class="author">
+          <span class="label">Author:</span> {item.data.author}
+        </div>
+
+        {hasDiscussion && (
+          <div class="discussion">
+            <h3>Continue the discussion</h3>
+            <p>Join the conversation in the open discussion document.</p>
+            <a href={item.data.discussionUrl} target="_blank" rel="noopener noreferrer" class="discussion-link">
+              {discussionLabel} &rarr;
+            </a>
+          </div>
+        )}
+
+        {hasTags && (
+          <div class="tags">
+            <span class="label">Tags:</span>
+            {item.data.tags!.map((tag) => (
+              <span class="tag">{tag}</span>
+            ))}
+          </div>
+        )}
+      </footer>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .page-content {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .page-title {
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+
+  .post-header {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    text-align: center;
+  }
+
+  .meta {
+    color: var(--c-text-light, #666);
+    margin-bottom: 10px;
+  }
+
+  .content-wrapper {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--c-text, #333);
+  }
+
+  .back-link {
+    margin-top: 40px;
+  }
+
+  .back-link a {
+    color: var(--c-text-light, #666);
+    text-decoration: none;
+    font-size: 0.9em;
+  }
+
+  .back-link a:hover {
+    text-decoration: underline;
+  }
+
+  .post-footer {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--c-divider, #eee);
+  }
+
+  .author {
+    margin-bottom: 24px;
+    font-size: 0.95em;
+  }
+
+  .author .label {
+    color: var(--c-text-light, #666);
+  }
+
+  .discussion {
+    margin-bottom: 24px;
+    padding: 20px;
+    background: var(--c-bg-secondary, #f9f9f9);
+    border-radius: 8px;
+  }
+
+  .discussion h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.1em;
+    font-weight: 600;
+  }
+
+  .discussion p {
+    margin: 0 0 12px 0;
+    font-size: 0.9em;
+    color: var(--c-text-light, #666);
+  }
+
+  .discussion-link {
+    display: inline-block;
+    color: var(--c-link, #0070f3);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .discussion-link:hover {
+    text-decoration: underline;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+  }
+
+  .tags .label {
+    color: var(--c-text-light, #666);
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--c-divider, #eee);
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: var(--c-text-light, #666);
+  }
+
+  /* Basic styling for content */
+  article :global(h2) {
+    margin-top: 2em;
+    font-size: 1.5em;
+    font-weight: 600;
+  }
+
+  article :global(h3) {
+    margin-top: 1.5em;
+    font-size: 1.25em;
+    font-weight: 600;
+  }
+
+  article :global(p) {
+    margin-bottom: 1em;
+  }
+
+  article :global(ul),
+  article :global(ol) {
+    margin-bottom: 1em;
+    padding-left: 2em;
+  }
+
+  article :global(img) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+  }
+</style>

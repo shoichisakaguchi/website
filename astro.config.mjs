@@ -9,7 +9,15 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-    integrations: [react(), keystatic(), markdoc(), sitemap()],
+    // Only include Keystatic in dev (or when explicitly enabled) to avoid bundling its admin UI.
+    integrations: [
+        react(),
+        ...(process.env.KEYSTATIC === 'true' || process.env.NODE_ENV !== 'production'
+            ? [keystatic()]
+            : []),
+        markdoc(),
+        sitemap()
+    ],
     output: 'server',
     adapter: cloudflare(),
     site: 'https://rdrp.io'

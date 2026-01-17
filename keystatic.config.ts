@@ -15,27 +15,31 @@ export default config({
         },
     collections: {
 
-        announcements: collection({
-            label: 'Announcements',
+        posts: collection({
+            label: 'Posts',
             slugField: 'title',
-            path: 'src/content/announcements/*',
+            path: 'src/content/posts/*',
             format: { contentField: 'content' },
-            previewUrl: '/announcements/{slug}',
+            previewUrl: '/posts/{slug}',
             schema: {
                 title: fields.slug({ name: { label: 'Title' } }),
-                publishedDate: fields.date({ label: 'Published Date', validation: { isRequired: true } }),
-                eventDate: fields.date({ label: 'Event Date' }),
-                category: fields.select({
-                    label: 'Category',
+                type: fields.select({
+                    label: 'Type',
                     options: [
-                        { label: 'News', value: 'News' },
-                        { label: 'Event', value: 'Event' },
-                        { label: 'Journal Club', value: 'Journal Club' },
-                        { label: 'Community', value: 'Community' },
+                        { label: 'Announcement', value: 'announcement' },
+                        { label: 'Post', value: 'post' },
                     ],
-                    defaultValue: 'News',
+                    defaultValue: 'announcement',
                 }),
-                isPinned: fields.checkbox({ label: 'Pin to top', defaultValue: false }),
+                publishedDate: fields.date({ label: 'Published Date', validation: { isRequired: true } }),
+                author: fields.text({ label: 'Author', validation: { isRequired: true } }),
+                excerpt: fields.text({ label: 'Excerpt', description: 'Short summary for list page (optional)', multiline: true }),
+                tags: fields.array(
+                    fields.text({ label: 'Tag' }),
+                    { label: 'Tags', description: 'Recommend 3-5 tags' }
+                ),
+                discussionUrl: fields.url({ label: 'Discussion URL', description: 'Link to external discussion doc (Google Docs, Notion, etc.)' }),
+                discussionLabel: fields.text({ label: 'Discussion Link Label', description: 'Default: "Open discussion doc"' }),
                 content: fields.document({
                     label: 'Content',
                     formatting: true,

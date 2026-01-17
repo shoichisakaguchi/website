@@ -4,6 +4,7 @@ import HomeAnnouncements from "../components/HomeAnnouncements.astro";
 import JournalClubHome from "../components/JournalClubHome.astro";
 import { getCollection, getEntry, type CollectionEntry } from "astro:content";
 import SummitDetail from "../components/SummitDetail.astro";
+import { formatDate } from "../utils/date";
 
 export const prerender = true;
 
@@ -123,9 +124,7 @@ const currentPhase = activeSummit?.data.phase || "Planning";
 								{activeSummit.data.startDate && (
 									<p class="date">
 										Save the Date:{" "}
-										{new Date(
-											activeSummit.data.startDate,
-										).toLocaleDateString()}
+										{formatDate(new Date(activeSummit.data.startDate))}
 									</p>
 								)}
 								{(activeSummit.data.city ||

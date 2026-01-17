@@ -1,51 +1,46 @@
 ---
 import { getCollection } from "astro:content";
+import { formatDate } from "../utils/date";
 
-// Fetch announcements
-const allAnnouncements = await getCollection("announcements");
+// Fetch posts (unified announcements + posts)
+const allPosts = await getCollection("posts");
 
 // Sort by date descending
-const sortedAnnouncements = allAnnouncements.sort(
+const sortedPosts = allPosts.sort(
     (a, b) =>
         new Date(b.data.publishedDate).valueOf() -
         new Date(a.data.publishedDate).valueOf(),
 );
 
 // Take latest 3
-const latestAnnouncements = sortedAnnouncements.slice(0, 3);
+const latestPosts = sortedPosts.slice(0, 3);
+
+function getTypeLabel(type: string | undefined): string {
+    return type === "announcement" ? "Announcement" : "Post";
+}
 ---
 
 {
-    latestAnnouncements.length > 0 && (
+    latestPosts.length > 0 && (
         <section class="announcements-section">
             <h2 class="section-title">Latest Updates</h2>
             <div class="announcements-list">
-                {latestAnnouncements.map((item) => (
+                {latestPosts.map((item) => (
                     <article class="announcement-card">
                         <a
-                            href={`/announcements/${item.slug}`}
+                            href={`/posts/${item.slug}`}
                             class="card-link"
                         >
                             <div class="content">
                                 <div class="meta">
                                     <span class="date">
-                                        {item.data.publishedDate
-                                            ? new Date(
-                                                  item.data.publishedDate,
-                                              ).toLocaleDateString("en-US", {
-                                                  year: "numeric",
-                                                  month: "short",
-                                                  day: "numeric",
-                                              })
-                                            : ""}
+                                        {formatDate(item.data.publishedDate)}
                                     </span>
-                                    {item.data.category && (
-                                        <span
-                                            class={`type-badge ${item.data.category.toLowerCase().replace(/\s+/g, "-")}`}
-                                        >
-                                            {item.data.category}
-                                        </span>
-                                    )}
+                                    <span
+                                        class={`type-badge ${item.data.type || "post"}`}
+                                    >
+                                        {getTypeLabel(item.data.type)}
+                                    </span>
                                 </div>
                                 <h3 class="title">{item.data.title}</h3>
                             </div>
@@ -54,7 +49,7 @@ const latestAnnouncements = sortedAnnouncements.slice(0, 3);
                 ))}
             </div>
             <div class="view-all-container">
-                <a href="/announcements" class="view-all-link">
+                <a href="/posts" class="view-all-link">
                     View all updates &rarr;
                 </a>
             </div>
@@ -133,19 +128,11 @@ const latestAnnouncements = sortedAnnouncements.slice(0, 3);
         letter-spacing: 0.02em;
     }
 
-    .type-badge.news {
+    .type-badge.announcement {
         background-color: #e6f6ff;
         color: #0070f3;
     }
-    .type-badge.event {
-        background-color: #f3e8ff;
-        color: #7928ca;
-    }
-    .type-badge.journal-club {
-        background-color: #fce7f3;
-        color: #db2777;
-    }
-    .type-badge.community {
+    .type-badge.post {
         background-color: #f0f0f0;
         color: #555;
     }

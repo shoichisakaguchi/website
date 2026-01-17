@@ -1,0 +1,125 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import { formatDate } from "../../utils/date";
+
+export const prerender = true;
+
+const posts = await getCollection("posts");
+const sortedPosts = posts.sort((a, b) => {
+	return (
+		new Date(b.data.publishedDate).valueOf() -
+		new Date(a.data.publishedDate).valueOf()
+	);
+});
+
+function getTypeLabel(type: string | undefined): string {
+	return type === "announcement" ? "Announcement" : "Post";
+}
+---
+
+<Layout>
+	<div class="container page-content">
+		<h1 class="page-title">Posts</h1>
+		<div class="content-wrapper">
+			<ul class="post-list">
+				{
+					sortedPosts.map((item) => (
+						<li>
+							<div class="meta">
+								<span class="date">
+									{formatDate(item.data.publishedDate)}
+								</span>
+								<span class={`type-badge ${item.data.type || "post"}`}>
+									{getTypeLabel(item.data.type)}
+								</span>
+							</div>
+							<a
+								href={`/posts/${item.slug}`}
+								class="title"
+							>
+								{item.data.title}
+							</a>
+							{item.data.excerpt && (
+								<p class="excerpt">{item.data.excerpt}</p>
+							)}
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.page-content {
+		max-width: 720px;
+		margin: 0 auto;
+	}
+
+	.page-title {
+		margin-top: 40px;
+		margin-bottom: 40px;
+		text-align: center;
+	}
+
+	.post-list {
+		list-style: none;
+		padding: 0;
+	}
+
+	.post-list li {
+		padding: 20px 0;
+		border-bottom: 1px solid var(--c-divider, #eee);
+	}
+
+	.post-list li:last-child {
+		border-bottom: none;
+	}
+
+	.meta {
+		font-size: 0.9em;
+		color: var(--c-text-light, #666);
+		margin-bottom: 4px;
+		display: flex;
+		gap: 10px;
+		align-items: center;
+	}
+
+	.type-badge {
+		padding: 2px 6px;
+		border-radius: 4px;
+		font-size: 0.8em;
+		font-weight: 500;
+	}
+
+	.type-badge.announcement {
+		background: var(--c-link, #0070f3);
+		color: white;
+	}
+
+	.type-badge.post {
+		background: var(--c-divider, #eee);
+		color: var(--c-text-light, #666);
+	}
+
+	.title {
+		text-decoration: none;
+		color: var(--c-text, #333);
+		font-size: 1.2em;
+		font-weight: 600;
+		display: block;
+	}
+
+	.title:hover {
+		color: var(--c-link, #0070f3);
+	}
+
+	.excerpt {
+		margin-top: 8px;
+		margin-bottom: 0;
+		color: var(--c-text-light, #666);
+		font-size: 0.95em;
+		line-height: 1.5;
+	}
+</style>

@@ -1,61 +1,54 @@
-# Astro Starter Kit: Basics
+# rdrp.io website
 
+Website for the RdRp Summit community.
+
+## Stack
+- Astro 5 (SSR)
+- React 19
+- Keystatic CMS
+- Markdoc
+- Pagefind
+- Cloudflare Pages
+
+## Development
 ```sh
-npm create astro@latest -- --template basics
+npm install
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Keystatic admin: http://localhost:4321/keystatic
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+## Build and Preview
+```sh
+npm run build
+npm run preview
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## Content and CMS
+- Content lives in `src/content/` (Keystatic local mode).
+- Homepage is phase-driven via the `summit` singleton and featured summit.
+- Search indexing runs after build: `pagefind --site dist`.
 
-## 📝 Content Management
-This project uses [Keystatic](https://keystatic.com/) for content management.
+## Images
+- People images: `src/assets/images/people/`
+- Summit heroes: `public/images/summits/hero/{slug}/`
+- Speaker images: `public/images/speakers/{summit-slug}/speakers/`
+- Sponsor logos: `public/images/summits/sponsors/`
 
-### Accessing the Admin Dashboard
-1. Start the development server:
-   ```sh
-   npm run dev
-   ```
-2. Navigate to:
-   [http://localhost:4321/keystatic](http://localhost:4321/keystatic)
+## Deployment
+Cloudflare Pages with `nodejs_compat`.
 
-### Content Location
-- **Posts**: `src/content/posts/`
-- **Config**: `keystatic.config.ts`
+Required environment variables:
+- `RESEND_API_KEY`
+- `KEYSTATIC_GITHUB_CLIENT_ID`
+- `KEYSTATIC_GITHUB_CLIENT_SECRET`
+- `KEYSTATIC_SECRET`
 
-## 🧞 Commands
+Optional:
+- `CONTACT_EMAIL` (defaults to `rdrp.summit@gmail.com`)
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## LLM Guidance
+- Project map: `AGENTS.md` (CLAUDE.md is a symlink)
+- Rules: `.claude/rules/`
+- Skills: `.claude/skills/`
+- Subagents: `.claude/subagents/`
