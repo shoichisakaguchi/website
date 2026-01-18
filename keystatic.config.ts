@@ -81,6 +81,10 @@ export default config({
                         },
                     },
                 }),
+                linkedin: fields.url({
+                    label: 'LinkedIn',
+                    description: 'LinkedIn profile URL (e.g., https://www.linkedin.com/in/username/)',
+                }),
             },
         }),
         journalClub: collection({
