@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { formatDate } from "../../utils/date";
+import CommunityFooter from "../../components/CommunityFooter.astro";
 
 export const prerender = true;
 
@@ -61,6 +62,8 @@ const hasDiscussion = item.data.discussionUrl && item.data.discussionUrl !== "";
           </div>
         )}
       </footer>
+
+      <CommunityFooter variant="post" />
     </div>
   </div>
 </Layout>

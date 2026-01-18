@@ -1,0 +1,46 @@
+---
+interface Props {
+	variant?: "post" | "summit";
+}
+
+const { variant = "post" } = Astro.props;
+
+const COMMUNITY_FORM_URL = "https://forms.gle/oPdeSmmLnQTi8UAB8";
+
+const message = variant === "summit"
+	? "Discussions around the summit continue in our community."
+	: "Discussions continue in our community.";
+---
+
+<div class="community-footer">
+	<p class="community-message">
+		{message}{" "}
+		<a href={COMMUNITY_FORM_URL} target="_blank" rel="noopener noreferrer" class="community-link">
+			Join community →
+		</a>
+	</p>
+</div>
+
+<style>
+	.community-footer {
+		margin-top: 2rem;
+		padding-top: 1.5rem;
+		border-top: 1px solid var(--c-divider, #eee);
+	}
+
+	.community-message {
+		font-size: 0.95em;
+		color: var(--c-text-light, #666);
+		margin: 0;
+	}
+
+	.community-link {
+		color: var(--c-link, #0070f3);
+		text-decoration: none;
+		font-weight: 500;
+	}
+
+	.community-link:hover {
+		text-decoration: underline;
+	}
+</style>

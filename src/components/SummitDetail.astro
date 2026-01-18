@@ -3,6 +3,7 @@ import { getEntry } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import { marked } from "marked";
 import { formatDate } from "../utils/date";
+import CommunityFooter from "./CommunityFooter.astro";
 
 interface Props {
     item: CollectionEntry<"summits">;
@@ -670,6 +671,9 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
                 </>
             )
         }
+
+        {/* Community Section (Summit variant only) */}
+        {variant === "summit" && <CommunityFooter variant="summit" />}
 
         {/* Footer Link (CoC) & Phase Notice */}
         {
