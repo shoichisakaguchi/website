@@ -28,6 +28,7 @@ const people = defineCollection({
             websiteUrl: z.string().url().optional().or(z.literal('')),
             orcid: z.string().optional().or(z.literal('')),
             linkedin: z.string().url().optional().or(z.literal('')),
+            github: z.string().optional().or(z.literal('')),
         }),
 });
 

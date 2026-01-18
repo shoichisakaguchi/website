@@ -81,6 +81,10 @@ export default config({
                         },
                     },
                 }),
+                github: fields.text({
+                    label: 'GitHub',
+                    description: 'GitHub username or full profile URL (e.g., username or https://github.com/username)',
+                }),
                 linkedin: fields.url({
                     label: 'LinkedIn',
                     description: 'LinkedIn profile URL (e.g., https://www.linkedin.com/in/username/)',
