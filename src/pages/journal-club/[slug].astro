@@ -48,6 +48,7 @@ function getAllLinks(): { label: string; url: string; isPrimary: boolean }[] {
 
 const speakerInfo = getSpeakerInfo();
 const allLinks = getAllLinks();
+const speakerImage = data.speaker_image && data.speaker_image.trim() ? data.speaker_image.trim() : null;
 
 // Helper to get UTC datetime from local or existing UTC field
 function getStartDateTimeUtc(): string | null {
@@ -162,11 +163,21 @@ const isCalendarUpcoming = (() => {
             <h1 class="page-title">{item.data.title}</h1>
 
             {speakerInfo && (
-                <div class="speaker-section">
-                    <span class="speaker-name">{speakerInfo.name}</span>
-                    {speakerInfo.affiliation && (
-                        <span class="speaker-affiliation">{speakerInfo.affiliation}</span>
+                <div class="speaker-callout">
+                    {speakerImage && (
+                        <img
+                            src={speakerImage}
+                            alt={`${speakerInfo.name}`}
+                            class="speaker-callout-image"
+                            loading="lazy"
+                        />
                     )}
+                    <div class="speaker-callout-text">
+                        <span class="speaker-name">{speakerInfo.name}</span>
+                        {speakerInfo.affiliation && (
+                            <span class="speaker-affiliation">{speakerInfo.affiliation}</span>
+                        )}
+                    </div>
                 </div>
             )}
         </header>
@@ -266,21 +277,40 @@ const isCalendarUpcoming = (() => {
         font-size: 0.95em;
     }
 
-    .speaker-section {
+    .speaker-callout {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin: 20px auto 0;
+        padding: 16px 18px;
+        background-color: #f6f6f6;
+        border-radius: 10px;
+    }
+
+    .speaker-callout-image,
+    .speaker-callout img {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex: 0 0 80px;
+    }
+
+    .speaker-callout-text {
         display: flex;
         flex-direction: column;
-        align-items: center;
         gap: 4px;
-        margin-top: 20px;
     }
 
     .speaker-name {
-        font-size: 1.1em;
+        display: block;
+        font-size: 1.15rem;
         font-weight: 600;
         color: var(--c-text, #333);
     }
 
     .speaker-affiliation {
+        display: block;
         font-size: 0.95em;
         color: var(--c-text-secondary, #666);
     }

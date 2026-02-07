@@ -40,6 +40,7 @@ const journalClub = defineCollection({
         // New structured speaker fields
         speakerName: z.string().optional(),
         speakerAffiliation: z.string().optional(),
+        speaker_image: z.string().optional().or(z.literal('')),
         // User-friendly time input fields
         localDate: z.coerce.date().optional(),
         localTime: z.string().optional().or(z.literal('')),

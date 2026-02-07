@@ -103,6 +103,12 @@ export default config({
                 isPinned: fields.checkbox({ label: 'Pin to top', defaultValue: false }),
                 speakerName: fields.text({ label: 'Speaker Name' }),
                 speakerAffiliation: fields.text({ label: 'Speaker Affiliation' }),
+                speaker_image: fields.image({
+                    label: 'Speaker Image',
+                    directory: 'public/images/journal_club/speakers',
+                    publicPath: '/images/journal_club/speakers',
+                    validation: { isRequired: false },
+                }),
                 // User-friendly time input fields (recommended)
                 localDate: fields.date({
                     label: 'Local Date',
