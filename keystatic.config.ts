@@ -1,5 +1,6 @@
 // keystatic.config.ts
 import { config, fields, collection, singleton } from '@keystatic/core';
+import { JOURNAL_CLUB_TIMEZONE_OPTIONS_WITH_LEGACY } from './src/lib/journalClubTimezones';
 
 export default config({
     ui: {
@@ -127,15 +128,8 @@ export default config({
                 eventTz: fields.select({
                     label: 'Event Timezone (IANA)',
                     description: 'Timezone where the event is primarily coordinated (DST-aware). The site will convert Local Date/Time + Timezone into UTC for sorting/upcoming logic.',
-                    options: [
-                        { label: 'Asia/Tokyo (Japan)', value: 'Asia/Tokyo' },
-                        { label: 'America/Toronto (Eastern Time)', value: 'America/Toronto' },
-                        { label: 'America/Santiago (Chile)', value: 'America/Santiago' },
-                        { label: 'Europe/Paris (Central European)', value: 'Europe/Paris' },
-                        { label: 'Europe/Vilnius (Eastern European)', value: 'Europe/Vilnius' },
-                        { label: 'Australia/Sydney (Australian Eastern)', value: 'Australia/Sydney' },
-                        { label: 'UTC', value: 'UTC' },
-                    ],
+                    // Legacy values are included to keep older entries editable.
+                    options: JOURNAL_CLUB_TIMEZONE_OPTIONS_WITH_LEGACY,
                     defaultValue: 'Asia/Tokyo',
                 }),
                 // Advanced field (backward compatibility)

@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import { JOURNAL_CLUB_TIMEZONE_DISPLAY } from '../../lib/journalClubTimezones';
 
 export const prerender = true;
 
@@ -89,14 +90,7 @@ function getStartDateTimeUtc(): string | null {
 const effectiveStartDateTimeUtc = getStartDateTimeUtc();
 
 // Timezone display helper
-const TIMEZONES = [
-    { name: 'America/Toronto', label: 'Eastern Time (Toronto)' },
-    { name: 'America/Santiago', label: 'Chile (Santiago)' },
-    { name: 'Europe/Paris', label: 'Central European (Paris)' },
-    { name: 'Europe/Vilnius', label: 'Eastern European (Vilnius)' },
-    { name: 'Asia/Tokyo', label: 'Japan (Tokyo)' },
-    { name: 'Australia/Sydney', label: 'Australian Eastern (Sydney)' },
-];
+const TIMEZONES = JOURNAL_CLUB_TIMEZONE_DISPLAY;
 
 function formatTimeInTimezone(utcIsoString: string, timezone: string): string {
     try {
