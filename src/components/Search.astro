@@ -1,38 +1,36 @@
+---
+const isProd = import.meta.env.PROD;
+---
+
 <div id="search" class="search-container"></div>
 
-<script>
-    // Only run on client
-    window.addEventListener("DOMContentLoaded", () => {
-        // Dynamic import to avoid build errors if not found, or just checks
-        if (typeof window !== "undefined") {
-            const script = document.createElement("script");
-            script.src = "/pagefind/pagefind-ui.js";
-            script.onload = () => {
-                // @ts-ignore
-                new PagefindUI({
-                    element: "#search",
-                    showSubResults: true,
-                    showImages: false,
-                });
-            };
-            script.onerror = () => {
-                console.warn(
-                    "Pagefind script not found. Search is only available in production.",
-                );
-                const el = document.getElementById("search");
-                if (el)
-                    el.innerHTML =
-                        "<p style='font-size:12px;color:#666;'>Search available in production build</p>";
-            };
-            document.head.appendChild(script);
+{isProd ? (
+	<script>
+		// Only run on client in production where Pagefind assets exist.
+		window.addEventListener("DOMContentLoaded", () => {
+			if (typeof window !== "undefined") {
+				const script = document.createElement("script");
+				script.src = "/pagefind/pagefind-ui.js";
+				script.onload = () => {
+					// @ts-ignore
+					new PagefindUI({
+						element: "#search",
+						showSubResults: true,
+						showImages: false,
+					});
+				};
+				document.head.appendChild(script);
 
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = "/pagefind/pagefind-ui.css";
-            document.head.appendChild(link);
-        }
-    });
-</script>
+				const link = document.createElement("link");
+				link.rel = "stylesheet";
+				link.href = "/pagefind/pagefind-ui.css";
+				document.head.appendChild(link);
+			}
+		});
+	</script>
+) : (
+	<p class="search-dev-note">Search available in production build</p>
+)}
 
 <style is:global>
     /* Customizing Pagefind UI */
@@ -48,5 +46,10 @@
     .pagefind-ui__result-excerpt {
         font-size: 13px;
         color: #666;
+    }
+    .search-dev-note {
+        font-size: 12px;
+        color: #666;
+        margin: 8px 0;
     }
 </style>

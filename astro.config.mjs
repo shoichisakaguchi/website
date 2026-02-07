@@ -18,6 +18,7 @@ export default defineConfig({
         markdoc(),
         sitemap()
     ],
+    imageService: 'compile',
     output: 'server',
     adapter: cloudflare(),
     site: 'https://rdrp.io'
