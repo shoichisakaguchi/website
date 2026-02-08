@@ -194,7 +194,7 @@ const isCalendarUpcoming = (() => {
                 rel="noopener noreferrer"
                 class="action-link discussion-link"
             >
-                Join discussion
+                Join Slack
             </a>
             {data.calendarUrl && isCalendarUpcoming && (
                 <a
@@ -217,7 +217,7 @@ const isCalendarUpcoming = (() => {
                 </a>
             )}
             {data.zoomUrl && !data.showZoomLink && !hasEventEnded && (
-                <span class="zoom-note">Zoom link available via Slack</span>
+                <span class="zoom-note">Add to Google Calendar to get the Zoom link.</span>
             )}
         </div>
 
