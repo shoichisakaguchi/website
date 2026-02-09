@@ -2,6 +2,7 @@ import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import { marked } from 'marked';
 import { getSortDate, sortEntriesByDateDesc } from '../utils/sortDate';
+import { formatDate } from '../utils/date';
 
 export async function GET(context: { site: URL }) {
     const posts = await getCollection('posts');
@@ -26,8 +27,25 @@ export async function GET(context: { site: URL }) {
     ).map((item) => ({
         title: `Journal Club: ${item.data.title}`,
         link: `/journal-club/${item.slug}/`,
-        pubDate: item.data.publishedDate!,
-        description: undefined,
+        pubDate: item.data.date,
+        description: (() => {
+            const speakerName = item.data.speakerName || item.data.speaker;
+            const speakerAffiliation = item.data.speakerAffiliation;
+            const speakerLine = speakerName
+                ? speakerAffiliation
+                    ? `${speakerName} (${speakerAffiliation})`
+                    : speakerName
+                : undefined;
+            const dateLine = formatDate(item.data.date);
+            return [
+                `<p><strong>Date:</strong> ${dateLine}</p>`,
+                speakerLine
+                    ? `<p><strong>Speaker:</strong> ${speakerLine}</p>`
+                    : undefined,
+            ]
+                .filter(Boolean)
+                .join('');
+        })(),
     }));
 
     const items = [...postItems, ...journalItems].sort(
