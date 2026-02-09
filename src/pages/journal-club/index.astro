@@ -1,13 +1,12 @@
 ---
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import { sortEntriesByDateDesc } from "../../utils/sortDate";
 
 export const prerender = true;
 
 const items = await getCollection("journal-club");
-const sortedItems = items.sort(
-    (a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf(),
-);
+const sortedItems = sortEntriesByDateDesc(items, "journal-club");
 
 // Helper to get speaker info (structured for two-line display)
 function getSpeakerInfo(data: typeof sortedItems[0]['data']): { name: string; affiliation: string | null } | null {

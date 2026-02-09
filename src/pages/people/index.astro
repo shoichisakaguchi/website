@@ -11,9 +11,13 @@ const summits = await getCollection("summits");
 
 // Build reverse index: personSlug -> [unique organizer years] (sorted descending)
 const organizerYearsMap = new Map<string, string[]>();
+const summitSlugByYear = new Map<string, string>();
 for (const summit of summits) {
 	const year = summit.data.year;
 	if (!year) continue;
+	if (!summitSlugByYear.has(year)) {
+		summitSlugByYear.set(year, summit.slug);
+	}
 	const organizers = summit.data.organizers ?? [];
 	for (const org of organizers) {
 		const personSlug = org.person;
@@ -254,15 +258,20 @@ const getGitHubLabel = (value?: string): string => {
 
 							{organizerYears.length > 0 && (
 								<div class="organizer-years">
-									{organizerYears.map((year) => (
-										<a
-											href={`/summits/rdrp-summit-${year}`}
-											class="year-badge"
-											aria-label={`Organizer · RdRp Summit ${year}`}
-										>
-											{year}
-										</a>
-									))}
+									{organizerYears.map((year) => {
+										const summitSlug = summitSlugByYear.get(year);
+										return summitSlug ? (
+											<a
+												href={`/summits/${summitSlug}`}
+												class="year-badge"
+												aria-label={`Organizer · RdRp Summit ${year}`}
+											>
+												{year}
+											</a>
+										) : (
+											<span class="year-badge">{year}</span>
+										);
+									})}
 								</div>
 							)}
 						</article>

@@ -2,14 +2,12 @@
 import { getCollection, getEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { type CollectionEntry } from 'astro:content';
+import { sortEntriesByDateDesc } from '../../utils/sortDate';
 
 export const prerender = true;
 
 const summits = await getCollection('summits');
-// Sort by year descending. Assuming year is a string "2024", but safely handle it.
-const sortedSummits = summits.sort((a, b) => {
-    return parseInt(b.data.year || '0') - parseInt(a.data.year || '0');
-});
+const sortedSummits = sortEntriesByDateDesc(summits, "summits");
 
 // Helper to get organizer name
 async function getOrganizerName(slug: string | undefined) {

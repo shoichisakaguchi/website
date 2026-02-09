@@ -6,6 +6,7 @@ import { getCollection, getEntry, type CollectionEntry } from "astro:content";
 import SummitDetail from "../components/SummitDetail.astro";
 import { formatDate } from "../utils/date";
 import { marked } from "marked";
+import { getSortDate, sortEntriesByDateDesc } from "../utils/sortDate";
 
 export const prerender = true;
 
@@ -13,11 +14,7 @@ export const prerender = true;
 const allSummits = await getCollection("summits");
 
 // Sort summits by year (descending) for the simple list
-const sortedSummits = [...allSummits].sort((a, b) => {
-	const yearA = parseInt(a.data.year || "0");
-	const yearB = parseInt(b.data.year || "0");
-	return yearB - yearA;
-});
+const sortedSummits = sortEntriesByDateDesc(allSummits, "summits");
 const summitInfo = await getEntry("summit", "info");
 
 let activeSummit: CollectionEntry<"summits"> | undefined;
@@ -46,17 +43,9 @@ if (!activeSummit) {
 
 // Strategy 4: Fallback to latest by date/year
 if (!activeSummit && allSummits.length > 0) {
-	activeSummit = allSummits.sort((a, b) => {
-		const dateA = a.data.startDate
-			? new Date(a.data.startDate).valueOf()
-			: 0;
-		const dateB = b.data.startDate
-			? new Date(b.data.startDate).valueOf()
-			: 0;
-		if (dateA !== dateB) return dateB - dateA;
-		// Fallback to year string comparison
-		return (b.data.year || "").localeCompare(a.data.year || "");
-	})[0];
+	activeSummit = [...allSummits].sort(
+		(a, b) => getSortDate("summits", b.data).valueOf() - getSortDate("summits", a.data).valueOf(),
+	)[0];
 }
 
 // Apply Phase Override if present AND not "Auto"

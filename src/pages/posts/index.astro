@@ -3,16 +3,12 @@ import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { formatDate } from "../../utils/date";
 import { marked } from "marked";
+import { sortEntriesByDateDesc } from "../../utils/sortDate";
 
 export const prerender = true;
 
 const posts = await getCollection("posts");
-const sortedPosts = posts.sort((a, b) => {
-	return (
-		new Date(b.data.publishedDate).valueOf() -
-		new Date(a.data.publishedDate).valueOf()
-	);
-});
+const sortedPosts = sortEntriesByDateDesc(posts, "posts");
 const postsWithExcerpt = sortedPosts.map((item) => ({
 	item,
 	excerptHtml: item.data.excerpt?.trim()

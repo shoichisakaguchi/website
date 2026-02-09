@@ -1,16 +1,13 @@
 ---
 import { getCollection } from "astro:content";
 import { formatDate } from "../utils/date";
+import { sortEntriesByDateDesc } from "../utils/sortDate";
 
 // Fetch posts (unified announcements + posts)
 const allPosts = await getCollection("posts");
 
 // Sort by date descending
-const sortedPosts = allPosts.sort(
-    (a, b) =>
-        new Date(b.data.publishedDate).valueOf() -
-        new Date(a.data.publishedDate).valueOf(),
-);
+const sortedPosts = sortEntriesByDateDesc(allPosts, "posts");
 
 // Take latest 3
 const latestPosts = sortedPosts.slice(0, 3);
