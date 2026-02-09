@@ -6,7 +6,6 @@ import { getSortDate, sortEntriesByDateDesc } from '../utils/sortDate';
 export async function GET(context: { site: URL }) {
     const posts = await getCollection('posts');
     const journalClub = await getCollection('journal-club');
-    const summits = await getCollection('summits');
 
     const postItems = sortEntriesByDateDesc(
         posts.filter((post) => post.data.publishedDate),
@@ -21,21 +20,17 @@ export async function GET(context: { site: URL }) {
         author: post.data.author || undefined,
     }));
 
-    const journalItems = sortEntriesByDateDesc(journalClub, 'journal-club').map((item) => ({
+    const journalItems = sortEntriesByDateDesc(
+        journalClub.filter((item) => item.data.publishedDate),
+        'journal-club',
+    ).map((item) => ({
         title: `Journal Club: ${item.data.title}`,
         link: `/journal-club/${item.slug}/`,
-        pubDate: getSortDate('journal-club', item.data),
+        pubDate: item.data.publishedDate!,
         description: undefined,
     }));
 
-    const summitItems = sortEntriesByDateDesc(summits, 'summits').map((item) => ({
-        title: `Summit: ${item.data.title}`,
-        link: `/summits/${item.slug}/`,
-        pubDate: getSortDate('summits', item.data),
-        description: item.data.description || item.data.intro || undefined,
-    }));
-
-    const items = [...postItems, ...journalItems, ...summitItems].sort(
+    const items = [...postItems, ...journalItems].sort(
         (a, b) => b.pubDate.valueOf() - a.pubDate.valueOf(),
     );
 

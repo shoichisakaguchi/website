@@ -161,6 +161,11 @@ export default config({
             schema: {
                 title: fields.slug({ name: { label: 'Paper Title/Topic' } }),
                 date: fields.date({ label: 'Date', validation: { isRequired: true } }),
+                publishedDate: fields.date({
+                    label: 'Published Date (RSS)',
+                    description: 'Published date for RSS feed. If empty, the post will not appear in RSS.',
+                    defaultValue: { kind: 'today' },
+                }),
                 isPinned: fields.checkbox({ label: 'Pin to top', defaultValue: false }),
                 speakerName: fields.text({ label: 'Speaker Name' }),
                 speakerAffiliation: fields.text({ label: 'Speaker Affiliation' }),

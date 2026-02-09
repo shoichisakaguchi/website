@@ -36,6 +36,7 @@ const journalClub = defineCollection({
     schema: z.object({
         title: z.string(),
         date: z.coerce.date(),
+        publishedDate: z.coerce.date().optional(),
         isPinned: z.boolean().default(false),
         // New structured speaker fields
         speakerName: z.string().optional(),
