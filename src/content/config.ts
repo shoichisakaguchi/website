@@ -152,9 +152,9 @@ const summit = defineCollection({
     schema: z.object({
         featuredSummit: z.string().optional(),
         overridePhase: z.enum(['Auto', 'Planning', 'Preview', 'Live', 'Archived']).optional().default('Auto'),
-        topMessagePlanning: z.any().optional(),
-        topMessageLive: z.any().optional(),
-        topMessageArchived: z.any().optional(),
+        topMessagePlanning: z.string().optional().or(z.literal('')),
+        topMessageLive: z.string().optional().or(z.literal('')),
+        topMessageArchived: z.string().optional().or(z.literal('')),
     }),
 });
 
