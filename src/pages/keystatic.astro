@@ -1,10 +1,7 @@
 ---
-import { makePage } from '@keystatic/astro/ui';
-import config from 'virtual:keystatic-config';
+import Keystatic from '@keystatic/astro/internal/keystatic-astro-page.astro';
 
 export const prerender = false;
-
-const Keystatic = makePage(config);
 ---
 
 <html lang="en">
@@ -14,6 +11,6 @@ const Keystatic = makePage(config);
     <title>rdrp.io admin</title>
   </head>
   <body>
-    <Keystatic client:only="react" />
+    <Keystatic />
   </body>
 </html>
