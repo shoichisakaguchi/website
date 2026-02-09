@@ -1,0 +1,61 @@
+---
+title: 'Phylogenetic Inference and Visualization: Community Insights'
+type: post
+publishedDate: 2026-02-09
+author: Shoichi
+tags:
+  - Phylogenetics
+  - Tools
+---
+In the rapidly evolving field of viral genomics, selecting the appropriate computational framework for phylogenetic analysis is as critical as the data itself. Following a recent [**Journal Club**](/journal-club/baltic-python-based-phylogenetic-tree-visualisation-module/) presentation, members of the RdRp Slack community engaged in a technical exchange that provided a snapshot of the current software landscape used by experts to reconstruct and visualize evolutionary histories.
+
+This post archives those recommendations, ranging from industry standards to niche libraries for specialized genomic architectures.
+
+### 1. Phylogenetic Tree Construction
+
+The discussion highlighted a clear distinction between rapid, maximum-likelihood (ML) heuristics for routine surveillance and rigorous Bayesian frameworks for complex evolutionary modeling.
+
+- **Routine & Rapid Inference:** **IQ-TREE 2** remains the community favorite for its speed and robust model selection. For real-time epidemiology, it is frequently paired with **TreeTime (Augur)** to generate time-resolved phylogenies.
+- **Deep Evolutionary Relationships:** When resolving deep nodes, **PhyloBayes** was noted for its ability to handle complex site-heterogeneous models.
+- **Phylodynamics & Reassortment:** **BEAST 1** and **BEAST 2** are the go-to frameworks for phylodynamic inference. Specifically, **BEAST 2** was highlighted for its specialized packages like **CoalRe**, which is essential for analyzing reassortment networks in multi-segmented viruses.
+
+| Tool | Category | Primary Use / Strengths | Link |
+| --- | --- | --- | --- |
+| IQ-TREE 2 | ML Inference | High-performance, automatic model selection | [Website](https://iqtree.github.io/) |
+| PhyML | ML Inference | Classical, well-validated ML approach | [Website](http://atgc.lirmm.fr/phyml) |
+| FastTree | ML Inference | Optimized for extremely large datasets | [Website](http://microbesonline.org/fasttree) |
+| MrBayes | Bayesian | Standard Bayesian MCMC inference | [Website](https://nbisweden.github.io/MrBayes/) |
+| PhyloBayes | Bayesian | Specialized for deep-level phylogenetics | [Website](http://www.phylobayes.org/) |
+| BEAST / BEAST 2 | Bayesian | Phylodynamics, molecular dating, reassortment | [Website](http://www.beast2.org/) |
+| TreeTime | Post-processing | ML-based temporal dating and Augur pipelines | [GitHub](https://github.com/neherlab/treetime) |
+
+---
+
+### 2. Visualization and Post-Processing
+
+Visualization remains a matter of both aesthetic preference and functional requirement (e.g., handling non-treelike evolution).
+
+- **Aesthetics:** **baltic** (Python) was highly recommended for producing publication-quality figures, though it carries a steeper learning curve.
+- **Interactivity:** For exploring Nextstrain-style JSON trees, **Auspice** is the standard. For visualizing complex reassortment networks, **IcyTree** remains a unique and vital web-based tool.
+- **Programmatic Integration:** **ggtree** (R) and **ete3** (Python) continue to be the workhorses for researchers integrating tree plotting into automated pipelines.
+
+| Tool | Type | Key Feature | Link |
+| --- | --- | --- | --- |
+| baltic | Python | Highly customizable, publication-ready plots | [GitHub](https://github.com/evogytis/baltic) |
+| ggtree | R | Seamless integration with the R/Tidyverse ecosystem | [Website](https://guangchuangyu.github.io/software/ggtree/) |
+| FigTree | Desktop GUI | Classic, user-friendly tree viewing/editing | [Website](http://tree.bio.ed.ac.uk/software/figtree/) |
+| iTOL | Web-based | Interactive, easy annotation of large trees | [Website](https://itol.embl.de/) |
+| Auspice | Web-based | Interactive viewer for Nextstrain datasets | [Website](https://auspice.us/) |
+| IcyTree | Web-based | Specialized for reassortment networks | [Website](https://icytree.org/) |
+| ete3 | Python | Comprehensive toolkit for tree manipulation | [Website](http://etetoolkit.org/) |
+| phylotree.hyphy.org | Web-based | Lightweight, interactive JS viewer | [Website](https://phylotree.hyphy.org/) |
+| phyTreeViz | Python | Minimalist plotting library | [GitHub](https://github.com/moshi4/phyTreeViz) |
+| TreeSwift | Processing | Ultra-fast tree traversal and manipulation | [GitHub](https://github.com/niemasd/TreeSwift) |
+| DendroPy | Processing | Professional-grade library for phylogenetic data | [Website](https://jeetsukumaran.github.io/DendroPy/) |
+| toytree | Python | Interactive plotting in Jupyter notebooks | [GitHub](https://github.com/eaton-lab/toytree) |
+
+---
+
+### Join the Community
+
+This summary represents only a fraction of the daily knowledge exchange within our community. If you are a virologist, bioinformatician, or student working with RNA viruses, consider joining our Slack to participate in these discussions in real-time.
