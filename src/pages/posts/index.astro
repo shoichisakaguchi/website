@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { formatDate } from "../../utils/date";
+import { marked } from "marked";
 
 export const prerender = true;
 
@@ -12,6 +13,12 @@ const sortedPosts = posts.sort((a, b) => {
 		new Date(a.data.publishedDate).valueOf()
 	);
 });
+const postsWithExcerpt = sortedPosts.map((item) => ({
+	item,
+	excerptHtml: item.data.excerpt?.trim()
+		? marked.parse(item.data.excerpt)
+		: null,
+}));
 
 function getTypeLabel(type: string | undefined): string {
 	return type === "announcement" ? "Announcement" : "Post";
@@ -24,7 +31,7 @@ function getTypeLabel(type: string | undefined): string {
 		<div class="content-wrapper">
 			<ul class="post-list">
 				{
-					sortedPosts.map((item) => (
+					postsWithExcerpt.map(({ item, excerptHtml }) => (
 						<li>
 							<div class="meta">
 								<span class="date">
@@ -40,8 +47,8 @@ function getTypeLabel(type: string | undefined): string {
 							>
 								{item.data.title}
 							</a>
-							{item.data.excerpt && (
-								<p class="excerpt">{item.data.excerpt}</p>
+							{excerptHtml && (
+								<div class="excerpt" set:html={excerptHtml} />
 							)}
 						</li>
 					))
@@ -121,5 +128,9 @@ function getTypeLabel(type: string | undefined): string {
 		color: var(--c-text-light, #666);
 		font-size: 0.95em;
 		line-height: 1.5;
+	}
+
+	.excerpt :global(p) {
+		margin: 0;
 	}
 </style>

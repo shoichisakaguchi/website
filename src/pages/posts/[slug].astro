@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { formatDate } from "../../utils/date";
 import CommunityFooter from "../../components/CommunityFooter.astro";
+import { marked } from "marked";
 
 export const prerender = true;
 
@@ -20,6 +21,9 @@ const { Content } = await item.render();
 const discussionLabel = item.data.discussionLabel || "Open discussion doc";
 const hasTags = item.data.tags && item.data.tags.length > 0;
 const hasDiscussion = item.data.discussionUrl && item.data.discussionUrl !== "";
+const excerptHtml = item.data.excerpt?.trim()
+  ? await marked.parse(item.data.excerpt)
+  : null;
 ---
 
 <Layout title={item.data.title}>
@@ -32,6 +36,7 @@ const hasDiscussion = item.data.discussionUrl && item.data.discussionUrl !== "";
         <time>{formatDate(item.data.publishedDate)}</time>
       </div>
       <h1 class="page-title">{item.data.title}</h1>
+      {excerptHtml && <div class="post-excerpt" set:html={excerptHtml} />}
     </header>
     <div class="content-wrapper">
       <article id="post-content">
@@ -112,6 +117,17 @@ const hasDiscussion = item.data.discussionUrl && item.data.discussionUrl !== "";
     margin-top: 40px;
     margin-bottom: 40px;
     text-align: center;
+  }
+
+  .post-excerpt {
+    margin-top: 12px;
+    font-size: 1.05em;
+    color: var(--c-text, #333);
+    text-align: left;
+  }
+
+  .post-excerpt :global(p) {
+    margin: 0;
   }
 
   .meta {

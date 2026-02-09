@@ -34,10 +34,18 @@ export default config({
                 }),
                 publishedDate: fields.date({ label: 'Published Date', validation: { isRequired: true } }),
                 author: fields.text({ label: 'Author', validation: { isRequired: true } }),
-                excerpt: fields.text({ label: 'Excerpt', description: 'Short summary for list page (optional)', multiline: true }),
+                excerpt: fields.text({
+                    label: 'Excerpt',
+                    description: 'Short summary for list page (optional). Markdown supported.',
+                    multiline: true,
+                }),
                 tags: fields.array(
                     fields.text({ label: 'Tag' }),
-                    { label: 'Tags', description: 'Recommend 3-5 tags' }
+                    {
+                        label: 'Tags',
+                        description: 'Recommend 3-5 tags',
+                        itemLabel: (props) => props.value || 'Tag',
+                    }
                 ),
                 discussionUrl: fields.url({ label: 'Discussion URL', description: 'Link to external discussion doc (Google Docs, Notion, etc.)' }),
                 discussionLabel: fields.text({ label: 'Discussion Link Label', description: 'Default: "Open discussion doc"' }),

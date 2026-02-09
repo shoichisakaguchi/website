@@ -1,5 +1,6 @@
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
+import { marked } from 'marked';
 
 export async function GET(context: { site: URL }) {
     const posts = await getCollection('posts');
@@ -10,7 +11,9 @@ export async function GET(context: { site: URL }) {
             title: post.data.title,
             link: `/posts/${post.slug}/`,
             pubDate: post.data.publishedDate,
-            description: post.data.excerpt,
+            description: post.data.excerpt
+                ? marked.parse(post.data.excerpt)
+                : undefined,
             author: post.data.author || undefined,
         }));
 
