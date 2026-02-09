@@ -5,6 +5,7 @@ import JournalClubHome from "../components/JournalClubHome.astro";
 import { getCollection, getEntry, type CollectionEntry } from "astro:content";
 import SummitDetail from "../components/SummitDetail.astro";
 import { formatDate } from "../utils/date";
+import { marked } from "marked";
 
 export const prerender = true;
 
@@ -74,6 +75,18 @@ if (
 }
 
 const currentPhase = activeSummit?.data.phase || "Planning";
+
+const topMessageMarkdown =
+	currentPhase === "Planning"
+		? summitInfo?.data?.topMessagePlanning
+		: currentPhase === "Live"
+			? summitInfo?.data?.topMessageLive
+			: currentPhase === "Archived"
+				? summitInfo?.data?.topMessageArchived
+				: undefined;
+const topMessageHtml = topMessageMarkdown
+	? await marked.parse(topMessageMarkdown)
+	: "";
 ---
 
 <Layout>
@@ -90,6 +103,14 @@ const currentPhase = activeSummit?.data.phase || "Planning";
 				<a href="/about" class="link-arrow">Read more &rarr;</a>
 			</div>
 		</section>
+
+		{topMessageHtml && (
+			<section class="top-message">
+				<div class="container">
+					<div class="markdown" set:html={topMessageHtml} />
+				</div>
+			</section>
+		)}
 
 		{
 			/*
@@ -268,6 +289,40 @@ const currentPhase = activeSummit?.data.phase || "Planning";
 	}
 	.button.primary:hover {
 		opacity: 0.9;
+	}
+
+	/* Top message (Markdown) */
+	.top-message {
+		padding: 28px 0 12px;
+	}
+
+	.top-message :global(p) {
+		margin: 0 0 12px;
+	}
+
+	.top-message :global(h1),
+	.top-message :global(h2),
+	.top-message :global(h3) {
+		margin: 16px 0 8px;
+	}
+
+	.top-message :global(table) {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 16px 0;
+		font-size: 0.95rem;
+	}
+
+	.top-message :global(th),
+	.top-message :global(td) {
+		border: 1px solid #d8dee4;
+		padding: 8px 10px;
+		text-align: left;
+		vertical-align: top;
+	}
+
+	.top-message :global(thead th) {
+		background: #f6f8fa;
 	}
 
 	/* Preview Specific */

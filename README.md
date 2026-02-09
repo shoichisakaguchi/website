@@ -29,6 +29,20 @@ npm run preview
 - Homepage is phase-driven via the `summit` singleton and featured summit.
 - Search indexing runs after build: `pagefind --site dist`.
 
+## Markdown Content
+- In Keystatic, posts, journal club entries, summits, and Summit Info messages are edited as Markdown source.
+- Tables should use standard Markdown table syntax for stability (RSS and future CSS changes).
+- Common patterns:
+```md
+| Column A | Column B |
+| --- | --- |
+| Value 1 | Value 2 |
+```
+Links: `[RdRp Summit](https://rdrp.io)`
+```bash
+echo "hello"
+```
+
 ## Images
 - People images: `src/assets/images/people/`
 - Summit heroes: `public/images/summits/hero/{slug}/`

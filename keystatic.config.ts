@@ -1,6 +1,61 @@
 // keystatic.config.ts
 import { config, fields, collection, singleton } from '@keystatic/core';
+import { Field } from '@keystar/ui/field';
+import { TextArea } from '@keystar/ui/text-field';
+import { createElement } from 'react';
 import { JOURNAL_CLUB_TIMEZONE_OPTIONS_WITH_LEGACY } from './src/lib/journalClubTimezones';
+
+const textDecoder = new TextDecoder();
+const textEncoder = new TextEncoder();
+
+const markdownSource = ({
+    label,
+    description,
+    extension = 'mdoc',
+}: {
+    label: string;
+    description?: string;
+    extension?: 'mdoc' | 'md';
+}) => ({
+    kind: 'form' as const,
+    formKind: 'content' as const,
+    contentExtension: `.${extension}`,
+    defaultValue() {
+        return '';
+    },
+    Input(props: { value: string; onChange: (value: string) => void; autoFocus: boolean }) {
+        return createElement(
+            Field,
+            { label, description },
+            (renderProps: Record<string, unknown>) =>
+                createElement(TextArea, {
+                    ...renderProps,
+                    value: props.value,
+                    onChange: props.onChange,
+                    autoFocus: props.autoFocus,
+                })
+        );
+    },
+    parse(_: unknown, { content }: { content: Uint8Array | undefined }) {
+        return content ? textDecoder.decode(content) : '';
+    },
+    serialize(value: string) {
+        return {
+            value: undefined,
+            content: textEncoder.encode(value ?? ''),
+            other: new Map(),
+            external: new Map(),
+        };
+    },
+    validate(value: string) {
+        return value ?? '';
+    },
+    reader: {
+        parse(_: unknown, { content }: { content: Uint8Array | undefined }) {
+            return content ? textDecoder.decode(content) : '';
+        },
+    },
+});
 
 export default config({
     ui: {
@@ -49,12 +104,9 @@ export default config({
                 ),
                 discussionUrl: fields.url({ label: 'Discussion URL', description: 'Link to external discussion doc (Google Docs, Notion, etc.)' }),
                 discussionLabel: fields.text({ label: 'Discussion Link Label', description: 'Default: "Open discussion doc"' }),
-                content: fields.document({
-                    label: 'Content',
-                    formatting: true,
-                    dividers: true,
-                    links: true,
-                    images: true,
+                content: markdownSource({
+                    label: 'Content (Markdown)',
+                    description: 'Write Markdown source. Tables and code blocks are supported.',
                 }),
             },
         }),
@@ -159,12 +211,9 @@ export default config({
                 calendarUrl: fields.url({ label: 'Google Calendar URL' }),
                 zoomUrl: fields.url({ label: 'Zoom URL' }),
                 showZoomLink: fields.checkbox({ label: 'Show Zoom Link', defaultValue: false }),
-                content: fields.document({
-                    label: 'Content',
-                    formatting: true,
-                    dividers: true,
-                    links: true,
-                    images: true,
+                content: markdownSource({
+                    label: 'Content (Markdown)',
+                    description: 'Write Markdown source. Tables and code blocks are supported.',
                 }),
             },
         }),
@@ -310,13 +359,9 @@ export default config({
                 // ─────────────────────────────────────────────────────────────
                 // 7. Objectives & Outcomes (Content Field)
                 // ─────────────────────────────────────────────────────────────
-                summary: fields.document({
-                    label: 'Objectives & Outcomes',
-                    description: 'The main content section describing objectives, outcomes, and detailed information.',
-                    formatting: true,
-                    dividers: true,
-                    links: true,
-                    images: true,
+                summary: markdownSource({
+                    label: 'Objectives & Outcomes (Markdown)',
+                    description: 'Write Markdown source. Tables and code blocks are supported.',
                 }),
 
                 // ─────────────────────────────────────────────────────────────
@@ -422,23 +467,20 @@ export default config({
                     ],
                     defaultValue: 'Auto',
                 }),
-                topMessagePlanning: fields.document({
-                    label: 'Planning Message',
-                    description: 'Shown when in Planning phase',
-                    formatting: true,
-                    links: true,
+                topMessagePlanning: fields.text({
+                    label: 'Planning Message (Markdown)',
+                    description: 'Shown when in Planning phase. Write Markdown source.',
+                    multiline: true,
                 }),
-                topMessageLive: fields.document({
-                    label: 'Live Message',
-                    description: 'Shown when in Live phase',
-                    formatting: true,
-                    links: true,
+                topMessageLive: fields.text({
+                    label: 'Live Message (Markdown)',
+                    description: 'Shown when in Live phase. Write Markdown source.',
+                    multiline: true,
                 }),
-                topMessageArchived: fields.document({
-                    label: 'Archived Message',
-                    description: 'Shown when in Archived phase',
-                    formatting: true,
-                    links: true,
+                topMessageArchived: fields.text({
+                    label: 'Archived Message (Markdown)',
+                    description: 'Shown when in Archived phase. Write Markdown source.',
+                    multiline: true,
                 }),
             },
         }),
