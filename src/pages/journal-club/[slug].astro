@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { JOURNAL_CLUB_TIMEZONE_DISPLAY } from '../../lib/journalClubTimezones';
+import { resolveDescription, resolveOgImage } from '../../lib/og';
 
 export const prerender = true;
 
@@ -161,9 +162,25 @@ const isCalendarUpcoming = (() => {
     endOfDay.setUTCHours(23, 59, 59, 999);
     return now < endOfDay.getTime();
 })();
+
+const metaDescription = resolveDescription({
+    body: item.body,
+    fallback: 'Upcoming RNA Virus Journal Club session.',
+});
+
+const ogImage = resolveOgImage({
+    image: data.ogImage,
+    alt: data.ogImageAlt,
+    category: 'journal-club',
+});
 ---
 
-<Layout title={item.data.title}>
+<Layout
+    title={item.data.title}
+    description={metaDescription}
+    ogImage={ogImage}
+    ogType="article"
+>
 	<div class="container page-content">
 		<div class="back-link">
 			<a href="/journal-club">← Back to Journal Club</a>

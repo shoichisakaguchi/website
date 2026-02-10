@@ -94,6 +94,17 @@ export default config({
                     description: 'Short summary for list page (optional). Markdown supported.',
                     multiline: true,
                 }),
+                ogImage: fields.image({
+                    label: 'OG Image',
+                    description: 'Optional social share image (1200x630 recommended).',
+                    directory: 'public/images/og/posts',
+                    publicPath: '/images/og/posts',
+                    validation: { isRequired: false },
+                }),
+                ogImageAlt: fields.text({
+                    label: 'OG Image Alt Text',
+                    description: 'Optional alt text for the OG image.',
+                }),
                 tags: fields.array(
                     fields.text({ label: 'Tag' }),
                     {
@@ -174,6 +185,17 @@ export default config({
                     directory: 'public/images/journal_club/speakers',
                     publicPath: '/images/journal_club/speakers',
                     validation: { isRequired: false },
+                }),
+                ogImage: fields.image({
+                    label: 'OG Image',
+                    description: 'Optional social share image (1200x630 recommended).',
+                    directory: 'public/images/og/journal-club',
+                    publicPath: '/images/og/journal-club',
+                    validation: { isRequired: false },
+                }),
+                ogImageAlt: fields.text({
+                    label: 'OG Image Alt Text',
+                    description: 'Optional alt text for the OG image.',
                 }),
                 chairs: fields.array(
                     fields.object({
@@ -258,6 +280,17 @@ export default config({
                     publicPath: '/images/summits/hero',
                 }),
                 description: fields.text({ label: 'Description (OGP/Card)', multiline: true }),
+                ogImage: fields.image({
+                    label: 'OG Image',
+                    description: 'Optional social share image (1200x630 recommended).',
+                    directory: 'public/images/og/summits',
+                    publicPath: '/images/og/summits',
+                    validation: { isRequired: false },
+                }),
+                ogImageAlt: fields.text({
+                    label: 'OG Image Alt Text',
+                    description: 'Optional alt text for the OG image.',
+                }),
                 phase: fields.select({
                     label: 'Phase (Editor Only)',
                     description: 'Controls which sections are shown and how the page behaves.',

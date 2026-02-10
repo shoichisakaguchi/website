@@ -2,20 +2,33 @@
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import BaseHead from "../components/BaseHead.astro";
+import type { OgImage } from "../lib/og";
 import "../styles/global.css";
 export interface Props {
 	title?: string;
 	description?: string;
 	image?: string;
+	ogImage?: OgImage;
+	ogType?: string;
+	canonicalUrl?: string | URL;
+	twitterCard?: string;
 }
 
-const { title, description, image } = Astro.props;
+const { title, description, image, ogImage, ogType, canonicalUrl, twitterCard } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={title} description={description} image={image} />
+		<BaseHead
+			title={title}
+			description={description}
+			image={image}
+			ogImage={ogImage}
+			ogType={ogType}
+			canonicalUrl={canonicalUrl}
+			twitterCard={twitterCard}
+		/>
 	</head>
 	<body>
 		<Header />

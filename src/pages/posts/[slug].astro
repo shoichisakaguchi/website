@@ -4,6 +4,7 @@ import Layout from "../../layouts/Layout.astro";
 import { formatDate } from "../../utils/date";
 import CommunityFooter from "../../components/CommunityFooter.astro";
 import { marked } from "marked";
+import { resolveDescription, resolveOgImage } from "../../lib/og";
 
 export const prerender = true;
 
@@ -24,9 +25,23 @@ const hasDiscussion = item.data.discussionUrl && item.data.discussionUrl !== "";
 const excerptHtml = item.data.excerpt?.trim()
   ? await marked.parse(item.data.excerpt)
   : null;
+const metaDescription = resolveDescription({
+  excerpt: item.data.excerpt,
+  body: item.body,
+});
+const ogImage = resolveOgImage({
+  image: item.data.ogImage,
+  alt: item.data.ogImageAlt,
+  category: "posts",
+});
 ---
 
-<Layout title={item.data.title}>
+<Layout
+  title={item.data.title}
+  description={metaDescription}
+  ogImage={ogImage}
+  ogType="article"
+>
   <div class="container page-content">
     <div class="back-link">
       <a href="/posts">&larr; Back to posts</a>

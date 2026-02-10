@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import SummitDetail from "../../components/SummitDetail.astro";
+import { resolveDescription, resolveOgImage } from "../../lib/og";
 
 export const prerender = true;
 
@@ -14,12 +15,24 @@ export async function getStaticPaths() {
 }
 
 const { item } = Astro.props;
+const metaDescription = resolveDescription({
+  description: item.data.description,
+  excerpt: item.data.intro,
+  body: item.body,
+  fallback: "RdRp Summit community event.",
+});
+const ogImage = resolveOgImage({
+  image: item.data.ogImage,
+  alt: item.data.ogImageAlt,
+  category: "summits",
+});
 ---
 
 <Layout
   title={item.data.title}
-  description={item.data.description}
-  image={item.data.heroImage}
+  description={metaDescription}
+  ogImage={ogImage}
+  ogType="article"
 >
   <div class="page-content" data-pagefind-body>
     <SummitDetail item={item} variant="summit" />

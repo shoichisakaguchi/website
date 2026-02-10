@@ -9,6 +9,8 @@ const posts = defineCollection({
         publishedDate: z.coerce.date(),
         author: z.string(),
         excerpt: z.string().optional(),
+        ogImage: z.string().optional().or(z.literal('')),
+        ogImageAlt: z.string().optional().or(z.literal('')),
         tags: z.array(z.string()).optional(),
         discussionUrl: z.string().url().optional().or(z.literal('')),
         discussionLabel: z.string().optional(),
@@ -42,6 +44,8 @@ const journalClub = defineCollection({
         speakerName: z.string().optional(),
         speakerAffiliation: z.string().optional(),
         speaker_image: z.string().optional().or(z.literal('')),
+        ogImage: z.string().optional().or(z.literal('')),
+        ogImageAlt: z.string().optional().or(z.literal('')),
         chairs: z.array(z.object({
             id: z.string().optional().or(z.literal('')),
             name: z.string(),
@@ -73,6 +77,8 @@ const summits = defineCollection({
     schema: z.object({
         title: z.string(),
         heroImage: z.string().optional(),
+        ogImage: z.string().optional().or(z.literal('')),
+        ogImageAlt: z.string().optional().or(z.literal('')),
         description: z.string().optional(),
         intro: z.string().optional(),
         tags: z.array(z.string()).optional(),

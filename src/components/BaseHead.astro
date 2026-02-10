@@ -1,19 +1,38 @@
 ---
+import type { OgImage } from "../lib/og";
+import { DEFAULT_DESCRIPTION, resolveOgImage } from "../lib/og";
+
 export interface Props {
     title?: string;
     description?: string;
     image?: string;
+    ogImage?: OgImage;
+    ogType?: string;
+    canonicalUrl?: string | URL;
+    twitterCard?: string;
 }
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = Astro.props.canonicalUrl
+    ? new URL(
+        typeof Astro.props.canonicalUrl === "string"
+            ? Astro.props.canonicalUrl
+            : Astro.props.canonicalUrl.toString(),
+        Astro.site
+    )
+    : new URL(Astro.url.pathname, Astro.site);
 
 const {
     title = "rdrp.io",
-    description = "The global hub for RdRp research and collaboration.",
-    image = "/og-image.png",
+    description = DEFAULT_DESCRIPTION,
+    image,
+    ogImage,
+    ogType = "website",
+    twitterCard = "summary_large_image",
 } = Astro.props;
 
 const fullTitle = title === "rdrp.io" ? title : `${title} | rdrp.io`;
+const resolvedOgImage = ogImage ?? resolveOgImage({ image, category: "default" });
+const ogImageUrl = new URL(resolvedOgImage.url, Astro.site);
 ---
 
 <!-- Global Metadata -->
@@ -40,15 +59,19 @@ const fullTitle = title === "rdrp.io" ? title : `${title} | rdrp.io`;
 
 <!-- Open Graph / Facebook -->
 <meta property="og:site_name" content="rdrp.io" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content={Astro.url} />
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={canonicalURL} />
 <meta property="og:title" content={fullTitle} />
 <meta property="og:description" content={description} />
-<meta property="og:image" content={new URL(image, Astro.url)} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:image:width" content={resolvedOgImage.width} />
+<meta property="og:image:height" content={resolvedOgImage.height} />
+{resolvedOgImage.alt && <meta property="og:image:alt" content={resolvedOgImage.alt} />}
 
 <!-- Twitter -->
-<meta property="twitter:card" content="summary_large_image" />
-<meta property="twitter:url" content={Astro.url} />
+<meta property="twitter:card" content={twitterCard} />
+<meta property="twitter:url" content={canonicalURL} />
 <meta property="twitter:title" content={fullTitle} />
 <meta property="twitter:description" content={description} />
-<meta property="twitter:image" content={new URL(image, Astro.url)} />
+<meta property="twitter:image" content={ogImageUrl} />
+{resolvedOgImage.alt && <meta property="twitter:image:alt" content={resolvedOgImage.alt} />}
