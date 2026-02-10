@@ -15,6 +15,8 @@ export const OG_IMAGE_DIMENSIONS = {
 export const DEFAULT_DESCRIPTION =
   'The global hub for RdRp research and collaboration.';
 
+export const DEFAULT_SITE_LABEL = 'rdrp.io';
+
 const OG_CATEGORY_DEFAULTS: Record<OgCategory, string> = {
   posts: '/og/posts.png',
   'journal-club': '/og/journal-club.png',
@@ -48,6 +50,25 @@ const truncate = (value: string, maxLength: number): string => {
   return `${value.slice(0, Math.max(0, maxLength - 1)).trim()}…`;
 };
 
+const sanitizeOgText = (value: string): string => {
+  return value.replace(/\s+/g, ' ').trim();
+};
+
+export const buildDynamicOgUrl = ({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string;
+}): string => {
+  const params = new URLSearchParams();
+  params.set('title', sanitizeOgText(title));
+  if (description) {
+    params.set('description', sanitizeOgText(description));
+  }
+  return `/og.png?${params.toString()}`;
+};
+
 export const resolveDescription = ({
   description,
   excerpt,
@@ -74,10 +95,16 @@ export const resolveOgImage = ({
   image,
   alt,
   category = 'default',
+  title,
+  description,
+  useDynamic = false,
 }: {
   image?: string | null;
   alt?: string | null;
   category?: OgCategory;
+  title?: string | null;
+  description?: string | null;
+  useDynamic?: boolean;
 }): OgImage => {
   const trimmedImage = image?.trim();
   if (trimmedImage) {
@@ -85,7 +112,19 @@ export const resolveOgImage = ({
       url: normalizePublicPath(trimmedImage),
       width: OG_IMAGE_DIMENSIONS.width,
       height: OG_IMAGE_DIMENSIONS.height,
-      alt: alt?.trim() || undefined,
+      alt: alt?.trim() || title?.trim() || undefined,
+    };
+  }
+
+  if (useDynamic && (title || description)) {
+    return {
+      url: buildDynamicOgUrl({
+        title: title?.trim() || DEFAULT_SITE_LABEL,
+        description: description?.trim() || undefined,
+      }),
+      width: OG_IMAGE_DIMENSIONS.width,
+      height: OG_IMAGE_DIMENSIONS.height,
+      alt: alt?.trim() || title?.trim() || undefined,
     };
   }
 
