@@ -175,6 +175,24 @@ export default config({
                     publicPath: '/images/journal_club/speakers',
                     validation: { isRequired: false },
                 }),
+                chairs: fields.array(
+                    fields.object({
+                        id: fields.text({
+                            label: 'ID (optional)',
+                            description: 'Future directory reference (Phase 2). Leave blank for now.',
+                        }),
+                        name: fields.text({ label: 'Name', validation: { isRequired: true } }),
+                        affiliation: fields.text({
+                            label: 'Affiliation',
+                            description: 'Keep it short (e.g., OSU, OMPU, Cambridge) to avoid long lines.',
+                            validation: { isRequired: true },
+                        }),
+                    }),
+                    {
+                        label: 'Chairs',
+                        itemLabel: (props) => props.fields.name.value || 'Chair',
+                    }
+                ),
                 // User-friendly time input fields (recommended)
                 localDate: fields.date({
                     label: 'Local Date',

@@ -49,7 +49,27 @@ function getAllLinks(): { label: string; url: string; isPrimary: boolean }[] {
 
 const speakerInfo = getSpeakerInfo();
 const allLinks = getAllLinks();
-const speakerImage = data.speaker_image && data.speaker_image.trim() ? data.speaker_image.trim() : null;
+const speakerImage = (() => {
+    if (!data.speaker_image || !data.speaker_image.trim()) {
+        return null;
+    }
+    const value = data.speaker_image.trim();
+    return value.startsWith('/')
+        ? value
+        : `/images/journal_club/speakers/${value}`;
+})();
+const chairs = Array.isArray(data.chairs)
+    ? data.chairs.filter(chair => chair?.name && chair?.affiliation)
+    : [];
+
+function formatChairsLine(): string | null {
+    if (chairs.length === 0) {
+        return null;
+    }
+    return chairs
+        .map(chair => `${chair.name} (${chair.affiliation})`)
+        .join(' · ');
+}
 
 // Helper to get UTC datetime from local or existing UTC field
 function getStartDateTimeUtc(): string | null {
@@ -172,6 +192,13 @@ const isCalendarUpcoming = (() => {
                             <span class="speaker-affiliation">{speakerInfo.affiliation}</span>
                         )}
                     </div>
+                </div>
+            )}
+
+            {formatChairsLine() && (
+                <div class="chairs-inline">
+                    <span class="chairs-label">Chaired by</span>{' '}
+                    <span class="chairs-text">{formatChairsLine()}</span>
                 </div>
             )}
         </header>
@@ -307,6 +334,23 @@ const isCalendarUpcoming = (() => {
         display: block;
         font-size: 0.95em;
         color: var(--c-text-secondary, #666);
+    }
+
+    .chairs-inline {
+        margin-top: 8px;
+        margin-bottom: 8px;
+        text-align: center;
+        font-size: 0.85em;
+        line-height: 1.5;
+        color: var(--c-text-secondary, #666);
+    }
+
+    .chairs-label {
+        font-weight: 500;
+    }
+
+    .chairs-text {
+        font-weight: 400;
     }
 
     /* Actions Section (consolidated) */

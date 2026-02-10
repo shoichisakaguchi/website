@@ -42,6 +42,11 @@ const journalClub = defineCollection({
         speakerName: z.string().optional(),
         speakerAffiliation: z.string().optional(),
         speaker_image: z.string().optional().or(z.literal('')),
+        chairs: z.array(z.object({
+            id: z.string().optional().or(z.literal('')),
+            name: z.string(),
+            affiliation: z.string(),
+        })).optional(),
         // User-friendly time input fields
         localDate: z.coerce.date().optional(),
         localTime: z.string().optional().or(z.literal('')),
