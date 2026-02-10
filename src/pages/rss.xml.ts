@@ -59,11 +59,20 @@ export async function GET(context: { site: URL }) {
                     ? `${speakerName} (${speakerAffiliation})`
                     : speakerName
                 : undefined;
+            const chairsLine = Array.isArray(item.data.chairs)
+                ? item.data.chairs
+                      .filter((chair) => chair?.name && chair?.affiliation)
+                      .map((chair) => `${chair.name} (${chair.affiliation})`)
+                      .join(' · ')
+                : '';
             const dateLine = formatDate(item.data.date);
             return [
                 `<p><strong>Date:</strong> ${dateLine}</p>`,
                 speakerLine
                     ? `<p><strong>Speaker:</strong> ${speakerLine}</p>`
+                    : undefined,
+                chairsLine
+                    ? `<p><strong>Chaired by:</strong> ${chairsLine}</p>`
                     : undefined,
             ]
                 .filter(Boolean)
