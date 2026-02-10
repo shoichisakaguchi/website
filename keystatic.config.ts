@@ -88,7 +88,7 @@ export default config({
                     defaultValue: 'announcement',
                 }),
                 publishedDate: fields.date({ label: 'Published Date', validation: { isRequired: true } }),
-                author: fields.text({ label: 'Author (legacy)', description: 'Optional fallback if credits are not set.' }),
+                author: fields.ignored(),
                 credits: fields.array(
                     fields.object({
                         role: fields.select({
@@ -106,10 +106,19 @@ export default config({
                     }),
                     {
                         label: 'Credits',
-                        itemLabel: (props) => {
-                            const role = props.value?.role || 'author';
-                            const name = props.value?.name || 'Name';
-                            return `${role}: ${name}`;
+                        itemLabel: (value) => {
+                            const roleValue = value?.fields?.role?.value || 'author';
+                            const roleLabel = (
+                                {
+                                    author: 'Author',
+                                    summary: 'Summary by',
+                                    editor: 'Editor',
+                                    translator: 'Translator',
+                                    curator: 'Curator',
+                                } as const
+                            )[roleValue] || 'Author';
+                            const name = value?.fields?.name?.value || 'Name';
+                            return `${roleLabel}: ${name}`;
                         },
                     },
                 ),
