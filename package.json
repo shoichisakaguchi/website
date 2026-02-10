@@ -16,7 +16,7 @@
     "@astrojs/sitemap": "^3.6.1",
     "@keystatic/astro": "^5.0.6",
     "@keystatic/core": "^0.5.48",
-    "@vercel/og": "^0.6.4",
+    "@cloudflare/pages-plugin-vercel-og": "^0.1.2",
     "astro": "^5.16.7",
     "marked": "^17.0.1",
     "react": "^19.2.3",
