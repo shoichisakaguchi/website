@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import { formatDate } from "../../utils/date";
 import CommunityFooter from "../../components/CommunityFooter.astro";
+import TypeBadge from "../../components/TypeBadge.astro";
 import { marked } from "marked";
 import { resolveDescription, resolveOgImage } from "../../lib/og";
 
@@ -68,6 +69,7 @@ const ogImage = resolveOgImage({
     <header class="post-header">
       <div class="meta">
         <time>{formatDate(item.data.publishedDate)}</time>
+        <TypeBadge type={item.data.type} />
       </div>
       <h1 class="page-title">{item.data.title}</h1>
       {excerptHtml && <div class="post-excerpt" set:html={excerptHtml} />}
@@ -173,6 +175,10 @@ const ogImage = resolveOgImage({
   .meta {
     color: var(--c-text-light, #666);
     margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
   }
 
   .content-wrapper {

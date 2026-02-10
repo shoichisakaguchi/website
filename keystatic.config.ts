@@ -83,6 +83,7 @@ export default config({
                     label: 'Type',
                     options: [
                         { label: 'Announcement', value: 'announcement' },
+                        { label: 'Event', value: 'event' },
                         { label: 'Post', value: 'post' },
                     ],
                     defaultValue: 'announcement',

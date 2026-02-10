@@ -5,7 +5,7 @@ import { defineCollection, z } from 'astro:content';
 const posts = defineCollection({
     schema: z.object({
         title: z.string(),
-        type: z.enum(['announcement', 'post']).optional().default('post'),
+        type: z.enum(['announcement', 'post', 'event']).optional().default('post'),
         publishedDate: z.coerce.date(),
         author: z.string().optional(),
         credits: z.array(z.object({

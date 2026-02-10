@@ -1,0 +1,36 @@
+---
+const { type } = Astro.props as { type?: string };
+
+const normalizedType = (type || "post").toLowerCase();
+const label =
+	normalizedType === "announcement"
+		? "Announcement"
+		: normalizedType === "event"
+		? "Event"
+		: "Post";
+---
+
+<span class={`type-badge ${normalizedType}`}>{label}</span>
+
+<style>
+	.type-badge {
+		font-size: 10px;
+		padding: 1px 6px;
+		border-radius: 4px;
+		text-transform: uppercase;
+		font-weight: 600;
+		letter-spacing: 0.02em;
+		background-color: #f0f0f0;
+		color: #555;
+	}
+
+	.type-badge.announcement {
+		background-color: #e6f6ff;
+		color: #0070f3;
+	}
+
+	.type-badge.event {
+		background-color: #f2994a;
+		color: #1a1a1a;
+	}
+</style>
