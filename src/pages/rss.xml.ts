@@ -27,6 +27,21 @@ function getRssPubDate(data: { publishedDate?: unknown; date?: unknown }): Date 
     );
 }
 
+function getPostAuthor(data: {
+    author?: string;
+    credits?: Array<{ role: string; name: string }>;
+}): string | undefined {
+    if (Array.isArray(data.credits) && data.credits.length > 0) {
+        const authorCredit = data.credits.find((credit) => credit.role === 'author');
+        if (authorCredit?.name) return authorCredit.name;
+        const summaryCredit = data.credits.find((credit) => credit.role === 'summary');
+        if (summaryCredit?.name) return summaryCredit.name;
+        const first = data.credits[0];
+        if (first?.name) return first.name;
+    }
+    return data.author || undefined;
+}
+
 export async function GET(context: { site: URL }) {
     const posts = await getCollection('posts');
     const journalClub = await getCollection('journal-club');
@@ -41,7 +56,7 @@ export async function GET(context: { site: URL }) {
         description: post.data.excerpt
             ? marked.parse(post.data.excerpt)
             : undefined,
-        author: post.data.author || undefined,
+        author: getPostAuthor(post.data),
     }));
 
     const journalItems = sortEntriesByDateDesc(

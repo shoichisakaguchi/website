@@ -88,7 +88,31 @@ export default config({
                     defaultValue: 'announcement',
                 }),
                 publishedDate: fields.date({ label: 'Published Date', validation: { isRequired: true } }),
-                author: fields.text({ label: 'Author', validation: { isRequired: true } }),
+                author: fields.text({ label: 'Author (legacy)', description: 'Optional fallback if credits are not set.' }),
+                credits: fields.array(
+                    fields.object({
+                        role: fields.select({
+                            label: 'Role',
+                            options: [
+                                { label: 'Author', value: 'author' },
+                                { label: 'Summary by', value: 'summary' },
+                                { label: 'Editor', value: 'editor' },
+                                { label: 'Translator', value: 'translator' },
+                                { label: 'Curator', value: 'curator' },
+                            ],
+                            defaultValue: 'author',
+                        }),
+                        name: fields.text({ label: 'Name', validation: { isRequired: true } }),
+                    }),
+                    {
+                        label: 'Credits',
+                        itemLabel: (props) => {
+                            const role = props.value?.role || 'author';
+                            const name = props.value?.name || 'Name';
+                            return `${role}: ${name}`;
+                        },
+                    },
+                ),
                 excerpt: fields.text({
                     label: 'Excerpt',
                     description: 'Short summary for list page (optional). Markdown supported.',

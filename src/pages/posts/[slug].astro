@@ -22,6 +22,22 @@ const { Content } = await item.render();
 const discussionLabel = item.data.discussionLabel || "Open discussion doc";
 const hasTags = item.data.tags && item.data.tags.length > 0;
 const hasDiscussion = item.data.discussionUrl && item.data.discussionUrl !== "";
+const hasCredits = Array.isArray(item.data.credits) && item.data.credits.length > 0;
+const creditLabelMap: Record<string, string> = {
+  author: "Author",
+  summary: "Summary by",
+  editor: "Editor",
+  translator: "Translator",
+  curator: "Curator",
+};
+const displayCredits = hasCredits
+  ? item.data.credits!.map((credit) => ({
+      label: creditLabelMap[credit.role] || "Author",
+      name: credit.name,
+    }))
+  : item.data.author
+    ? [{ label: "Author", name: item.data.author }]
+    : [];
 const excerptHtml = item.data.excerpt?.trim()
   ? await marked.parse(item.data.excerpt)
   : null;
@@ -62,9 +78,15 @@ const ogImage = resolveOgImage({
       </article>
 
       <footer class="post-footer">
-        <div class="author">
-          <span class="label">Author:</span> {item.data.author}
-        </div>
+        {displayCredits.length > 0 && (
+          <div class="author">
+            {displayCredits.map((credit) => (
+              <div class="credit-line">
+                <span class="label">{credit.label}:</span> {credit.name}
+              </div>
+            ))}
+          </div>
+        )}
 
         {hasDiscussion && (
           <div class="discussion">
@@ -186,6 +208,10 @@ const ogImage = resolveOgImage({
 
   .author .label {
     color: var(--c-text-light, #666);
+  }
+
+  .credit-line + .credit-line {
+    margin-top: 6px;
   }
 
   .discussion {

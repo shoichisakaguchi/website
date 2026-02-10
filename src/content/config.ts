@@ -7,7 +7,11 @@ const posts = defineCollection({
         title: z.string(),
         type: z.enum(['announcement', 'post']).optional().default('post'),
         publishedDate: z.coerce.date(),
-        author: z.string(),
+        author: z.string().optional(),
+        credits: z.array(z.object({
+            role: z.enum(['author', 'summary', 'editor', 'translator', 'curator']).default('author'),
+            name: z.string(),
+        })).optional(),
         excerpt: z.string().optional(),
         ogImage: z.string().optional().or(z.literal('')),
         ogImageAlt: z.string().optional().or(z.literal('')),
