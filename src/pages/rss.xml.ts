@@ -4,6 +4,29 @@ import { marked } from 'marked';
 import { getSortDate, sortEntriesByDateDesc } from '../utils/sortDate';
 import { formatDate } from '../utils/date';
 
+function toRssDate(value: unknown): Date | undefined {
+    if (value instanceof Date && !Number.isNaN(value.valueOf())) {
+        return value;
+    }
+    if (typeof value === 'string') {
+        const trimmed = value.trim();
+        if (!trimmed) return undefined;
+        const parsed = new Date(trimmed);
+        if (!Number.isNaN(parsed.valueOf())) {
+            return parsed;
+        }
+    }
+    return undefined;
+}
+
+function getRssPubDate(data: { publishedDate?: unknown; date?: unknown }): Date {
+    return (
+        toRssDate(data.publishedDate) ||
+        toRssDate(data.date) ||
+        new Date('1970-01-01T00:00:00Z')
+    );
+}
+
 export async function GET(context: { site: URL }) {
     const posts = await getCollection('posts');
     const journalClub = await getCollection('journal-club');
@@ -14,7 +37,7 @@ export async function GET(context: { site: URL }) {
     ).map((post) => ({
         title: post.data.title,
         link: `/posts/${post.slug}/`,
-        pubDate: post.data.publishedDate,
+        pubDate: getRssPubDate(post.data),
         description: post.data.excerpt
             ? marked.parse(post.data.excerpt)
             : undefined,
@@ -22,12 +45,12 @@ export async function GET(context: { site: URL }) {
     }));
 
     const journalItems = sortEntriesByDateDesc(
-        journalClub.filter((item) => item.data.publishedDate),
+        journalClub,
         'journal-club',
     ).map((item) => ({
         title: `Journal Club: ${item.data.title}`,
         link: `/journal-club/${item.slug}/`,
-        pubDate: item.data.date,
+        pubDate: getRssPubDate(item.data),
         description: (() => {
             const speakerName = item.data.speakerName || item.data.speaker;
             const speakerAffiliation = item.data.speakerAffiliation;
