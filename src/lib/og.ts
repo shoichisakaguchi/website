@@ -57,14 +57,19 @@ const sanitizeOgText = (value: string): string => {
 export const buildDynamicOgUrl = ({
   title,
   description,
+  logo,
 }: {
   title: string;
   description?: string;
+  logo?: string;
 }): string => {
   const params = new URLSearchParams();
   params.set('title', sanitizeOgText(title));
   if (description) {
     params.set('description', sanitizeOgText(description));
+  }
+  if (logo) {
+    params.set('logo', logo);
   }
   return `/og.png?${params.toString()}`;
 };
@@ -107,21 +112,22 @@ export const resolveOgImage = ({
   useDynamic?: boolean;
 }): OgImage => {
   const trimmedImage = image?.trim();
-  if (trimmedImage) {
+  if (useDynamic && (title || description)) {
     return {
-      url: normalizePublicPath(trimmedImage),
+      url: buildDynamicOgUrl({
+        title: title?.trim() || DEFAULT_SITE_LABEL,
+        description: description?.trim() || undefined,
+        logo: trimmedImage ? normalizePublicPath(trimmedImage) : undefined,
+      }),
       width: OG_IMAGE_DIMENSIONS.width,
       height: OG_IMAGE_DIMENSIONS.height,
       alt: alt?.trim() || title?.trim() || undefined,
     };
   }
 
-  if (useDynamic && (title || description)) {
+  if (trimmedImage) {
     return {
-      url: buildDynamicOgUrl({
-        title: title?.trim() || DEFAULT_SITE_LABEL,
-        description: description?.trim() || undefined,
-      }),
+      url: normalizePublicPath(trimmedImage),
       width: OG_IMAGE_DIMENSIONS.width,
       height: OG_IMAGE_DIMENSIONS.height,
       alt: alt?.trim() || title?.trim() || undefined,

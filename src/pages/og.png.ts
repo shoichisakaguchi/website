@@ -25,11 +25,12 @@ export async function GET({ request }: { request: Request }) {
   const rawTitle = url.searchParams.get('title') ?? DEFAULT_SITE_LABEL;
   const rawDescription =
     url.searchParams.get('description') ?? DEFAULT_DESCRIPTION;
+  const rawLogo = url.searchParams.get('logo');
 
   const title = truncate(sanitize(rawTitle), TITLE_MAX);
   const description = truncate(sanitize(rawDescription), DESCRIPTION_MAX);
 
-  const logoUrl = new URL('/og-image.png', url).toString();
+  const logoUrl = new URL(rawLogo || '/og-image.png', url).toString();
 
   return new ImageResponse(
     h(
