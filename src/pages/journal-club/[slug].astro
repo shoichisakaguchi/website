@@ -109,6 +109,7 @@ function getStartDateTimeUtc(): string | null {
 }
 
 const effectiveStartDateTimeUtc = getStartDateTimeUtc();
+const EVENT_DURATION_MINUTES = 60;
 
 // Timezone display helper
 const TIMEZONES = JOURNAL_CLUB_TIMEZONE_DISPLAY;
@@ -154,13 +155,23 @@ const isCalendarUpcoming = (() => {
     const now = new Date().getTime();
     if (effectiveStartDateTimeUtc) {
         // Use precise time: event start + 60 minutes
-        return now < new Date(effectiveStartDateTimeUtc).getTime() + 60 * 60 * 1000;
+        return now < new Date(effectiveStartDateTimeUtc).getTime() + EVENT_DURATION_MINUTES * 60 * 1000;
     }
     // Fallback: use date field, event considered over at end of that day (23:59:59)
     const eventDate = new Date(data.date);
     const endOfDay = new Date(eventDate);
     endOfDay.setUTCHours(23, 59, 59, 999);
     return now < endOfDay.getTime();
+})();
+
+// Build-time past check for Event Times section.
+// Event is considered past when (eventStart + duration) < build time.
+const isPast = (() => {
+    if (!effectiveStartDateTimeUtc) {
+        return false;
+    }
+    const eventEnd = new Date(effectiveStartDateTimeUtc).getTime() + EVENT_DURATION_MINUTES * 60 * 1000;
+    return eventEnd < new Date().getTime();
 })();
 
 const metaDescription = resolveDescription({
@@ -276,7 +287,7 @@ const ogImage = resolveOgImage({
 		</div>
 
         {/* D. Event Times (reference section - bottom) */}
-        {effectiveStartDateTimeUtc && (
+        {effectiveStartDateTimeUtc && !isPast && (
             <aside class="event-times-section">
                 <h3 class="event-times-heading">Event Times</h3>
                 <ul class="timezone-list">
