@@ -3,18 +3,34 @@ import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { JOURNAL_CLUB_TIMEZONE_DISPLAY } from '../../lib/journalClubTimezones';
 import { resolveDescription, resolveOgImage } from '../../lib/og';
+import PrevNextNav from '../../components/PrevNextNav.astro';
 
 export const prerender = true;
 
 export async function getStaticPaths() {
   const items = await getCollection('journal-club');
-  return items.map(item => ({
+  const sortedItems = [...items].sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+
+  const toNavItem = (entry?: (typeof sortedItems)[number]) =>
+    entry
+      ? {
+          slug: entry.slug,
+          title: entry.data.title,
+          date: entry.data.date,
+        }
+      : undefined;
+
+  return sortedItems.map((item, index) => ({
     params: { slug: item.slug },
-    props: { item },
+    props: {
+      item,
+      prev: toNavItem(sortedItems[index - 1]),
+      next: toNavItem(sortedItems[index + 1]),
+    },
   }));
 }
 
-const { item } = Astro.props;
+const { item, prev, next } = Astro.props;
 const { Content } = await item.render();
 const { data } = item;
 
@@ -300,6 +316,8 @@ const ogImage = resolveOgImage({
                 </ul>
             </aside>
         )}
+
+        <PrevNextNav basePath="/journal-club" prev={prev} next={next} />
 	</div>
 </Layout>
 

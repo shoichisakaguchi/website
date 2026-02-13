@@ -4,6 +4,7 @@ import Layout from "../../layouts/Layout.astro";
 import { formatDate } from "../../utils/date";
 import CommunityFooter from "../../components/CommunityFooter.astro";
 import TypeBadge from "../../components/TypeBadge.astro";
+import PrevNextNav from "../../components/PrevNextNav.astro";
 import { marked } from "marked";
 import { resolveDescription, resolveOgImage } from "../../lib/og";
 
@@ -11,13 +12,30 @@ export const prerender = true;
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
-  return posts.map((item) => ({
+  const sortedPosts = [...posts].sort(
+    (a, b) => a.data.publishedDate.getTime() - b.data.publishedDate.getTime(),
+  );
+
+  const toNavItem = (entry?: (typeof sortedPosts)[number]) =>
+    entry
+      ? {
+          slug: entry.slug,
+          title: entry.data.title,
+          date: entry.data.publishedDate,
+        }
+      : undefined;
+
+  return sortedPosts.map((item, index) => ({
     params: { slug: item.slug },
-    props: { item },
+    props: {
+      item,
+      prev: toNavItem(sortedPosts[index - 1]),
+      next: toNavItem(sortedPosts[index + 1]),
+    },
   }));
 }
 
-const { item } = Astro.props;
+const { item, prev, next } = Astro.props;
 const { Content } = await item.render();
 
 const discussionLabel = item.data.discussionLabel || "Open discussion doc";
@@ -111,6 +129,7 @@ const ogImage = resolveOgImage({
       </footer>
 
       <CommunityFooter variant="post" />
+      <PrevNextNav basePath="/posts" prev={prev} next={next} />
     </div>
   </div>
 </Layout>

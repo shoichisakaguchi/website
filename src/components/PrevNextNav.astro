@@ -1,0 +1,136 @@
+---
+import { formatDate } from "../utils/date";
+
+interface NavItem {
+  slug: string;
+  title: string;
+  date: Date | string;
+}
+
+interface Props {
+  basePath: string;
+  prev?: NavItem;
+  next?: NavItem;
+}
+
+const { basePath, prev, next } = Astro.props;
+
+function toValidDate(value: Date | string): Date | null {
+  if (value instanceof Date && !Number.isNaN(value.valueOf())) {
+    return value;
+  }
+  if (typeof value === "string") {
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.valueOf())) {
+      return parsed;
+    }
+  }
+  return null;
+}
+
+function formatNavDate(value: Date | string): string {
+  const parsed = toValidDate(value);
+  return parsed ? formatDate(parsed) : String(value);
+}
+
+function toDateTimeAttr(value: Date | string): string | undefined {
+  const parsed = toValidDate(value);
+  return parsed ? parsed.toISOString() : undefined;
+}
+
+const navClass = [
+  "prev-next-nav",
+  prev ? "has-prev" : "",
+  next ? "has-next" : "",
+].join(" ").trim();
+---
+
+{(prev || next) && (
+  <nav class={navClass} aria-label="Content navigation">
+    {prev && (
+      <div class="nav-item nav-prev">
+        <span class="nav-label">← Previous</span>
+        <a href={`${basePath}/${prev.slug}/`} rel="prev" class="nav-title">
+          {prev.title}
+        </a>
+        <time datetime={toDateTimeAttr(prev.date)} class="nav-date">
+          {formatNavDate(prev.date)}
+        </time>
+      </div>
+    )}
+
+    {next && (
+      <div class="nav-item nav-next">
+        <span class="nav-label">Next →</span>
+        <a href={`${basePath}/${next.slug}/`} rel="next" class="nav-title">
+          {next.title}
+        </a>
+        <time datetime={toDateTimeAttr(next.date)} class="nav-date">
+          {formatNavDate(next.date)}
+        </time>
+      </div>
+    )}
+  </nav>
+)}
+
+<style>
+  .prev-next-nav {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--c-divider, #eee);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .nav-next {
+    text-align: right;
+  }
+
+  .prev-next-nav.has-next:not(.has-prev) .nav-next {
+    grid-column: 2;
+  }
+
+  .nav-label {
+    color: var(--c-text-light, #666);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .nav-title {
+    color: var(--c-text, #333);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .nav-title:hover {
+    text-decoration: underline;
+  }
+
+  .nav-date {
+    color: var(--c-text-light, #666);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 640px) {
+    .prev-next-nav {
+      grid-template-columns: 1fr;
+    }
+
+    .prev-next-nav.has-next:not(.has-prev) .nav-next {
+      grid-column: auto;
+    }
+
+    .nav-next {
+      text-align: left;
+    }
+  }
+</style>
