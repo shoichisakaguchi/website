@@ -89,7 +89,14 @@ const topMessageHtml = topMessageMarkdown
 					a key enzyme shared by all RNA viruses. We bring together researchers to advance the discovery,
 					classification, and analysis of RNA viruses through open discussion, shared data, and community-driven standards.
 				</p>
-				<a href="/about" class="link-arrow">Read more &rarr;</a>
+				<a
+					href="https://forms.gle/oPdeSmmLnQTi8UAB8"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="link-arrow"
+				>
+					Join the community on Slack &rarr;
+				</a>
 			</div>
 		</section>
 
@@ -240,11 +247,7 @@ const topMessageHtml = topMessageMarkdown
 	.hero-preview {
 		padding: 100px 0;
 		text-align: center;
-		background: linear-gradient(
-			180deg,
-			rgba(230, 246, 255, 0.5) 0%,
-			white 100%
-		);
+		background: var(--c-bg);
 	}
 
 	.hero-content h1 {
@@ -355,14 +358,11 @@ const topMessageHtml = topMessageMarkdown
 	.about-summary {
 		text-align: center;
 		padding: 60px 0 40px;
-		background: linear-gradient(
-			180deg,
-			rgba(230, 246, 255, 0.5) 0%,
-			white 100%
-		);
+		background: var(--c-bg);
 	}
 	.about-summary h2 {
 		font-size: 2rem;
+		line-height: 1.2;
 		margin-bottom: 1rem;
 		font-weight: 700;
 	}
@@ -378,13 +378,14 @@ const topMessageHtml = topMessageMarkdown
 	.past-summits-list {
 		text-align: center;
 		padding: 60px 0;
-		background-color: #f9fafb;
+		background-color: var(--c-bg);
 		border-top: 1px solid rgba(0, 0, 0, 0.05);
 		border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 	}
 	.past-summits-list h2 {
-		font-size: 1.8rem;
-		margin-bottom: 1.5rem;
+		font-size: 2rem;
+		line-height: 1.2;
+		margin-bottom: 1rem;
 	}
 	.summits-grid {
 		display: flex;
