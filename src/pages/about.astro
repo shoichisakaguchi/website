@@ -56,40 +56,41 @@ export const prerender = true;
 	}
 
 	.page-title {
-		margin-top: 40px;
-		margin-bottom: 40px;
+		margin-top: var(--space-page-title-top);
+		margin-bottom: var(--space-page-title-bottom);
 		text-align: center;
 	}
 
 	.content-wrapper {
-		font-size: 17px;
+		font-size: var(--fs-body);
 		line-height: 1.7;
 		color: #333;
 	}
 
 	.intro {
-		font-weight: 500;
+		font-size: var(--fs-intro);
+		font-weight: var(--fw-medium);
 		color: var(--c-text);
-		margin-bottom: 40px;
+		margin-bottom: var(--space-section-tight);
 	}
 
 	.divider {
 		border: 0;
 		border-top: 1px solid var(--c-divider);
-		margin: 40px 0;
+		margin: var(--space-section-tight) 0;
 	}
 
 	h2 {
 		margin-top: 2rem;
 		margin-bottom: 0.75rem;
-		font-size: 1.75rem;
+		font-size: 2rem;
 		line-height: 1.3;
 	}
 
 	.link-arrow {
 		color: var(--c-accent, #0066cc);
 		text-decoration: none;
-		font-weight: 500;
+		font-weight: var(--fw-semibold);
 	}
 
 	.link-arrow:hover {

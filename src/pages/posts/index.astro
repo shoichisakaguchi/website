@@ -57,8 +57,8 @@ const postsWithExcerpt = sortedPosts.map((item) => ({
 	}
 
 	.page-title {
-		margin-top: 40px;
-		margin-bottom: 40px;
+		margin-top: var(--space-page-title-top);
+		margin-bottom: var(--space-page-title-bottom);
 		text-align: center;
 	}
 
@@ -77,7 +77,7 @@ const postsWithExcerpt = sortedPosts.map((item) => ({
 	}
 
 	.meta {
-		font-size: 0.9em;
+		font-size: var(--fs-meta);
 		color: var(--c-text-light, #666);
 		margin-bottom: 4px;
 		display: flex;
@@ -88,8 +88,8 @@ const postsWithExcerpt = sortedPosts.map((item) => ({
 	.title {
 		text-decoration: none;
 		color: var(--c-text, #333);
-		font-size: 1.2em;
-		font-weight: 600;
+		font-size: calc(var(--fs-body) * 1.2);
+		font-weight: var(--fw-semibold);
 		display: block;
 	}
 
@@ -101,7 +101,7 @@ const postsWithExcerpt = sortedPosts.map((item) => ({
 		margin-top: 8px;
 		margin-bottom: 0;
 		color: var(--c-text-light, #666);
-		font-size: 0.95em;
+		font-size: var(--fs-meta);
 		line-height: 1.5;
 	}
 

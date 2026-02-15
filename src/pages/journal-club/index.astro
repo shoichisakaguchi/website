@@ -201,26 +201,26 @@ function formatDate(date: Date): string {
     }
 
     .page-title {
-        margin-top: 40px;
-        margin-bottom: 20px;
+        margin-top: var(--space-page-title-top);
+        margin-bottom: var(--space-page-title-bottom);
         text-align: center;
     }
 
     .intro-section {
         max-width: 700px;
-        margin: 0 auto 50px;
+        margin: 0 auto var(--space-section);
         text-align: center;
     }
 
     .intro-text {
-        font-size: 1.1em;
+        font-size: var(--fs-intro);
         line-height: 1.5;
         color: var(--c-text);
         margin-bottom: 1em;
     }
 
     .action-container {
-        margin-top: 30px;
+        margin-top: var(--space-section-tight);
     }
 
     .nomination-button {
@@ -230,7 +230,7 @@ function formatDate(date: Date): string {
         color: white;
         text-decoration: none;
         border-radius: 999px;
-        font-weight: 500;
+        font-weight: var(--fw-semibold);
         transition: opacity 0.2s;
     }
 
@@ -242,7 +242,7 @@ function formatDate(date: Date): string {
 
     .action-note {
         margin-top: 12px;
-        font-size: 0.9em;
+        font-size: var(--fs-meta);
         color: var(--c-text-secondary);
     }
 
@@ -263,7 +263,7 @@ function formatDate(date: Date): string {
     .journal-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 16px;
+        font-size: var(--fs-body);
     }
 
     .journal-table th,
@@ -298,17 +298,17 @@ function formatDate(date: Date): string {
     }
 
     .speaker-cell .speaker-name {
-        font-weight: 500;
+        font-weight: var(--fw-semibold);
         color: var(--c-text, #333);
     }
 
     .speaker-cell .speaker-affiliation {
-        font-size: 0.85em;
+        font-size: var(--fs-small);
         color: var(--c-text-secondary, #666);
     }
 
     .topic-link {
-        font-weight: 500;
+        font-weight: var(--fw-semibold);
         color: var(--c-text, #333);
         text-decoration: none;
     }
@@ -321,7 +321,7 @@ function formatDate(date: Date): string {
     .paper-link {
         color: var(--c-link, #0070f3);
         text-decoration: none;
-        font-size: 0.9em;
+        font-size: var(--fs-meta);
     }
 
     .paper-link:hover {
@@ -336,14 +336,14 @@ function formatDate(date: Date): string {
     }
 
     .item-date {
-        font-size: 0.9em;
+        font-size: var(--fs-meta);
         color: var(--c-text-secondary, #666);
         margin-bottom: 4px;
     }
 
     .item-title {
         margin: 0 0 8px;
-        font-size: 1.1em;
+        font-size: var(--fs-intro);
     }
 
     .item-title a {
@@ -359,19 +359,19 @@ function formatDate(date: Date): string {
     }
 
     .item-speaker .speaker-name {
-        font-size: 0.95em;
-        font-weight: 500;
+        font-size: var(--fs-meta);
+        font-weight: var(--fw-semibold);
         color: var(--c-text, #333);
     }
 
     .item-speaker .speaker-affiliation {
-        font-size: 0.85em;
+        font-size: var(--fs-small);
         color: var(--c-text-secondary, #666);
     }
 
     .item-paper-link {
         color: var(--c-link, #0070f3);
         text-decoration: none;
-        font-size: 0.9em;
+        font-size: var(--fs-meta);
     }
 </style>
