@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+
+npm run journal-club:slug-date:apply
+
+# Stage potential rename/new file updates made by the slug-date script.
+git add src/content/journal-club/*.mdoc

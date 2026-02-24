@@ -6,7 +6,10 @@
     "dev": "astro dev",
     "build": "KEYSTATIC=true astro build && pagefind --site dist",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "hooks:install": "git config core.hooksPath .githooks",
+    "journal-club:slug-date:check": "node scripts/prefix-journal-club-date-slugs.mjs",
+    "journal-club:slug-date:apply": "node scripts/prefix-journal-club-date-slugs.mjs --apply"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",

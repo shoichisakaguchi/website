@@ -13,10 +13,15 @@ Website for the RdRp Summit community.
 ## Development
 ```sh
 npm install
+npm run hooks:install
 npm run dev
 ```
 
 Keystatic admin: http://localhost:4321/keystatic
+
+Git hooks:
+- `npm run hooks:install` enables repo hooks via `core.hooksPath=.githooks`.
+- `pre-commit` runs `journal-club:slug-date:apply` to prefix new Journal Club slugs with `YYYY-MM-dd-`.
 
 ## Build and Preview
 ```sh
