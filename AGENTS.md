@@ -27,6 +27,17 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 - Images use Astro's `image()` helper for type safety/optimization.
 - Dates are parsed with `z.coerce.date()` and displayed in "Month Day, Year" format.
 
+## Journal Club Operations
+- After each `journal-club` session ends, make a same-day commit and push so Cloudflare Pages deploys the latest site state.
+- If there are post-event updates such as slides, recording links, or status text, include them in that commit.
+- If no content changes are needed, still create an empty commit to record the post-event check and trigger deployment.
+- Suggested commit message: `chore: post-journal-club sync YYYY-MM-DD`
+
+## Git Workflow
+- Before starting any repository edits, check `git status`.
+- If the local branch is behind or the remote may have changed, run `git pull --rebase` before making edits.
+- Do not start editing shared files such as `AGENTS.md` until the local branch is synchronized with the remote.
+
 ## Rules, Skills, Subagents
 - **Rules:** `.claude/rules/` (absolute constraints and invariants)
 - **Skills:** `.claude/skills/` (explicit workflows to run when requested)
