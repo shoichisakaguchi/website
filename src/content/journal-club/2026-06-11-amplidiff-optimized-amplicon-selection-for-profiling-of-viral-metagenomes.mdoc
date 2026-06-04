@@ -1,0 +1,32 @@
+---
+title: 'AmpliDiff: optimized amplicon selection for profiling of viral metagenomes'
+date: 2026-06-11
+isPinned: true
+speakerName: Dr. Jasmijn Baaijens
+speakerAffiliation: Delft University of Technology
+speaker_image: >-
+  /images/journal_club/speakers/2026-06-11-amplidiff-optimized-amplicon-selection-for-profiling-of-viral-metagenomes/speaker_image.webp
+chairs:
+  - name: Marco Forgia
+    affiliation: IPSP-CNR Turin
+  - name: Laura Patino
+    affiliation: Wageningen University
+localDate: 2026-06-11
+localTime: '15:30'
+eventTz: Europe/Paris
+links:
+  - label: Paper
+    url: >-
+      https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-024-05735-4
+    isPrimary: true
+  - label: Speaker profile
+    url: >-
+      https://www.tudelft.nl/ewi/over-de-faculteit/afdelingen/intelligent-systems/pattern-recognition-bioinformatics/the-delft-bioinformatics-lab/people/jasmijn-baaijens
+    isPrimary: false
+showZoomLink: false
+---
+Metagenomic profiling algorithms commonly rely on genomic differences between lineages, strains, or species to infer the relative abundances of sequences present in a sample. This observation plays an important role in the analysis of diverse microbial communities, where targeted sequencing of 16S and 18S rRNA, both well-known hypervariable genomic regions, have led to insights into microbial diversity and the discovery of novel organisms. However, the variable nature of discriminatory regions can also act as a double-edged sword, as the sought-after variability can make it difficult to design primers for their amplification through PCR. Moreover, the most variable regions are not necessarily the most informative regions for the purpose of differentiation; one should focus on regions that maximize the number of lineages that can be distinguished.
+
+We present **AmpliDiff**, a computational tool that simultaneously finds highly discriminatory genomic regions in viral genomes of a single species, as well as primers allowing for the amplification of these regions. We show that regions and primers found by AmpliDiff can be used to accurately estimate relative abundances of SARS-CoV-2 lineages, for example in wastewater sequencing data. We obtain errors that are comparable with using whole genome information to estimate relative abundances. Furthermore, our results show that AmpliDiff is robust against incomplete input data and that primers designed by AmpliDiff also bind to genomes sampled months after the primers were selected. With AmpliDiff we provide an effective, cost-efficient alternative to whole genome sequencing for estimating lineage abundances in viral metagenomes.
+</content>
+</invoke>
