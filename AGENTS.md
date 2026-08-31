@@ -28,10 +28,11 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 - Dates are parsed with `z.coerce.date()` and displayed in "Month Day, Year" format.
 
 ## Journal Club Operations
-- After each `journal-club` session ends, make a same-day commit and push so Cloudflare Pages deploys the latest site state.
-- If there are post-event updates such as slides, recording links, or status text, include them in that commit.
-- If no content changes are needed, still create an empty commit to record the post-event check and trigger deployment.
-- Suggested commit message: `chore: post-journal-club sync YYYY-MM-DD`
+- The homepage "Next Meeting" card is prerendered, so it only reflects the build-time clock. An entry stays "Live Now"/upcoming until a rebuild runs after its end time (`start + durationMinutes`, default 60).
+- **Live window / end time:** set `durationMinutes` per entry (Keystatic field). The site (`src/components/JournalClubHome.astro`) and the rebuild trigger both read it, so they always agree on when an event becomes past.
+- **Automated post-event rebuild:** a scheduled job (`ops/scheduled-rebuild/`, launchd on the always-on Mac) POSTs a Cloudflare Deploy Hook shortly after each event ends — no commit, clean history. See `ops/scheduled-rebuild/README.md`.
+- If there are post-event content updates (slides, recording links, status text), still commit and push them as usual; the automated rebuild only handles the "event just ended, nothing to commit" case.
+- Inspect timing without side effects: `npm run journal-club:rebuild:list` (all events, UTC start/end, status) and `npm run journal-club:rebuild:check` (dry-run of the next scheduled decision).
 
 ## Git Workflow
 - Before starting any repository edits, check `git status`.

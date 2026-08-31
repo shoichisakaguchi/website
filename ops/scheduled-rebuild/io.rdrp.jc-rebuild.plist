@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  launchd agent: triggers a Cloudflare rebuild shortly after a Journal Club
+  event ends, so the prerendered homepage "Next Meeting" card advances.
+
+  Install (see ops/scheduled-rebuild/README.md):
+    cp ops/scheduled-rebuild/io.rdrp.jc-rebuild.plist ~/Library/LaunchAgents/
+    launchctl load -w ~/Library/LaunchAgents/io.rdrp.jc-rebuild.plist
+
+  Adjust the two absolute paths below if the repo lives elsewhere.
+  Runs every 900 seconds (15 min). RunAtLoad does an immediate first run
+  (which only initializes state; it never rebuilds on the very first run).
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>io.rdrp.jc-rebuild</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/shoichi/Projects/website/ops/scheduled-rebuild/run-jc-rebuild.sh</string>
+    </array>
+
+    <key>StartInterval</key>
+    <integer>900</integer>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/shoichi/Library/Logs/rdrp-jc-rebuild.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/shoichi/Library/Logs/rdrp-jc-rebuild.log</string>
+</dict>
+</plist>

@@ -59,6 +59,10 @@ const journalClub = defineCollection({
         localDate: z.coerce.date().optional(),
         localTime: z.string().optional().or(z.literal('')),
         eventTz: z.string().optional().default('Asia/Tokyo'),
+        // How long the event lasts. Controls the homepage "Live Now" window and
+        // when the entry moves from upcoming/live to past. Also read by the
+        // scheduled rebuild trigger so both compute the same end time.
+        durationMinutes: z.number().optional().default(60),
         // Advanced/backward compatibility
         startDateTimeUtc: z.string().optional().or(z.literal('')),
         // New generalized links array

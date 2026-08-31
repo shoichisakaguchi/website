@@ -9,7 +9,9 @@
     "astro": "astro",
     "hooks:install": "git config core.hooksPath .githooks",
     "journal-club:slug-date:check": "node scripts/prefix-journal-club-date-slugs.mjs",
-    "journal-club:slug-date:apply": "node scripts/prefix-journal-club-date-slugs.mjs --apply"
+    "journal-club:slug-date:apply": "node scripts/prefix-journal-club-date-slugs.mjs --apply",
+    "journal-club:rebuild:list": "node scripts/check-journal-club-rebuild.mjs --list",
+    "journal-club:rebuild:check": "node scripts/check-journal-club-rebuild.mjs --dry-run"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.6.12",

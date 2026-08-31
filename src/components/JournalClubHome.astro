@@ -61,10 +61,11 @@ function getEventTimes(item: (typeof allJournalClub)[0]) {
     const data = item.data;
 
     // Try to get UTC time from either field
+    const durationMs = (data.durationMinutes ?? 60) * 60 * 1000;
     const utcString = convertLocalToUtc(item);
     if (utcString) {
         const start = new Date(utcString);
-        const end = new Date(start.getTime() + 2 * 60 * 60 * 1000); // +2 hours
+        const end = new Date(start.getTime() + durationMs);
         return { start, end, hasTime: true };
     }
 

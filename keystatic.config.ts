@@ -271,6 +271,12 @@ export default config({
                     options: JOURNAL_CLUB_TIMEZONE_OPTIONS_WITH_LEGACY,
                     defaultValue: 'Asia/Tokyo',
                 }),
+                durationMinutes: fields.integer({
+                    label: 'Duration (minutes)',
+                    description: 'Event length in minutes (default 60). Controls how long it shows as "Live Now" on the homepage and when it moves to past. The scheduled rebuild fires right after this window ends.',
+                    defaultValue: 60,
+                    validation: { min: 1 },
+                }),
                 // Advanced field (backward compatibility)
                 startDateTimeUtc: fields.text({
                     label: 'Start Date/Time (UTC) — auto',

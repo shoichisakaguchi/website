@@ -125,7 +125,9 @@ function getStartDateTimeUtc(): string | null {
 }
 
 const effectiveStartDateTimeUtc = getStartDateTimeUtc();
-const EVENT_DURATION_MINUTES = 60;
+// Per-entry duration (default 60). Same field the homepage card and the
+// scheduled rebuild trigger read, so all three agree on when an event ends.
+const EVENT_DURATION_MINUTES = data.durationMinutes ?? 60;
 
 // Timezone display helper
 const TIMEZONES = JOURNAL_CLUB_TIMEZONE_DISPLAY;
@@ -161,7 +163,7 @@ function formatHeaderDate(date: Date): string {
 
 // Check if event has ended (for auto-hiding Zoom link)
 const hasEventEnded = effectiveStartDateTimeUtc
-    ? new Date().getTime() > new Date(effectiveStartDateTimeUtc).getTime() + 2 * 60 * 60 * 1000 // Event end = start + 2 hours
+    ? new Date().getTime() > new Date(effectiveStartDateTimeUtc).getTime() + EVENT_DURATION_MINUTES * 60 * 1000 // Event end = start + duration
     : false;
 
 // Check if calendar link should be shown (event not yet ended)
