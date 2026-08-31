@@ -91,6 +91,17 @@ launchctl unload -w ~/Library/LaunchAgents/io.rdrp.jc-rebuild.plist
 
 - **First run never rebuilds.** It only records the current time, so historical
   events don't trigger a build. Real triggering starts from the next event end.
+- The "Initialized state at ..." line appears only while `~/.cache/rdrp-jc-rebuild/last-check`
+  does not exist yet. If you ran the wrapper or the script by hand before loading the agent,
+  the state file already exists, so `RunAtLoad`'s first run prints the ordinary
+  "No event ended since ..." line instead. That is not a failure.
+- **`RDRP_REPO_DIR` selects which clone the agent reads and pulls.** Set it in the secrets
+  file (it is sourced before the path is resolved). Point it at a clone nobody edits by hand:
+  the agent runs `git pull --rebase`, which fails on a dirty tree and skips the run. If the
+  resolved clone has no rebuild script the wrapper aborts with a message rather than a bare
+  node error.
+- To confirm which clone the agent actually used, leave the two clones at different commits
+  and check which one advanced after a run — the output alone is identical either way.
 - If the deploy hook fails (network, etc.) the last-run timestamp is *not*
   advanced, so the next run retries.
 - `durationMinutes` lives on each Journal Club entry (Keystatic field). The site
