@@ -34,13 +34,15 @@ import os from "node:os";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import {
+    resolveEventTimes,
+    DEFAULT_DURATION_MINUTES,
+} from "../src/lib/journalClubTime.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.join(__dirname, "..");
 const journalClubDir = path.join(repoRoot, "src/content/journal-club");
-
-const DEFAULT_DURATION_MINUTES = 60;
 
 const args = new Set(process.argv.slice(2));
 const flags = {
@@ -80,46 +82,6 @@ function field(fm, key) {
     return raw.replace(/^['"]|['"]$/g, "").trim() || null;
 }
 
-// --- Timezone-aware wall time -> UTC --------------------------------------
-
-// Offset (ms) between wall-clock time in `tz` and UTC at the given instant.
-function tzOffsetMs(utcMs, tz) {
-    const dtf = new Intl.DateTimeFormat("en-US", {
-        timeZone: tz,
-        hour12: false,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-    });
-    const parts = Object.fromEntries(
-        dtf.formatToParts(new Date(utcMs)).map((p) => [p.type, p.value]),
-    );
-    let hour = Number(parts.hour);
-    if (hour === 24) hour = 0; // some engines emit 24 for midnight
-    const asUtc = Date.UTC(
-        Number(parts.year),
-        Number(parts.month) - 1,
-        Number(parts.day),
-        hour,
-        Number(parts.minute),
-        Number(parts.second),
-    );
-    return asUtc - utcMs;
-}
-
-// Interpret `${dateStr}T${timeStr}` as wall-clock time in `tz`; return UTC Date.
-function zonedWallTimeToUtc(dateStr, timeStr, tz) {
-    const [y, mo, d] = dateStr.split("-").map(Number);
-    const [h, mi] = timeStr.split(":").map(Number);
-    const guess = Date.UTC(y, mo - 1, d, h, mi, 0);
-    // One refinement pass handles DST/offset correctly away from transitions.
-    const offset = tzOffsetMs(guess, tz);
-    return new Date(guess - offset);
-}
-
 // --- Build event list with start/end instants -----------------------------
 
 async function loadEvents() {
@@ -137,40 +99,21 @@ async function loadEvents() {
         const fm = fmMatch[1];
 
         const title = field(fm, "title") || file;
-        const date = field(fm, "date");
-        const localDate = field(fm, "localDate");
-        const localTime = field(fm, "localTime");
-        const eventTz = field(fm, "eventTz") || "Asia/Tokyo";
-        const startUtcRaw = field(fm, "startDateTimeUtc");
         const durRaw = field(fm, "durationMinutes");
         const durationMinutes = durRaw ? Number(durRaw) : DEFAULT_DURATION_MINUTES;
-        const durationMs =
-            (Number.isFinite(durationMinutes) ? durationMinutes : DEFAULT_DURATION_MINUTES) *
-            60 *
-            1000;
 
-        let start = null;
-        let end = null;
-        let hasTime = false;
+        // Same resolver the site uses, so "past" means the same thing here.
+        const times = resolveEventTimes({
+            startDateTimeUtc: field(fm, "startDateTimeUtc"),
+            localDate: field(fm, "localDate"),
+            localTime: field(fm, "localTime"),
+            eventTz: field(fm, "eventTz") || "Asia/Tokyo",
+            date: field(fm, "date"),
+            durationMinutes,
+        });
+        if (!times) continue;
+        const { start, end, hasTime } = times;
 
-        if (startUtcRaw) {
-            start = new Date(startUtcRaw);
-            end = new Date(start.getTime() + durationMs);
-            hasTime = true;
-        } else if (localDate && localTime) {
-            start = zonedWallTimeToUtc(localDate, localTime, eventTz);
-            end = new Date(start.getTime() + durationMs);
-            hasTime = true;
-        } else if (date) {
-            // Date-only fallback: start of day -> end of day (UTC), matching the site.
-            start = new Date(`${date}T00:00:00.000Z`);
-            end = new Date(`${date}T23:59:59.999Z`);
-            hasTime = false;
-        } else {
-            continue;
-        }
-
-        if (!start || Number.isNaN(start.getTime())) continue;
         events.push({ file, title, start, end, hasTime, durationMinutes });
     }
     return events;

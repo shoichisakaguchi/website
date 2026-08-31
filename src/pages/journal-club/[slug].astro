@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { JOURNAL_CLUB_TIMEZONE_DISPLAY } from '../../lib/journalClubTimezones';
+import { resolveEventTimes, DEFAULT_DURATION_MINUTES } from '../../lib/journalClubTime.mjs';
 import { resolveDescription, resolveOgImage } from '../../lib/og';
 import PrevNextNav from '../../components/PrevNextNav.astro';
 
@@ -88,46 +89,17 @@ function formatChairsLine(): string | null {
         .join(' · ');
 }
 
-// Helper to get UTC datetime from local or existing UTC field
-function getStartDateTimeUtc(): string | null {
-    // Prefer existing UTC field for backward compatibility
-    if (data.startDateTimeUtc && data.startDateTimeUtc.trim()) {
-        return data.startDateTimeUtc.trim();
-    }
+// Start/end instants come from the shared resolver so this page, the homepage
+// card and the scheduled rebuild trigger cannot drift apart. Keep returning an
+// ISO string (or null when the entry carries only a date) — the rest of this
+// page is written against that shape.
+const eventTimes = resolveEventTimes(data);
 
-    // Convert from local date/time if available
-    if (data.localDate && data.localTime && data.localTime.trim()) {
-        const tz = data.eventTz || 'Asia/Tokyo';
-        const dateStr = data.localDate.toISOString().split('T')[0]; // YYYY-MM-DD
-        const timeStr = data.localTime.trim(); // HH:mm
-
-        try {
-            // Technique: Create a "fake" local date, then adjust for timezone offset
-            // Based on: https://stackoverflow.com/a/54127122
-            const fakeLocalDate = new Date(`${dateStr}T${timeStr}:00`);
-
-            // Get what this date looks like in the target timezone
-            const tzDateString = fakeLocalDate.toLocaleString('en-US', { timeZone: tz });
-            const tzDate = new Date(tzDateString);
-
-            // Calculate the difference
-            const diff = fakeLocalDate.getTime() - tzDate.getTime();
-
-            // Apply the difference to get the correct UTC time
-            const correctUTC = new Date(fakeLocalDate.getTime() + diff);
-            return correctUTC.toISOString();
-        } catch (e) {
-            console.error('Failed to convert local time to UTC:', e);
-        }
-    }
-
-    return null;
-}
-
-const effectiveStartDateTimeUtc = getStartDateTimeUtc();
+const effectiveStartDateTimeUtc =
+    eventTimes && eventTimes.hasTime ? eventTimes.start.toISOString() : null;
 // Per-entry duration (default 60). Same field the homepage card and the
 // scheduled rebuild trigger read, so all three agree on when an event ends.
-const EVENT_DURATION_MINUTES = data.durationMinutes ?? 60;
+const EVENT_DURATION_MINUTES = data.durationMinutes ?? DEFAULT_DURATION_MINUTES;
 
 // Timezone display helper
 const TIMEZONES = JOURNAL_CLUB_TIMEZONE_DISPLAY;

@@ -43,6 +43,19 @@ export const prerender = true;
 					placeholder="How can we help?"></textarea>
 			</div>
 
+			{/* Honeypot: hidden from people, irresistible to bots. A filled
+			    value makes the API discard the submission. */}
+			<div class="hp-field" aria-hidden="true">
+				<label for="website">Leave this field empty</label>
+				<input
+					type="text"
+					id="website"
+					name="website"
+					tabindex="-1"
+					autocomplete="off"
+				/>
+			</div>
+
 			<button type="submit" class="submit-btn">Send Message</button>
 		</form>
 		<div id="toast" class="toast">Message sent successfully!</div>
@@ -79,7 +92,9 @@ export const prerender = true;
 							showToast("Message sent successfully!", "success");
 						} else {
 							showToast(
-								result.message || "Failed to send message.",
+								result.error ||
+									result.message ||
+									"Failed to send message.",
 								"error",
 							);
 						}
@@ -108,6 +123,14 @@ export const prerender = true;
 </Layout>
 
 <style>
+	.hp-field {
+		position: absolute;
+		left: -9999px;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+	}
+
 	.page-content {
 		max-width: 600px;
 		margin: 0 auto;
