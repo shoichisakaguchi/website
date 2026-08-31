@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # AI context
 GEMINI.md
+
+# Claude Code per-machine settings (permissions differ per host)
+.claude/settings.local.json
