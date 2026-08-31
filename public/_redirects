@@ -1,0 +1,6 @@
+# /contact was a Resend-backed form that was never wired up (no RESEND_API_KEY
+# was ever set, so it only ever returned 500). The community intake is the
+# Google Form linked from the header, so send the indexed URL there instead of
+# 404ing visitors who arrive from search.
+/contact    https://forms.gle/oPdeSmmLnQTi8UAB8  301
+/contact/   https://forms.gle/oPdeSmmLnQTi8UAB8  301

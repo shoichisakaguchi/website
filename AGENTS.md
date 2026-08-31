@@ -13,12 +13,12 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 - **Content Collections:** `summit` singleton, `summits`, `people`, `announcements`, `journal-club`.
 - **Content Flow:** `summit` singleton -> featured summit -> phase-specific rendering -> organizers resolved from `people` with role/affiliation overrides.
 - **Search:** Pagefind indexing during build (`astro build` then `pagefind --site dist`); only `data-pagefind-body` content is indexed.
-- **Contact Form:** `src/pages/api/contact.ts` uses Resend and reads env from Cloudflare `locals.runtime.env` or `import.meta.env` in dev.
+- **Contact:** there is no server-side contact form and no email provider. Community intake is the Google Form linked from the header; `public/_redirects` 301s the retired `/contact` URL to it. A Resend-backed form used to live at `src/pages/api/contact.ts`, but `RESEND_API_KEY` was never set in either Cloudflare environment, so it only ever returned 500 — it was removed rather than finished.
 - **Keystatic:** Admin UI at `/keystatic` (dev: http://localhost:4321/keystatic).
 
 ## Key Locations
 - **Config:** `astro.config.mjs`, `wrangler.toml`, `keystatic.config.ts`, `src/content/config.ts`
-- **Pages:** `src/pages/index.astro`, `src/pages/summits/[slug].astro`, `src/pages/api/contact.ts`
+- **Pages:** `src/pages/index.astro`, `src/pages/summits/[slug].astro`, `src/pages/journal-club/[slug].astro`
 - **Images:** `src/assets/images/people/`, `public/images/summits/`, `public/images/speakers/`
 - **Search UI:** `src/components/Search.astro`
 

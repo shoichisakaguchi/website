@@ -16,7 +16,11 @@ export default defineConfig({
             ? [keystatic()]
             : []),
         markdoc(),
-        sitemap()
+        sitemap({
+            // Keep the Keystatic admin UI and the retired /contact URL out of
+            // the sitemap. /contact is a 301 to the Google Form.
+            filter: (page) => !page.includes('/keystatic') && !page.includes('/contact'),
+        })
     ],
     imageService: 'compile',
     output: 'server',
