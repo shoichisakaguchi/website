@@ -51,8 +51,10 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 
 ## Rules, Skills, Subagents
 - **Rules:** `.claude/rules/` (absolute constraints and invariants)
-- **Skills:** `.claude/skills/` (explicit workflows to run when requested)
-- **Subagents:** `.claude/subagents/` (heavy/automated workflows; add as needed)
+- **Skills:** `.claude/skills/<name>/SKILL.md`, each with `name` + `description` frontmatter so Claude Code actually
+  loads them. Current set: `dev-commands`, `add-content-keystatic`, `add-summit`, `change-featured-summit`,
+  `test-contact-form`. A bare `.claude/skills/*.md` file is **not** a skill — it is just a note nothing will invoke.
+- **Subagents:** `.claude/subagents/` (heavy/automated workflows; add as needed — currently empty)
 
 ## Priority
 AGENTS.md -> Rules -> Skills -> User request. If there is a conflict, ask.
