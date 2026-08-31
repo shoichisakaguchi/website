@@ -20,16 +20,19 @@ POSTs a Cloudflare **Deploy Hook** to rebuild `main` — no commit, clean histor
 
 ## Current installation (as of 2026-09-01)
 
-- **Host:** MacBook Pro (`Shoichis-MacBook-Pro.local`), repo at `~/Projects/website`.
+- **Host:** Mac mini (`Shoichis-Mac-mini`). Always on: `pmset` reports `sleep 0` on AC power.
+- **Clone the agent reads:** `~/ops/rdrp-website` — **dedicated to the agent; never hand-edit it.** Selected via
+  `RDRP_REPO_DIR` in the secrets file. The human working copy on that machine stays at `~/Projects/website`.
 - **Agent:** `~/Library/LaunchAgents/io.rdrp.jc-rebuild.plist`, label `io.rdrp.jc-rebuild`, every 900 s.
 - **Deploy hook:** Cloudflare Pages project `website` -> `journal-club-auto-rebuild`, branch `main`.
 - **Secret:** `~/.config/rdrp/deploy-hook.env` (chmod 600, outside the repo).
 - **Log:** `~/Library/Logs/rdrp-jc-rebuild.log`.
-- Verified: hook POST returns HTTP 200 `success: true`; first run initialised state without rebuilding.
+- Verified end to end: hook POST returns HTTP 200 `success: true`; the agent pulls the dedicated clone (checked by
+  leaving the two clones at different commits and seeing which one advanced); consecutive scheduled runs 15 minutes
+  apart (15:42:48Z -> 15:57:50Z).
 
-Because this host is a laptop it can be asleep when an event ends. Nothing is lost — the next run rebuilds for any
-event that ended since the last check — but the rebuild can be late. Moving the agent to an always-on machine only
-needs a clone of this repo plus the same two files there.
+The agent previously ran on the MacBook Pro out of the shared development clone. It was moved because a laptop sleeps
+and, more importantly, because sharing a clone with hand-editing means a dirty tree silently disables rebuilds.
 
 ## One-time setup
 
