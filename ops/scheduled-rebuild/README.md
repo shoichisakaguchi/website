@@ -18,6 +18,19 @@ POSTs a Cloudflare **Deploy Hook** to rebuild `main` — no commit, clean histor
   Deploy Hook URL and runs the script with `--pull`.
 - `ops/scheduled-rebuild/io.rdrp.jc-rebuild.plist` — the launchd agent.
 
+## Current installation (as of 2026-09-01)
+
+- **Host:** MacBook Pro (`Shoichis-MacBook-Pro.local`), repo at `~/Projects/website`.
+- **Agent:** `~/Library/LaunchAgents/io.rdrp.jc-rebuild.plist`, label `io.rdrp.jc-rebuild`, every 900 s.
+- **Deploy hook:** Cloudflare Pages project `website` -> `journal-club-auto-rebuild`, branch `main`.
+- **Secret:** `~/.config/rdrp/deploy-hook.env` (chmod 600, outside the repo).
+- **Log:** `~/Library/Logs/rdrp-jc-rebuild.log`.
+- Verified: hook POST returns HTTP 200 `success: true`; first run initialised state without rebuilding.
+
+Because this host is a laptop it can be asleep when an event ends. Nothing is lost — the next run rebuilds for any
+event that ended since the last check — but the rebuild can be late. Moving the agent to an always-on machine only
+needs a clone of this repo plus the same two files there.
+
 ## One-time setup
 
 1. **Create a Cloudflare Deploy Hook**

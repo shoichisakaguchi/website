@@ -30,7 +30,10 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 ## Journal Club Operations
 - The homepage "Next Meeting" card is prerendered, so it only reflects the build-time clock. An entry stays "Live Now"/upcoming until a rebuild runs after its end time (`start + durationMinutes`, default 60).
 - **Live window / end time:** set `durationMinutes` per entry (Keystatic field). The site (`src/components/JournalClubHome.astro`) and the rebuild trigger both read it, so they always agree on when an event becomes past.
-- **Automated post-event rebuild:** a scheduled job (`ops/scheduled-rebuild/`, launchd on the always-on Mac) POSTs a Cloudflare Deploy Hook shortly after each event ends — no commit, clean history. See `ops/scheduled-rebuild/README.md`.
+- **Automated post-event rebuild:** a scheduled job (`ops/scheduled-rebuild/`, launchd every 15 min) POSTs a Cloudflare Deploy Hook shortly after each event ends — no commit, clean history. See `ops/scheduled-rebuild/README.md`.
+- **Where it runs:** installed on the **MacBook Pro** (`~/Library/LaunchAgents/io.rdrp.jc-rebuild.plist`, label `io.rdrp.jc-rebuild`, log `~/Library/Logs/rdrp-jc-rebuild.log`). The Cloudflare deploy hook is named `journal-club-auto-rebuild` (branch `main`); its URL is a secret kept outside the repo at `~/.config/rdrp/deploy-hook.env` (chmod 600) and must never be committed.
+- ⚠ The agent runs `git pull --rebase` on this working copy, which **fails while the tree has uncommitted changes** — it then skips the rebuild and retries on the next run without advancing state. A long-lived dirty tree therefore blocks automatic rebuilds; commit or stash before leaving the repo unattended.
+- Because it runs on a laptop, a rebuild can be late if the machine is asleep, but nothing is lost: the check fires for any event that ended since the last run.
 - If there are post-event content updates (slides, recording links, status text), still commit and push them as usual; the automated rebuild only handles the "event just ended, nothing to commit" case.
 - Inspect timing without side effects: `npm run journal-club:rebuild:list` (all events, UTC start/end, status) and `npm run journal-club:rebuild:check` (dry-run of the next scheduled decision).
 
@@ -38,6 +41,13 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 - Before starting any repository edits, check `git status`.
 - If the local branch is behind or the remote may have changed, run `git pull --rebase` before making edits.
 - Do not start editing shared files such as `AGENTS.md` until the local branch is synchronized with the remote.
+- **This repo has a GitHub remote and pushing to `main` is the deploy.** Cloudflare Pages auto-deploys every push to
+  `main`, so a push is a production release — commit and push only when the user asks. This is the explicit exception to
+  the lab-wide "local commits only, never push" default, which applies to remote-less repos synced via Dropbox.
+- The `origin` remote is an HTTPS URL but the keychain holds no GitHub credential; pushes go over SSH
+  (`git push git@github.com:shoichisakaguchi/website.git main`). Keystatic's production GitHub mode is unrelated to this.
+- Content edited through Keystatic in production commits straight to GitHub, so the local clone can fall behind without
+  anyone touching it. Always pull before editing content.
 
 ## Rules, Skills, Subagents
 - **Rules:** `.claude/rules/` (absolute constraints and invariants)
