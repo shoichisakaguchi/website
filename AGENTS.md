@@ -44,6 +44,39 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 - If there are post-event content updates (slides, recording links, status text), still commit and push them as usual; the automated rebuild only handles the "event just ended, nothing to commit" case.
 - Inspect timing without side effects: `npm run journal-club:rebuild:list` (all events, UTC start/end, status) and `npm run journal-club:rebuild:check` (dry-run of the next scheduled decision).
 
+## Ownership Transfer (deferred)
+
+The repository description states the intent to move this repo from the personal account to an RdRp Summit
+GitHub Organization. As of 2026-09-01 this is **on hold** pending a check with Neri about what is already managed
+elsewhere. Keep this list so the work is not re-derived later.
+
+Verified against GitHub's transfer docs: existing collaborators remain intact, webhooks/secrets/deploy keys stay
+associated, and old URLs redirect automatically. So adding editors before the transfer is not wasted work.
+
+What still has to be touched, because it names the repo explicitly or authorises against it:
+
+- `keystatic.config.ts` — `repo: 'shoichisakaguchi/website'` is hardcoded. **Miss this and production Keystatic breaks.**
+- Docs that name the slug: this file, `.claude/rules/keystatic.md`, `.claude/rules/git-workflow.md`,
+  `.claude/skills/add-content-keystatic/SKILL.md`.
+- Local clones — `git remote set-url`: `~/Projects/website` (MacBook Pro and Mac mini) and the rebuild agent's
+  `~/ops/rdrp-website` on the Mac mini. Redirects cover them for a while, but leaving them stale is asking for
+  confusion later.
+- **Verify after transferring** (the docs do not settle these): that the Cloudflare Pages GitHub connection still
+  builds, and that the Keystatic GitHub App (client id `Iv23li…`) is installed on the organization.
+
+## Editing access
+
+- Keystatic requires **write access to the repository** — there is no content-only permission. An editor can push
+  anything, not just content. On a personal account there is no finer role than write.
+- **Saving in Keystatic commits straight to `main`**, which deploys to production in about 90 seconds. There is no
+  review step, and there never has been: the repo has no pull requests at all. Verified in the admin UI on
+  2026-09-01 — the editor shows a single Save button while the branch selector reads `main`.
+- A branch workflow exists (the "New branch…" button on the dashboard) but it is opt-in per session, not enforced.
+- ⚠ **Do not enable "require a pull request" branch protection on `main`** unless everyone switches to the branch
+  workflow first: it would break Save for every editor, including the repo owner.
+- Tell new editors one thing: check that the branch selector says `main` before editing. Work saved on some other
+  branch never reaches the site.
+
 ## Summit Phases
 
 - A summit's `phase` (Planning / Preview / Live / Archived) is **deliberately manual**, set per entry in Keystatic
