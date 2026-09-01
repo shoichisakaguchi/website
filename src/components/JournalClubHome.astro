@@ -18,35 +18,25 @@ const {
 const allJournalClub = await getCollection("journal-club");
 const now = new Date();
 
-// Classify events into Upcoming, Live, and Archived
-const classifiedEvents = allJournalClub.flatMap((item) => {
-    const times = resolveEventTimes(item.data);
-    if (!times) return [];
-    const { start, end, hasTime } = times;
+// Every event whose end time is still in the future at build time. The card
+// only ever shows one of these, and the inline script below re-picks from the
+// same list using the visitor's clock — so a stale build can never leave a
+// finished event on the homepage (which is exactly what happened in June 2026,
+// when a build landed inside a wrongly-assumed 2-hour window and froze the card
+// on "Live Now" for three months).
+const cardEvents = allJournalClub
+    .flatMap((item) => {
+        const times = resolveEventTimes(item.data);
+        if (!times || times.end <= now) return [];
+        return [{ item, start: times.start, end: times.end }];
+    })
+    .sort((a, b) => a.start.valueOf() - b.start.valueOf());
 
-    let status: "upcoming" | "live" | "archived";
-    if (now < start) {
-        status = "upcoming";
-    } else if (now >= start && now < end) {
-        status = "live";
-    } else {
-        status = "archived";
-    }
-
-    return [{ item, start, end, hasTime, status }];
-});
-
-// Find the next meeting: prioritize Live, then Upcoming
-const liveEvent = classifiedEvents
-    .filter((e) => e.status === "live")
-    .sort((a, b) => a.start.valueOf() - b.start.valueOf())[0];
-
-const nextUpcoming = classifiedEvents
-    .filter((e) => e.status === "upcoming")
-    .sort((a, b) => a.start.valueOf() - b.start.valueOf())[0];
-
-const upcomingJournalClub = liveEvent?.item || nextUpcoming?.item || null;
-const isLiveNow = !!liveEvent;
+// A live event started before any upcoming one, so "earliest by start" is the
+// same choice the previous live-then-upcoming logic made.
+const chosen = cardEvents[0] ?? null;
+const upcomingJournalClub = chosen?.item ?? null;
+const isLiveNow = !!chosen && now >= chosen.start;
 
 // Helper to get speaker display (two-line format)
 function getSpeakerInfo(data: typeof upcomingJournalClub.data) {
@@ -96,6 +86,30 @@ const speakerInfo = upcomingJournalClub
 const primaryLink = upcomingJournalClub
     ? getPrimaryLink(upcomingJournalClub.data)
     : null;
+
+// Dates are formatted here, not in the browser, so the label does not change
+// with the visitor's locale.
+function formatCardDate(value: Date | string) {
+    return new Date(value).toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+    });
+}
+
+const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
+    const speaker = getSpeakerInfo(item.data);
+    return {
+        slug: item.slug,
+        title: item.data.title,
+        dateLabel: formatCardDate(item.data.date),
+        speakerName: speaker?.name ?? null,
+        speakerAffiliation: speaker?.affiliation ?? null,
+        calendarUrl: item.data.calendarUrl || null,
+        start: start.toISOString(),
+        end: end.toISOString(),
+    };
+});
 ---
 
 <section class={`journal-section variant-${variant}`}>
@@ -169,78 +183,169 @@ const primaryLink = upcomingJournalClub
             }
         </div>
 
-        <div class="next-meeting-card">
-            {
-                upcomingJournalClub ? (
-                    <>
-                        <span class={`badge ${isLiveNow ? "badge-live" : ""}`}>
-                            {isLiveNow ? "Live Now" : "Next Meeting"}
+        <div class="next-meeting-card" data-jc-card>
+            {/* Both states ship in the HTML; the script below decides which one
+                the visitor sees, using their own clock. Without JavaScript the
+                build-time choice stands, which is the previous behaviour. */}
+            <script
+                type="application/json"
+                data-jc-data
+                is:inline
+                set:html={JSON.stringify(cardEventsPayload).replace(/</g, "\\u003c")}
+            />
+            <div data-jc-content hidden={!upcomingJournalClub}>
+                <span
+                    class={`badge ${isLiveNow ? "badge-live" : ""}`}
+                    data-jc-badge
+                >
+                    {isLiveNow ? "Live Now" : "Next Meeting"}
+                </span>
+                <h3 class="paper-title" data-jc-title>
+                    {upcomingJournalClub?.data.title}
+                </h3>
+                <div class="meeting-meta">
+                    <div
+                        class="speaker-info"
+                        data-jc-speaker
+                        hidden={!speakerInfo}
+                    >
+                        <span class="speaker-name" data-jc-speaker-name>
+                            {speakerInfo?.name}
                         </span>
-                        <h3 class="paper-title">
-                            {upcomingJournalClub.data.title}
-                        </h3>
-                        <div class="meeting-meta">
-                            {speakerInfo && (
-                                <div class="speaker-info">
-                                    <span class="speaker-name">
-                                        {speakerInfo.name}
-                                    </span>
-                                    {speakerInfo.affiliation && (
-                                        <span class="speaker-affiliation">
-                                            {speakerInfo.affiliation}
-                                        </span>
-                                    )}
-                                </div>
-                            )}
-                            <p class="meeting-date">
-                                {new Date(
-                                    upcomingJournalClub.data.date,
-                                ).toLocaleDateString("en-US", {
-                                    weekday: "long",
-                                    month: "long",
-                                    day: "numeric",
-                                })}
-                            </p>
-                        </div>
-                        <div class="card-actions">
-                            {calendarUrl && (
-                                <>
-                                    <a
-                                        href={calendarUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="button small primary-cal"
-                                    >
-                                        Add to Google Calendar
-                                    </a>
-                                </>
-                            )}
-                            <a href={eventDetailUrl} class="link-arrow">
-                                View details &rarr;
-                            </a>
-                        </div>
-                        {calendarUrl && (
-                            <p class="calendar-hint">
-                                Timezones are handled automatically in Google
-                                Calendar.
-                            </p>
-                        )}
-                    </>
-                ) : (
-                    <div class="empty-state">
-                        <h3>No upcoming meetings scheduled</h3>
-                        <p>Stay tuned for the next Journal Club.</p>
-                        <a href="/journal-club" class="link-arrow">
-                            Browse past Journal Clubs &rarr;
-                        </a>
+                        <span
+                            class="speaker-affiliation"
+                            data-jc-speaker-affiliation
+                            hidden={!speakerInfo?.affiliation}
+                        >
+                            {speakerInfo?.affiliation}
+                        </span>
                     </div>
-                )
-            }
+                    <p class="meeting-date" data-jc-date>
+                        {upcomingJournalClub &&
+                            formatCardDate(upcomingJournalClub.data.date)}
+                    </p>
+                </div>
+                <div class="card-actions">
+                    <a
+                        href={calendarUrl ?? "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="button small primary-cal"
+                        data-jc-calendar
+                        hidden={!calendarUrl}
+                    >
+                        Add to Google Calendar
+                    </a>
+                    <a
+                        href={eventDetailUrl ?? "/journal-club"}
+                        class="link-arrow"
+                        data-jc-details
+                    >
+                        View details &rarr;
+                    </a>
+                </div>
+                <p class="calendar-hint" data-jc-hint hidden={!calendarUrl}>
+                    Timezones are handled automatically in Google Calendar.
+                </p>
+            </div>
+            <div class="empty-state" data-jc-empty hidden={!!upcomingJournalClub}>
+                <h3>No upcoming meetings scheduled</h3>
+                <p>Stay tuned for the next Journal Club.</p>
+                <a href="/journal-club" class="link-arrow">
+                    Browse past Journal Clubs &rarr;
+                </a>
+            </div>
         </div>
     </div>
 </section>
 
+<script is:inline>
+    // Re-pick the card's event using the visitor's clock instead of the build
+    // clock. The homepage is prerendered, so without this the badge and the
+    // displayed event are frozen at whatever the last build believed — which is
+    // how a finished session stayed on "Live Now" for three months.
+    (() => {
+        const cards = document.querySelectorAll("[data-jc-card]");
+        cards.forEach((card) => {
+            const holder = card.querySelector("[data-jc-data]");
+            const content = card.querySelector("[data-jc-content]");
+            const empty = card.querySelector("[data-jc-empty]");
+            if (!holder || !content || !empty) return;
+
+            let events;
+            try {
+                events = JSON.parse(holder.textContent || "[]");
+            } catch {
+                return; // leave the server-rendered state alone
+            }
+            if (!Array.isArray(events)) return;
+
+            const q = (sel) => card.querySelector(sel);
+
+            const render = () => {
+                const now = Date.now();
+                const ev = events.find((e) => Date.parse(e.end) > now);
+                if (!ev) {
+                    content.hidden = true;
+                    empty.hidden = false;
+                    return;
+                }
+
+                const live = Date.parse(ev.start) <= now;
+                const badge = q("[data-jc-badge]");
+                if (badge) {
+                    badge.textContent = live ? "Live Now" : "Next Meeting";
+                    badge.classList.toggle("badge-live", live);
+                }
+
+                const title = q("[data-jc-title]");
+                if (title) title.textContent = ev.title;
+
+                const speaker = q("[data-jc-speaker]");
+                if (speaker) {
+                    speaker.hidden = !ev.speakerName;
+                    const name = q("[data-jc-speaker-name]");
+                    if (name) name.textContent = ev.speakerName || "";
+                    const aff = q("[data-jc-speaker-affiliation]");
+                    if (aff) {
+                        aff.hidden = !ev.speakerAffiliation;
+                        aff.textContent = ev.speakerAffiliation || "";
+                    }
+                }
+
+                const date = q("[data-jc-date]");
+                if (date) date.textContent = ev.dateLabel;
+
+                const cal = q("[data-jc-calendar]");
+                if (cal) {
+                    cal.hidden = !ev.calendarUrl;
+                    if (ev.calendarUrl) cal.href = ev.calendarUrl;
+                }
+                const hint = q("[data-jc-hint]");
+                if (hint) hint.hidden = !ev.calendarUrl;
+
+                const details = q("[data-jc-details]");
+                if (details) details.href = "/journal-club/" + ev.slug;
+
+                content.hidden = false;
+                empty.hidden = true;
+            };
+
+            render();
+            // Also cross a start or end boundary for someone who left the page open.
+            setInterval(render, 60000);
+        });
+    })();
+</script>
+
 <style>
+    /* Author rules like .button { display: inline-flex } outbid the UA's
+       [hidden] { display: none }, so the toggles above need this to bite. */
+    [hidden] {
+        display: none !important;
+    }
+
+
     /* Global Reused */
     .container {
         max-width: 980px;

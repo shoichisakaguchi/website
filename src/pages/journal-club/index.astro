@@ -5,8 +5,32 @@ import { sortEntriesByDateDesc } from "../../utils/sortDate";
 
 export const prerender = true;
 
+import { resolveEventTimes } from "../../lib/journalClubTime.mjs";
+
 const items = await getCollection("journal-club");
 const sortedItems = sortEntriesByDateDesc(items, "journal-club");
+
+// Split the schedule into what is still to come and what has happened. The
+// build clock decides the initial split; the script at the bottom re-checks it
+// with the visitor's clock, so a stale build cannot leave a finished session
+// sitting under "Upcoming".
+const now = new Date();
+const endOf = (item: (typeof sortedItems)[number]) =>
+    resolveEventTimes(item.data)?.end ?? null;
+
+const upcomingItems = sortedItems
+    .filter((item) => {
+        const end = endOf(item);
+        return !!end && end > now;
+    })
+    .reverse(); // soonest first
+const pastItems = sortedItems.filter((item) => {
+    const end = endOf(item);
+    return !end || end <= now;
+}); // newest first, as sorted
+
+const endAttr = (item: (typeof sortedItems)[number]) =>
+    endOf(item)?.toISOString() ?? undefined;
 
 // Helper to get speaker info (structured for two-line display)
 function getSpeakerInfo(data: typeof sortedItems[0]['data']): { name: string; affiliation: string | null } | null {
@@ -91,7 +115,7 @@ function formatDate(date: Date): string {
 
         <div class="journal-list">
             <div class="table-container">
-                <table class="journal-table">
+                <table class="journal-table" data-jc-pair>
                     <thead>
                         <tr>
                             <th class="col-date">Date</th>
@@ -100,13 +124,68 @@ function formatDate(date: Date): string {
                             <th class="col-link">Paper</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody data-jc-list="upcoming" hidden={upcomingItems.length === 0}>
+                        <tr class="section-row" data-jc-heading>
+                            <th colspan="4">Upcoming</th>
+                        </tr>
                         {
-                            sortedItems.map((item) => {
+                            upcomingItems.map((item) => {
                                 const speakerInfo = getSpeakerInfo(item.data);
                                 const primaryLink = getPrimaryLink(item.data);
                                 return (
-                                    <tr>
+                                    <tr data-jc-row data-jc-end={endAttr(item)}>
+                                        <td class="col-date">
+                                            {formatDate(item.data.date)}
+                                        </td>
+                                        <td class="col-topic">
+                                            <a
+                                                href={`/journal-club/${item.slug}`}
+                                                class="topic-link"
+                                            >
+                                                {item.data.title}
+                                            </a>
+                                        </td>
+                                        <td class="col-speaker">
+                                            {speakerInfo ? (
+                                                <div class="speaker-cell">
+                                                    <span class="speaker-name">{speakerInfo.name}</span>
+                                                    {speakerInfo.affiliation && (
+                                                        <span class="speaker-affiliation">{speakerInfo.affiliation}</span>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                "-"
+                                            )}
+                                        </td>
+                                        <td class="col-link">
+                                            {primaryLink ? (
+                                                <a
+                                                    href={primaryLink.url}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    class="paper-link"
+                                                >
+                                                    {primaryLink.label} &nearr;
+                                                </a>
+                                            ) : (
+                                                "-"
+                                            )}
+                                        </td>
+                                    </tr>
+                                );
+                            })
+                        }
+                    </tbody>
+                    <tbody data-jc-list="past">
+                        <tr class="section-row" data-jc-heading>
+                            <th colspan="4">Past sessions</th>
+                        </tr>
+                        {
+                            pastItems.map((item) => {
+                                const speakerInfo = getSpeakerInfo(item.data);
+                                const primaryLink = getPrimaryLink(item.data);
+                                return (
+                                    <tr data-jc-row data-jc-end={endAttr(item)}>
                                         <td class="col-date">
                                             {formatDate(item.data.date)}
                                         </td>
@@ -152,13 +231,15 @@ function formatDate(date: Date): string {
                 </table>
             </div>
 
-            <div class="journal-list-mobile">
-                {
-                    sortedItems.map((item) => {
+            <div class="journal-list-mobile" data-jc-pair>
+                <div class="journal-group" data-jc-list="upcoming" hidden={upcomingItems.length === 0}>
+                    <h2 class="section-heading" data-jc-heading>Upcoming</h2>
+                    {
+                        upcomingItems.map((item) => {
                         const speakerInfo = getSpeakerInfo(item.data);
                         const primaryLink = getPrimaryLink(item.data);
                         return (
-                            <div class="journal-item">
+                            <div class="journal-item" data-jc-row data-jc-end={endAttr(item)}>
                                 <div class="item-date">
                                     {formatDate(item.data.date)}
                                 </div>
@@ -188,13 +269,123 @@ function formatDate(date: Date): string {
                             </div>
                         );
                     })
-                }
+                    }
+                </div>
+                <div class="journal-group" data-jc-list="past">
+                    <h2 class="section-heading" data-jc-heading>Past sessions</h2>
+                    {
+                        pastItems.map((item) => {
+                        const speakerInfo = getSpeakerInfo(item.data);
+                        const primaryLink = getPrimaryLink(item.data);
+                        return (
+                            <div class="journal-item" data-jc-row data-jc-end={endAttr(item)}>
+                                <div class="item-date">
+                                    {formatDate(item.data.date)}
+                                </div>
+                                <h3 class="item-title">
+                                    <a href={`/journal-club/${item.slug}`}>
+                                        {item.data.title}
+                                    </a>
+                                </h3>
+                                {speakerInfo && (
+                                    <div class="item-speaker">
+                                        <span class="speaker-name">{speakerInfo.name}</span>
+                                        {speakerInfo.affiliation && (
+                                            <span class="speaker-affiliation">{speakerInfo.affiliation}</span>
+                                        )}
+                                    </div>
+                                )}
+                                {primaryLink && (
+                                    <a
+                                        href={primaryLink.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        class="item-paper-link"
+                                    >
+                                        {primaryLink.label} &nearr;
+                                    </a>
+                                )}
+                            </div>
+                        );
+                    })
+                    }
+                </div>
             </div>
         </div>
     </div>
+
+<script is:inline>
+    // Re-check the Upcoming / Past split against the visitor's clock. The page
+    // is prerendered, so without this a session that has already happened would
+    // stay under "Upcoming" until the next build.
+    (() => {
+        document.querySelectorAll("[data-jc-pair]").forEach((pair) => {
+            const upcoming = pair.querySelector('[data-jc-list="upcoming"]');
+            const past = pair.querySelector('[data-jc-list="past"]');
+            if (!upcoming || !past) return;
+
+            const rows = (el) => Array.from(el.querySelectorAll("[data-jc-row]"));
+
+            const settle = () => {
+                const now = Date.now();
+                const heading = past.querySelector("[data-jc-heading]");
+                // Upcoming is soonest-first; inserting each ended row directly
+                // after the Past heading leaves Past newest-first.
+                rows(upcoming)
+                    .filter((row) => {
+                        const end = row.getAttribute("data-jc-end");
+                        return end && Date.parse(end) <= now;
+                    })
+                    .forEach((row) => {
+                        if (heading && heading.nextSibling) {
+                            past.insertBefore(row, heading.nextSibling);
+                        } else {
+                            past.insertBefore(row, past.firstChild);
+                        }
+                    });
+
+                [upcoming, past].forEach((group) => {
+                    const empty = rows(group).length === 0;
+                    group.hidden = empty;
+                    const h = group.querySelector("[data-jc-heading]");
+                    if (h) h.hidden = empty;
+                });
+            };
+
+            settle();
+            setInterval(settle, 60000);
+        });
+    })();
+</script>
 </Layout>
 
 <style>
+    /* Author rules like .button { display: inline-flex } outbid the UA's
+       [hidden] { display: none }, so the toggles above need this to bite. */
+    [hidden] {
+        display: none !important;
+    }
+
+
+    .section-row th {
+        padding-top: 28px;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #86868b;
+        text-align: left;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .journal-group .section-heading {
+        margin: 28px 0 12px;
+        font-size: 13px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #86868b;
+        font-weight: 600;
+    }
+
     .page-content {
         max-width: 980px;
         margin: 0 auto;

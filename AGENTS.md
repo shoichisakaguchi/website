@@ -28,13 +28,33 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 - Dates are parsed with `z.coerce.date()` and displayed in "Month Day, Year" format.
 
 ## Journal Club Operations
-- The homepage "Next Meeting" card is prerendered, so it only reflects the build-time clock. An entry stays "Live Now"/upcoming until a rebuild runs after its end time (`start + durationMinutes`, default 60).
+- **The homepage card and the schedule page decide what to show in the browser, not at build time.** Each embeds the
+  events that were still upcoming when the page was built, plus their start/end instants, and a small inline script
+  re-picks using the visitor's clock (re-checked every 60 s, so a page left open crosses a start or end on its own).
+  A stale build therefore cannot leave a finished session on "Live Now" — which is exactly what happened in June 2026.
+  Without JavaScript the build-time choice stands, which is the old behaviour.
+- Because of that, the scheduled rebuild is a **safety net, not the mechanism**: its job is to refresh the embedded
+  list, and normal content pushes already do that. Correctness of the badge no longer depends on it.
+- ⚠ Toggling with the `hidden` attribute needs `[hidden] { display: none !important }` in these components: author
+  rules like `.button { display: inline-flex }` outbid the UA stylesheet and the element stays visible otherwise.
 - **Live window / end time:** set `durationMinutes` per entry (Keystatic field). The site (`src/components/JournalClubHome.astro`) and the rebuild trigger both read it, so they always agree on when an event becomes past.
 - **Automated post-event rebuild:** a scheduled job (`ops/scheduled-rebuild/`, launchd every 15 min) POSTs a Cloudflare Deploy Hook shortly after each event ends — no commit, clean history. See `ops/scheduled-rebuild/README.md`.
 - **Where it runs:** the **Mac mini** (always on — `pmset` reports `sleep 0` on AC), out of a **dedicated clone at `~/ops/rdrp-website` that nobody edits by hand**. Agent label `io.rdrp.jc-rebuild`, log `~/Library/Logs/rdrp-jc-rebuild.log`. `RDRP_REPO_DIR` in the secrets file selects that clone. The Cloudflare deploy hook is named `journal-club-auto-rebuild` (branch `main`); its URL is a secret kept outside the repo at `~/.config/rdrp/deploy-hook.env` (chmod 600) and must never be committed.
 - ⚠ The agent runs `git pull --rebase` in its clone, which **fails while that tree is dirty** — it then skips the rebuild and retries next run without advancing state. This is why the agent has its own clone: a dirty development tree would otherwise silently disable automatic rebuilds. Never hand-edit `~/ops/rdrp-website`.
 - If there are post-event content updates (slides, recording links, status text), still commit and push them as usual; the automated rebuild only handles the "event just ended, nothing to commit" case.
 - Inspect timing without side effects: `npm run journal-club:rebuild:list` (all events, UTC start/end, status) and `npm run journal-club:rebuild:check` (dry-run of the next scheduled decision).
+
+## Summit Phases
+
+- A summit's `phase` (Planning / Preview / Live / Archived) is **deliberately manual**, set per entry in Keystatic
+  (the field is labelled "Phase (Editor Only)"). Nothing derives it from `startDate`/`endDate`, and that is intended:
+  the summit should not flip into an announcement mode while venue, dates and programme are still undecided. Do not
+  "fix" this by automating it.
+- `src/content/summit/info.yaml` picks the featured summit and can force a phase (`overridePhase`).
+- ⚠ Known gaps, in case they look like bugs: on the homepage the Planning and Archived branches render identical markup,
+  so switching between those two changes nothing; and the three `topMessage*` fields never reach the page, because
+  Keystatic stores them as `.mdoc` files under `src/content/summit/info/` while the Astro `summit` collection is
+  `type: 'data'` and only reads `info.yaml`. Only `Preview` and `Live` currently produce a distinct homepage.
 
 ## Git Workflow
 - Before starting any repository edits, check `git status`.
