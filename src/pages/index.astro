@@ -203,10 +203,10 @@ const topMessageHtml = topMessageMarkdown
 		{/* COMMON SECTIONS */}
 		<HomeAnnouncements />
 
-		{/* Past RdRp Summits - Simple list for all phases */}
+		{/* All RdRp Summits, upcoming included - each carries its own phase badge */}
 		<section class="past-summits-list">
 			<div class="container">
-				<h2>Past RdRp Summits</h2>
+				<h2>RdRp Summits</h2>
 				<div class="summits-grid">
 					{sortedSummits.map((summit) => (
 						<a href={`/summits/${summit.slug}`} class="summit-item">

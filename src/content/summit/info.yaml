@@ -1,2 +1,40 @@
-featuredSummit: 2025-05-11-rdrp-summit-2025
+# The featured summit drives the homepage phase, which in turn selects which
+# of the three messages below is shown.
+featuredSummit: 2027-rdrp-summit-2027
 overridePhase: Auto
+
+# Phase messages. These used to live as .mdoc sidecar files in info/, which the
+# Astro `summit` collection (type: 'data') never read, so none of them ever
+# reached the page. Keystatic declares them as multiline text fields, which
+# belong here in the YAML.
+topMessagePlanning: |-
+  ### RdRp Summit — Planning in Progress
+
+  The next **RdRp Summit** is currently in the planning phase.
+
+  Dates, location, and the scientific program are not finalized yet, but discussions are actively ongoing among the organizers.\
+  We will share updates here as soon as details are confirmed.
+
+  In the meantime, feel free to explore information from previous summits and join the community discussions on Slack.
+
+  📅 You can also follow the **RdRp Summit Google Calendar** to stay up to date with upcoming announcements.
+topMessageLive: |-
+  ### RdRp Summit — Now Live
+
+  Welcome to the **RdRp Summit**!
+
+  The summit is currently taking place.\
+  Please check the program page for session schedules, speaker information, and connection details for both on-site and remote participants.
+
+  We encourage you to actively participate in discussions, ask questions, and connect with fellow RdRp researchers through Slack.
+
+  Let’s enjoy an exciting and productive summit together!
+topMessageArchived: |-
+  ### RdRp Summit — Archived
+
+  The **RdRp Summit** has concluded.\
+  Thank you to all participants, speakers, and organizers for making this summit a success.
+
+  Information from this summit, including the program, speakers, and related resources, is archived on this site and will remain available for reference.
+
+  We look forward to seeing you at the next RdRp Summit.

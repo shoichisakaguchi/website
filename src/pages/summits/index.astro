@@ -29,7 +29,7 @@ const summitsWithOrganizers = await Promise.all(sortedSummits.map(async (summit)
 
 <Layout>
 	<div class="container page-content">
-		<h1 class="text-center page-title">Past Summits</h1>
+		<h1 class="text-center page-title">Summits</h1>
 		
 		<div class="summit-list">
             {summitsWithOrganizers.map(summit => (
@@ -41,7 +41,11 @@ const summitsWithOrganizers = await Promise.all(sortedSummits.map(async (summit)
                         </h2>
                         {summit.organizerName && <p class="organizer">Organizer: {summit.organizerName}</p>}
                         <div class="actions">
-                            <a href={`/summits/${summit.slug}`}>View Proceedings &rarr;</a>
+                            <a href={`/summits/${summit.slug}`}>
+                                {summit.data.phase === 'Archived'
+                                    ? 'View Proceedings'
+                                    : 'View details'} &rarr;
+                            </a>
                         </div>
                     </div>
                 </div>
