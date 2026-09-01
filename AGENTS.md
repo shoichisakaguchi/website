@@ -47,8 +47,10 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 ## Ownership Transfer (deferred)
 
 The repository description states the intent to move this repo from the personal account to an RdRp Summit
-GitHub Organization. As of 2026-09-01 this is **on hold** pending a check with Neri about what is already managed
-elsewhere. Keep this list so the work is not re-derived later.
+GitHub Organization. As of 2026-09-01 this is **on hold** until the first RdRp Summit 2027 Zoom meeting assigns someone to the website;
+there is also something Neri already manages that needs checking first. Editor onboarding waits on the same
+decision, so that access is granted once, to the right people, in the right place. Keep this list so the work is
+not re-derived later.
 
 Verified against GitHub's transfer docs: existing collaborators remain intact, webhooks/secrets/deploy keys stay
 associated, and old URLs redirect automatically. So adding editors before the transfer is not wasted work.
