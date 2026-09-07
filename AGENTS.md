@@ -79,6 +79,25 @@ What still has to be touched, because it names the repo explicitly or authorises
 - Tell new editors one thing: check that the branch selector says `main` before editing. Work saved on some other
   branch never reaches the site.
 
+## Showing drafts to organizers (branch previews)
+
+To let organizers review a page before it is public, push it to a **branch other than `main`**. Cloudflare Pages
+builds every such branch automatically (`preview_deployment_setting: all`, includes `*` — verified against the API on
+2026-09-07, no setup needed) and serves it at `https://<branch>.website-8cm.pages.dev`. The alias is stable across
+pushes, so the link you send stays valid while you keep iterating. Nothing reaches production until the branch is
+merged to `main`.
+
+- Editors can produce the same thing from production Keystatic: **"New branch…"** on the dashboard, then save. Use
+  `rdrp.io/keystatic` for that, **not** the preview deployment's own `/keystatic` — the Pages *preview* environment
+  only has `KEYSTATIC`, not `KEYSTATIC_GITHUB_CLIENT_ID` / `_SECRET` / `KEYSTATIC_SECRET`, so the admin UI cannot
+  complete GitHub OAuth there. The site itself renders fine on a preview.
+- ⚠ **A preview URL is public to anyone who has it** — there is no gate. Fine for drafts; do not park embargoed
+  material (unannounced speakers, unsigned venues) there. Pages Settings → *Preview deployment access control*
+  (Cloudflare Access, one-time email PIN, free for 50 users) is the one-toggle fix if a review ever needs one.
+- Search engines are unlikely to index a preview separately: every page emits `<link rel="canonical">` pointing at
+  the `https://rdrp.io/...` equivalent.
+- Branch pushes do not touch the scheduled rebuild agent, which only ever works on `main` in its own clone.
+
 ## Summit Phases
 
 - A summit's `phase` (Planning / Preview / Live / Archived) is **deliberately manual**, set per entry in Keystatic
