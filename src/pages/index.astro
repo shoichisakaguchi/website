@@ -5,7 +5,7 @@ import JournalClubHome from "../components/JournalClubHome.astro";
 import { getCollection, getEntry, type CollectionEntry } from "astro:content";
 import SummitDetail from "../components/SummitDetail.astro";
 import { formatDate } from "../utils/date";
-import { marked } from "marked";
+import { Marked } from "marked";
 import { getSortDate, sortEntriesByDateDesc } from "../utils/sortDate";
 
 export const prerender = true;
@@ -73,8 +73,25 @@ const topMessageMarkdown =
 			: currentPhase === "Archived"
 				? summitInfo?.data?.topMessageArchived
 				: undefined;
+// The phase message is Markdown an editor writes in Keystatic, so its links come
+// out of `marked` bare. Send the outbound ones to a new tab, the way every
+// hand-written outbound link on the site already behaves. Scoped to this page:
+// `marked` is a shared singleton, and the RSS feed must not inherit this.
+const topMessageMarked = new Marked({
+	renderer: {
+		link({ href, title, tokens }) {
+			const text = this.parser.parseInline(tokens);
+			const attrs = [`href="${href}"`];
+			if (title) attrs.push(`title="${title}"`);
+			if (/^https?:\/\//i.test(href)) {
+				attrs.push('target="_blank"', 'rel="noopener noreferrer"');
+			}
+			return `<a ${attrs.join(" ")}>${text}</a>`;
+		},
+	},
+});
 const topMessageHtml = topMessageMarkdown
-	? await marked.parse(topMessageMarkdown)
+	? await topMessageMarked.parse(topMessageMarkdown)
 	: "";
 ---
 
@@ -207,24 +224,54 @@ const topMessageHtml = topMessageMarkdown
 		<section class="past-summits-list">
 			<div class="container">
 				<h2>RdRp Summits</h2>
-				<div class="summits-grid">
-					{sortedSummits.map((summit) => (
-						<a href={`/summits/${summit.slug}`} class="summit-item">
-							<span class="summit-year">{summit.data.year}</span>
-							<span class="summit-title">{summit.data.title}</span>
-							{(summit.data.city || summit.data.country) && (
-								<span class="summit-location">
-									{[summit.data.city, summit.data.country]
-										.filter(Boolean)
-										.join(", ")}
-								</span>
-							)}
-							<span class={`summit-phase ${summit.data.phase?.toLowerCase()}`}>
-								{summit.data.phase}
-							</span>
-						</a>
-					))}
-				</div>
+				<ul class="summits-grid">
+					{sortedSummits.map((summit) => {
+						// Peer-reviewed outputs of the summit itself, shown next to it as evidence.
+						const statements = (summit.data.communityOutcomes ?? []).filter(
+							(outcome) => outcome.type === "Consensus statement" && outcome.doi,
+						);
+						return (
+							<li class="summit-item">
+								<div class="summit-row">
+									<span class="summit-year">{summit.data.year}</span>
+									<a href={`/summits/${summit.slug}`} class="summit-title">
+										{summit.data.title}
+									</a>
+									{(summit.data.city || summit.data.country) && (
+										<span class="summit-location">
+											{[summit.data.city, summit.data.country]
+												.filter(Boolean)
+												.join(", ")}
+										</span>
+									)}
+									{/* "Archived" only says "not upcoming", which the absence of a badge already says. */}
+									{summit.data.phase && summit.data.phase !== "Archived" && (
+										<span class={`summit-phase ${summit.data.phase.toLowerCase()}`}>
+											{summit.data.phase}
+										</span>
+									)}
+								</div>
+								{statements.length > 0 && (
+									<div class="summit-outcomes">
+										{statements.map((outcome) => (
+											<div class="summit-outcome">
+												<span class="outcome-chip">Consensus statement</span>
+												<a
+													class="outcome-doi"
+													href={`https://doi.org/${outcome.doi}`}
+													target="_blank"
+													rel="noopener noreferrer"
+												>
+													https://doi.org/{outcome.doi}
+												</a>
+											</div>
+										))}
+									</div>
+								)}
+							</li>
+						);
+					})}
+				</ul>
 				<a href="/summits" class="link-arrow browse-all">
 					Browse all summits &rarr;
 				</a>
@@ -393,32 +440,38 @@ const topMessageHtml = topMessageMarkdown
 		gap: 12px;
 		max-width: 600px;
 		margin: 0 auto 1.5rem;
+		list-style: none;
+		padding: 0;
 	}
 	.summit-item {
-		display: grid;
-		grid-template-columns: auto 1fr auto auto;
-		align-items: center;
-		gap: 16px;
 		padding: 16px 20px;
 		background: white;
 		border-radius: 12px;
-		text-decoration: none;
-		color: inherit;
 		border: 1px solid rgba(0, 0, 0, 0.05);
-		transition: transform 0.2s, box-shadow 0.2s;
+		transition: box-shadow 0.2s;
 	}
 	.summit-item:hover {
-		transform: translateY(-2px);
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	}
+	.summit-row {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto auto;
+		align-items: center;
+		gap: 16px;
 	}
 	.summit-year {
 		font-weight: 700;
 		font-size: 1.1rem;
-		color: var(--c-primary);
+		color: var(--c-link);
 	}
 	.summit-title {
 		font-weight: 600;
 		text-align: left;
+		color: inherit;
+		text-decoration: none;
+	}
+	.summit-title:hover {
+		text-decoration: underline;
 	}
 	.summit-location {
 		font-size: 0.9rem;
@@ -445,19 +498,57 @@ const topMessageHtml = topMessageMarkdown
 		background: #dcfce7;
 		color: #15803d;
 	}
+	.summit-outcomes {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin-top: 10px;
+		padding-top: 10px;
+		border-top: 1px solid var(--c-divider);
+	}
+	.summit-outcome {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 10px;
+	}
+	.outcome-chip {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		font-weight: 600;
+		padding: 4px 8px;
+		border-radius: 4px;
+		background: #eef4ff;
+		color: #1c4fa1;
+		white-space: nowrap;
+	}
+	.outcome-doi {
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 0.8125rem;
+		color: var(--c-link);
+		text-decoration: none;
+		overflow-wrap: anywhere;
+	}
+	.outcome-doi:hover {
+		text-decoration: underline;
+	}
 	.browse-all {
 		display: inline-block;
 		margin-top: 0.5rem;
 	}
 
 	@media (max-width: 640px) {
-		.summit-item {
+		.summit-row {
 			grid-template-columns: 1fr;
 			text-align: center;
 			gap: 8px;
+			justify-items: center;
 		}
 		.summit-title {
 			text-align: center;
+		}
+		.summit-outcome {
+			justify-content: center;
 		}
 	}
 
