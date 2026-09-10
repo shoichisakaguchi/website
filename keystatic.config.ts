@@ -432,7 +432,6 @@ export default config({
                     registration: fields.url({ label: 'Registration URL' }),
                     callForPapers: fields.url({ label: 'Call for Papers URL' }),
                     slack: fields.url({ label: 'Slack Invite URL' }),
-                    googleCalendar: fields.url({ label: 'Google Calendar URL' }),
                     codeOfConduct: fields.url({ label: 'Code of Conduct URL' }),
                 }, { label: 'Key Links' }),
 

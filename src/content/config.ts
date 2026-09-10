@@ -114,7 +114,6 @@ const summits = defineCollection({
             registration: z.string().url().optional().or(z.literal('')),
             callForPapers: z.string().url().optional().or(z.literal('')),
             slack: z.string().url().optional().or(z.literal('')),
-            googleCalendar: z.string().url().optional().or(z.literal('')),
             detailedProgram: z.string().url().optional().or(z.literal('')),
             codeOfConduct: z.string().url().optional().or(z.literal('')),
         }).optional(),
