@@ -1,94 +1,125 @@
 # HANDOFF — rdrp.io
 
-最終更新: 2026-09-10 / セッション: 018pQNozbBvBw9A24k1mxXXV
+最終更新: 2026-09-14 / セッション: 19a3c309
 
 このファイルはセッション間の引き継ぎ用。安定した設計事実は `AGENTS.md` に、
 ここには「いまどこまで進んでいて、次に何をするか」だけを書く。
 
-## 今回やったこと（2026-09-10・本番反映済み）
+## いまブロックされていること
 
-コミット `028f28d`、`1be87fb`（どちらも `main` に push 済み）。
+**RdRp Summit 2027 の日程は 2027-03-07〜11 でほぼ確定。ただしサイトには入れない。**
+理由は**本家の ViBioM が正式な日程を発表していない**から（2025 と同じくサテライト開催。
+2025 の `satelliteOf` は ViBioM 2025 / https://evbc.uni-jena.de/events/vibiom2025/）。
+ViBioM の発表が出たら `src/content/summits/2027-rdrp-summit-2027.mdoc` に
+`startDate` / `endDate` / `satelliteOf` を入れる（5分）。**これが今いちばん価値の高い1行**で、
+トップの2027カードが「年号だけ」から「日程の決まった会議」に変わる。
+2027 の準備物は `~/Dropbox/omc/がっかい/20270307-11_RdRp_summit/`。
 
-- **トップページのサミット一覧に Consensus statement の DOI を出した。**
-  合意文書2本は元から `communityOutcomes` にあり詳細ページには出ていたが、
-  トップからは2クリック奥だった。新規データは作っていない。
-- **Archived バッジを非表示にした。** 3件中2件が Archived で「Planning でない」
-  としか言っておらず、Planning バッジの不在と年号が同じことを二重に言っていた。
-  `phase` のデータ自体は触っていない。
-- **カードを `<a>` から `<li>` に変えた。** DOI リンクを入れると入れ子リンクになるため。
-  一覧は `<ul>`。ホバーの浮き上がりは、押せないのに動くので外した。
-- **Google Calendar を2箇所でリンクにした**（名前だけ書かれていた）。
-  `src/content/summit/info.yaml` の Planning メッセージと `/journal-club/`。
-  URL は `https://calendar.google.com/calendar/u/0?cid=cmRycC5zdW1taXRAZ21haWwuY29t`
-  （= rdrp.summit@gmail.com の購読リンク）。
-- **`marked` に renderer を足した**（`src/pages/index.astro`）。編集者が書いた
-  Markdown の外部リンクを新規タブで開くため。⚠ `marked` は index / posts /
-  SummitDetail / rss.xml.ts で共有シングルトンなので、`marked.use()` ではなく
-  `new Marked({...})` にしてある。**グローバルにすると RSS に `target="_blank"` が混ざる。**
-- **`--c-primary` の未定義参照を2箇所直した**（`.summit-year`、`.eyebrow` → `--c-link`）。
-- **`links.googleCalendar` を削除した**（スキーマと Keystatic の両方）。値が3件とも空で、
-  どこからも描画されていなかった。他の5つの `links.*` は描画されているので残してある。
+## 2026-09-14 に決めたこと（実装はまだゼロ・コミットなし）
 
-## 触ったファイル
+### JC の録画と同意
 
-- `src/pages/index.astro`（一覧のマークアップ・CSS・marked renderer）
-- `src/pages/journal-club/index.astro`（カレンダーのリンク化）
-- `src/content/summit/info.yaml`（同上）
-- `src/content/config.ts` / `keystatic.config.ts`（`links.googleCalendar` 削除）
-- 新規: `docs/HANDOFF.md`（このファイル）
+- **既定は「録画を公開しない」。** 削除の約束は「1年後」ではなく**「言われたら即消す」**にする。
+  タイマーは将来の担当者を必要とするが、トリガーは依頼そのものが起動条件なので記憶が要らない。
+  ウェブサイト担当が未定（`AGENTS.md` の Ownership Transfer 参照）である以上、
+  期限つきの約束は破れる約束になる。
+- **中間状態「unlisted」を無くす。** 状態は「公開（同意あり・JCページからリンク）」か
+  「削除」の2つだけ。リンクの有無が同意の記録になるので、新しい欄も台帳も要らない。
+- **既存の在庫の片付け方**: 登壇者に1通ずつメール。①スライドを Zenodo に上げて DOI を
+  付けないか（＝還元）②録画をどうするか（公開／削除）③**2週間返事がなければ削除**。
+  沈黙が安全側に倒れるので追いかける仕事が出ない。8通で済む。
+- ⚠ **削除対象は YouTube の unlisted だけではない。** 原本が
+  `~/Dropbox/omc/RdRp_Summit/RVJC/` にもある（`20251002_Ito.mp4` `20251107_Kim.mp4`
+  `20260115_Gytis.mp4` `20260317_MetaVR_Fiamenghi.mp4` ほか音声・txt・stats）。
+- 法的な向き: 登壇者はフィンランド・オランダ・リトアニア・スイス。録画は GDPR の個人データで、
+  同意は「示せること」が要る（第7条1項）。`src/pages/privacy.astro` に録画の記載は無い。
+- **JC 登壇者は全員が自分の仕事を話している**（8回とも）。他人の論文を紹介する抄読会ではないので、
+  スライドを Zenodo に上げても第三者図版の著作権問題が起きない。DOI 提案が成立する前提。
 
-## 次のセッションの主題
+### ファビコンは差し替えない
 
-**JC のスライドの DOI・録画の公開期限・発表者への還元。**
+`public/favicon.svg`（878バイト・手書き SVG）の手は **RdRp の palm / fingers / thumb**。
+分野の人には酵素に、それ以外には「いいね」に見える二重の読み。**テンプレートの残りものではない。**
+以前このファイルに「差し替える」方向の記述があったが撤回済み。
 
-前提として調べ済みのこと:
+### トップページで直すもの（優先順）
 
-- **サイト側は既に受け入れ可能。** `journal-club` の `links: [{label, url, isPrimary}]`
-  は label が自由入力なので、`Slides (Zenodo)` + `https://doi.org/...` を
-  **コード変更ゼロ**で追加できる（`src/content/config.ts` の journal-club、
-  `keystatic.config.ts` の Links 欄、表示は `src/pages/journal-club/[slug].astro`）。
-  `isPrimary` は紹介論文のものに残し、スライドには付けない。
-- **録画は1本も無い。** 技術的な問題ではなく**同意プロセスが無いだけ**。
-  登壇依頼フォームに「録画公開の可否」を1行足すのが最小の一手。
-  `summits` の `archiveResources.recordingsUrl` は器が用意されていて中身が無い。
-- **DOI はスライド優先**という判断（録画は視聴コストが高く引用されない。
-  スライドは引用され CV に書ける）。Zenodo は無料・1レコード50GBまで。
-  やめても**発行済み DOI は永続する**ので参加者の業績は毀損されない＝始めやすい。
-- **`links` は「紹介した論文」と「我々が出した成果物」を区別していない。**
-  将来 Year in Review で DOI を自動収集したくなったら `type` を足す。今は不要。
-- 未確認: ウェビナー録画特化の Zenodo 運用例は調査で見つからず＝先行例なしの試み。
+1. **「No upcoming meetings scheduled」** — 画面中央で「何も起きていない」と言っている。
+   JC のエントリを1件足せば直る（Keystatic で5分・コード変更なし）。
+   9/25 の回は Tatiana が提案中で未確定のため**確定待ち**。
+2. **最初の画面に画像が1枚もない。** バナーは `public/images/summits/hero/rdrp-summit-2025/heroImage.jpg`
+   （3650×1047）に既にある。`figure_2025_lisbon_field-timeline.svg`（分野の年表・2027を足せる）も候補。
+3. **Latest Posts の1件が「rdrp.io is moving to Astro + Cloudflare Pages」。**
+   消さない（URL 変更の記録）。`HomeAnnouncements.astro:14` は `slice(0, 3)` なので、
+   **新しい記事を出せば自然に下がる**。書くべき1本は決まっていて、
+   **2本目の Consensus statement（Peer Community Journal Vol.6 e50 / 10.24072/pcjournal.727 /
+   2026-05-28）がまだサイトで告知されていない**。データは 2025 の mdoc:142-152 に揃っている。
+   これ1本で「移行告知が下がる」「最新が7ヶ月前でなくなる」「合意文書を出す場という位置づけが実例で出る」が同時に片付く。
+4. 人の顔が1つも出ていない（`people` は43人分あるのに未使用。旧サイトは21人並べていた）。
+5. About の文が一般的。旧サイトの "a discussion-centric event that aims to foster
+   reproducibility, collaboration, and interoperability in omics-derived RNA virus discovery" が強い。
+6. ヘッダーがテキスト `rdrp.io` のまま。ワードマークは存在する（下記）。
 
-還元の設計として調査済みの材料:
+## 現物の在り処（repo の外・どこにも書かれていなかった）
 
-- **公開の承認が最も安い部品。** CSCCE 2017年調査でアンバサダー制度の参加インセンティブ
-  最多は「公的な評価・承認」79%。登壇歴を people / JC ページに残し**消さない**
-  （nf-core の「一度載せたら消さない」方針）＋「依頼があれば推薦状を書く」の明記。
-  CV には `Invited speaker, RdRp Summit Journal Club, <date>`。
-- preLights の見返り設計＝科学ライティング経験・著者とのネットワーク・**推薦状**・
-  プロフィール向上。このうち推薦状とプロフィールだけを取るのが安い。
-- **JC の月1が崩れかけている**（最後の間隔が86日）。新コーナー（若手10分枠など）を
-  足すのは月1が戻ってから。崩れかけの枠に負荷を足すと本体が落ちる。
+| 何 | 場所 | 備考 |
+|---|---|---|
+| 2027 準備一式 | `~/Dropbox/omc/がっかい/20270307-11_RdRp_summit/` | README.md / docs / summary / tools / member.xlsx |
+| リスボン一式（198ファイル） | `~/Dropbox/omc/がっかい/20250509-12_RdRpSummit2_Lisbon/` | 下記参照 |
+| 旧 WordPress のメディア | `~/Dropbox/omc/RdRp_Summit/wordpress/uploads/` | 405ファイル中341は自動生成サムネ＝**原本64**。⚠オンラインのみ（0バイト） |
+| JC 録画の原本 | `~/Dropbox/omc/RdRp_Summit/RVJC/` | 同意整理の対象 |
+| デザイン素材（厳選10点） | Drive `RdRp_Summit_2027 > Design` ＝ `~/Dropbox/omc/がっかい/20270307-11_RdRp_summit/Design` | 命名は `<種別>_<時期>_<対象>` |
 
-## まだ手をつけていない（優先順）
+リスボン一式の中で効くもの:
 
-1. **Cloudflare Web Analytics の有効化**（10分・無料・cookie 不要・Pages のトグル1つ）。
-   いま何が読まれているか測る手段がゼロで、施策が効いたかを判定できない。
-   測る問いは「流入元の上位3つ」だけに絞り、四半期に1回見る。
-2. **2025 Lisbon の参加者数を埋める**（15分）。2023には「70名超・50機関超」があるのに
-   2025は空欄。数字が2期分並ぶと2027の勧誘材料になる。
-3. `/publications` と `/tools` の独立ページ化（Q2想定・2〜3時間）。
-   全サミットの `communityOutcomes` を横断で並べるだけなので新規データ不要。
-   `/tools` は検索流入を生みうる唯一のページ。⚠ NeoRdRp を特別扱いせず、
-   「このページは NeoRdRp の著者が運営するサイトにあります」と開示する。
-4. 2027 の律速は集客ではなく**ドイツ側のローカルオーガナイザーが決まっていないこと**。
+- `docs/Registration/RdRp Summit 2025 Registration (Responses).xlsx` — **参加者数はここ**
+  （⚠ 2025-03-31 時点の集計で、最終参加者数とは違う可能性）
+- `docs/fund_raising/ISME General Sponsorship - Acceptance letter.pdf` — トラベルグラントの裏付け
+- `docs/Communications/Visuals/` — SVG のQRコード、動画版ロゴ、分野年表
+- `summary/RdRp_Summit_2025_Progress_Report_EN.md` — ⚠ **2025-04-03 作成＝事後報告ではない**。
+  準備状況の棚卸しなので `archiveResources.reportUrl` は埋まらない
+- `pictures/` — ⚠ **開催中の写真ではない。** EXIF は 2025-04-30 と 05-07（開催は 05-11/12）＝
+  **会場の下見写真9枚**。開催中の写真は現時点でどこにも見つかっていない
+- `docs/Setting up NGO in Lithuania/` — **リトアニアで NGO 法人を設立中**。repo にもサイトにも記載なし
+
+## 移行で落ちたテキスト（復元候補）
+
+- サミットの定義文（上記 5）
+- 2023 の実績の詳細: 60% 現地 / 40% リモート、50機関、**参加者の多くが ECR で半数が PhD students**
+  （repo にあるのは "over 70 participants from more than 50" の一行だけ）
+- **ISME のトラベルグラント 500 EUR**（`2025-05-11-rdrp-summit-2025.mdoc:141` が `travelGrant: {}` のまま）
+
+## 技術的な不具合（デザインとは無関係）
+
+- **OG 画像の寸法が宣言と食い違う。** `public/og/*.png` は4つとも**同一ファイル**（md5 一致）で
+  743×736 の正方形なのに、`src/lib/og.ts` の `OG_IMAGE_DIMENSIONS` は 1200×630 を宣言し
+  `BaseHead.astro:66,73` がそれを出力。`twitter:card` は `summary_large_image`。
+  ⚠ 個別ページ（journal-club / summits / posts）は `useDynamic: true` で
+  `src/pages/og.png.ts` が 1200×630 を生成するので**固定ページだけの問題**。
+- 同 og の静的 PNG は 2.1MB × 4、`public/og-image.png` も 2.1MB（260×260 枠に描くのに毎回フェッチ）。
+- `public/images/journal_club/journal_club.png` は 800×800 / 648KB を 80〜100px で表示。
+- `.button.primary` がまだ未定義の `--c-primary` を参照（`index.astro:321`）。
+  ただしそのクラスを使う要素が無い**未使用 CSS** なので実害なし。
+
+## 対外
+
+- **Lana Vogrinec に Slack で Design フォルダを共有済み**（2026-09-14 23:47）。
+  リファレンスとして渡しただけで、依頼はしていない。
+  palm/fingers/thumb のコンセプトは**意図的に説明していない**
+  （説明なしで伝わるかどうかがそのままデザインの検証になるため）。
+  「なぜ親指？」と聞かれたら答える。
+
+## 2026-09-10 にやったこと（本番反映済み・詳細は git log）
+
+`028f28d` `1be87fb` `a282b9d`。トップのサミット一覧に Consensus statement の DOI を出し、
+Archived バッジを外し、Google Calendar を2箇所でリンクにし、`links.googleCalendar` を削除した。
+⚠ `src/pages/index.astro` の `marked` は `new Marked({...})` の隔離インスタンス。
+**グローバルにすると RSS に `target="_blank"` が混ざる。**
 
 ## 注意点
 
-- **push = 本番デプロイ。** `main` への push で Cloudflare Pages が自動デプロイし約90秒で反映。
-  実測でも140秒だった。指示があるまで push しない。
+- **push = 本番デプロイ。** `main` への push で Cloudflare Pages が自動デプロイ（実測140秒）。指示があるまで push しない。
 - `origin` は HTTPS だが認証情報が無いので push は SSH:
   `git push git@github.com:shoichisakaguchi/website.git main`
-- **`.button.primary` はまだ `--c-primary` を参照している**（`index.astro:321`）。
-  ただしそのクラスを使う要素が存在しない**未使用 CSS** なので実害なし。消すなら別途。
-- Keystatic の編集は `main` に直コミットされる＝ローカルが黙って古くなる。作業前に pull。
+- Keystatic の編集は `main` に直コミットされる＝ローカルが黙って古くなる。作業前に `git pull --rebase`。
 - 調査の根拠と3案のモック: https://claude.ai/code/artifact/9044dda2-108e-42e5-af54-e2d73e0bb594
