@@ -1,6 +1,6 @@
 # HANDOFF — rdrp.io
 
-最終更新: 2026-09-14 / セッション: 19a3c309
+最終更新: 2026-09-15 / セッション: 19a3c309
 
 このファイルはセッション間の引き継ぎ用。安定した設計事実は `AGENTS.md` に、
 ここには「いまどこまで進んでいて、次に何をするか」だけを書く。
@@ -14,6 +14,60 @@ ViBioM の発表が出たら `src/content/summits/2027-rdrp-summit-2027.mdoc` �
 `startDate` / `endDate` / `satelliteOf` を入れる（5分）。**これが今いちばん価値の高い1行**で、
 トップの2027カードが「年号だけ」から「日程の決まった会議」に変わる。
 2027 の準備物は `~/Dropbox/omc/がっかい/20270307-11_RdRp_summit/`。
+
+## 記事作成ポリシー（2026-09-15 制定・未実装）
+
+⚠ **これを `keystatic.config.ts` のフィールド `description` に書くのが次の一手。**
+`docs/` や `AGENTS.md` に置いても、Keystatic で書く人は読まない。**書く場所の横に
+出ている文字列だけが読まれる。**（codex の指摘。同意した）
+
+### 掲載するかの判定（10秒・判断不要）
+
+> 論文が公開された、またはツールが公開リリースされた。著者か開発者の少なくとも1人が
+> サイトの People に載っている。まだ誰も記事にしていない。── この3つが揃ったら1本出す。
+
+パッチ・引用・講演・小規模更新は自動対象にしない。
+
+### 書き方
+
+- **事実だけ。ただし「それが何をするものか」の平文1文は必須。**
+  引用と DOI だけでは、既にその仕事を知っている人にしか意味がない。初見の人が
+  クリックする理由が無くなる。逆に「画期的な成果」は熱意だけで情報が無い。
+- 意味づけの段落、締めの一文、有意性の主張は**書かない**。
+- `publishedDate` は**記事を書いた日**（論文の公開日ではない）。論文の日付は本文1行目に書く。
+  過去の積み残しを今書く場合も今日の日付。RSS に新着として届く。
+- ⚠ **`credits` の `role` は `editor`（表示は "Edited by"）。`author` にしない。**
+  他人の仕事についての告知に「Author: 自分」が出る。2026-09-15 に実際にやらかして直した。
+- オーガナイザーの共著者名を並べない。9名中5名を並べると自薦に見える。
+  帰属は論文自身の言葉を引く（RdRpCATCH は論文が自ら "developed as a community
+  initiative following the 1st RdRp Summit" と書いていた）。
+
+### 個人の仕事を名指しする告知は、本人に先に見せる
+
+コミュニティ全体の成果物（Consensus statement）とは扱いが違う。
+下書きをそのまま Slack DM で送り、①説明の1文を書き直してもらう ②リンクの順序を聞く
+③断る余地を残す。RdRpCATCH では Dimitris Karapliafis が推敲した段落を返してくれたので、
+**一字も変えずに載せた**。所要は1往復。
+
+### 最大のリスク
+
+テンプレートの手間ではなく**誰も起動しないこと**。対策は担当者を1人決め、
+**DOI か URL だけで投稿受付とする**（著者に文章を書かせない）。
+⚠ ウェブ担当は2027の会議まで未定なので、**当面は坂口**と明記すること。
+委員会承認・編集会議・コンテンツカレンダーは作らない。
+
+## 2026-09-15 にやったこと（本番反映済み）
+
+`3326050` `03dab7e`。
+
+- **RdRpCATCH の告知を出した。** NAR Genomics and Bioinformatics 8(3) lqag076 /
+  2026-06-27 / https://doi.org/10.1093/nargab/lqag076 。説明の段落は Dimitris 本人の文章。
+  web https://rdrpcatch.bioinformatics.nl / src https://github.com/dimitris-karapliafis/RdRpCATCH
+- **Consensus statement の記事に「何についての合意か」の1文を足した**（抄録より）。
+- **`[slug].astro:48` の `editor` ラベルを "Editor" → "Edited by"** に変え、2記事の
+  `role` を `editor` に。既存の Feb 記事（`summary` = "Summary by"）には影響なし。
+- **結果としてトップの Latest Posts から移行告知が消えた。** `HomeAnnouncements.astro:14`
+  が `slice(0, 3)` なので、記事を1本も消さずに4番目へ落ちた。
 
 ## 2026-09-14 に決めたこと（実装はまだゼロ・コミットなし）
 
@@ -103,6 +157,9 @@ ViBioM の発表が出たら `src/content/summits/2027-rdrp-summit-2027.mdoc` �
 
 ## 対外
 
+- **Dimitris Karapliafis（RdRpCATCH 第一著者）に Slack DM で下書きを見せ、了承を得た**
+  （2026-09-15）。推敲した段落を返してくれたので一字も変えずに載せた。公開後の一報は済み。
+
 - **Lana Vogrinec に Slack で Design フォルダを共有済み**（2026-09-14 23:47）。
   リファレンスとして渡しただけで、依頼はしていない。
   palm/fingers/thumb のコンセプトは**意図的に説明していない**
@@ -115,6 +172,14 @@ ViBioM の発表が出たら `src/content/summits/2027-rdrp-summit-2027.mdoc` �
 Archived バッジを外し、Google Calendar を2箇所でリンクにし、`links.googleCalendar` を削除した。
 ⚠ `src/pages/index.astro` の `marked` は `new Marked({...})` の隔離インスタンス。
 **グローバルにすると RSS に `target="_blank"` が混ざる。**
+
+## 次にやること
+
+1. **`keystatic.config.ts` の posts に上の記事作成ポリシーを `description` として書く。**
+   これが今いちばん効く（今回の知見が全部そこに集約される）。
+2. 「移行で落ちたテキスト」3点の復元（下記）。素材の在り処は特定済み。
+3. `natural-english` スキルの検討。`~/.claude/skills/natural-japanese` の英語版が無い。
+   このサイトは英語で、Keystatic 経由で他の人も書く。日本語版の構造を移植できる。
 
 ## 注意点
 
