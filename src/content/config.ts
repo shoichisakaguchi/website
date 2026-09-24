@@ -107,6 +107,7 @@ const summits = defineCollection({
             person: z.string(),
             role: z.string().optional(),
             affiliation: z.string().optional(),
+            country: z.string().optional(),
             section: z.string().optional(),
             weight: z.number().optional().default(50),
         })).optional(),

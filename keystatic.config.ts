@@ -522,6 +522,7 @@ export default config({
                         }),
                         role: fields.text({ label: 'Role' }),
                         affiliation: fields.text({ label: 'Affiliation (Override)' }),
+                        country: fields.text({ label: 'Country (Override)' }),
                         section: fields.text({ label: 'Team / Section' }),
                     }),
                     {
