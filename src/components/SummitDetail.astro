@@ -1205,7 +1205,12 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
         background-color: #f0f0f0;
     }
 
+    /* Dashed, so it reads as "photo still to come" rather than as a finished
+       anonymous avatar. Every published photo is one the person consented to,
+       so a missing one means we have not asked them yet, or they have not sent
+       it: a state worth showing rather than smoothing over. */
     .organizer-image-placeholder {
+        box-sizing: border-box;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1213,6 +1218,8 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
         font-weight: 600;
         color: #9a9a9a;
         letter-spacing: 0.05em;
+        background-color: transparent;
+        border: 2px dashed #d4d4d4;
     }
 
     .organizer-name {
