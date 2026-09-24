@@ -2,7 +2,7 @@
 import { getEntry } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import { marked } from "marked";
-import { formatDate } from "../utils/date";
+import { formatDate, formatDateRange } from "../utils/date";
 import CommunityFooter from "./CommunityFooter.astro";
 
 interface Props {
@@ -80,6 +80,25 @@ const mapQuery = [item.data.venue, item.data.city, item.data.country]
     .join(", ");
 const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`;
 
+// The header showed only the year, so a summit page never said when it happened
+// and a "save the date" page could not state its own date. Planning stays bare:
+// the phase exists precisely so nothing is announced before it is settled.
+const summitDates =
+    item.data.phase !== "Planning" && item.data.startDate
+        ? formatDateRange(item.data.startDate, item.data.endDate)
+        : null;
+
+// A committee member whose photo has not arrived yet still needs to occupy a
+// full-height card, or their column jumps up and the grid row looks broken.
+function initials(name: string): string {
+    return name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0]?.toUpperCase() ?? "")
+        .join("");
+}
+
 // Render registration fees markdown if present
 const registrationFeesHtml = item.data.registrationFees?.trim()
     ? await marked.parse(item.data.registrationFees)
@@ -131,7 +150,7 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
 
                 <h1 class="page-title">{item.data.title}</h1>
                 <div class="meta">
-                    <span class="year">{item.data.year}</span>
+                    <span class="year">{summitDates ?? item.data.year}</span>
                     {
                         item.data.phase !== "Planning" &&
                             (item.data.city || item.data.country ? (
@@ -333,7 +352,8 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
 
                     {/* 5. Program Section */}
                     {item.data.phase !== "Planning" &&
-                        (item.data.programArchive ||
+                        (item.data.programArchive?.url ||
+                            item.data.programArchive?.items?.length ||
                             item.data.links?.detailedProgram) && (
                             <section class="program-archive-section">
                                 <h2>
@@ -420,16 +440,6 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
                                             </div>
                                         )}
 
-                                    {/* Option C: Placeholder */}
-                                    {!item.data.programArchive?.url &&
-                                        !item.data.programArchive?.items
-                                            ?.length &&
-                                        !item.data.links?.detailedProgram && (
-                                            <p class="program-placeholder">
-                                                Program details will be added
-                                                soon.
-                                            </p>
-                                        )}
                                 </div>
                             </section>
                         )}
@@ -637,13 +647,20 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
                             <div class="organizers-grid">
                                 {organizers.map((org) => (
                                     <div class="organizer-card">
-                                        {org.image && (
+                                        {org.image ? (
                                             <img
                                                 src={org.image.src}
                                                 alt={org.name}
                                                 class="organizer-image"
                                                 loading="lazy"
                                             />
+                                        ) : (
+                                            <div
+                                                class="organizer-image organizer-image-placeholder"
+                                                aria-hidden="true"
+                                            >
+                                                {initials(org.name)}
+                                            </div>
                                         )}
                                         <h3 class="organizer-name">
                                             {org.name}
@@ -1186,6 +1203,16 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
         object-fit: cover;
         margin-bottom: 1rem;
         background-color: #f0f0f0;
+    }
+
+    .organizer-image-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #9a9a9a;
+        letter-spacing: 0.05em;
     }
 
     .organizer-name {
