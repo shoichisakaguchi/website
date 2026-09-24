@@ -28,13 +28,17 @@ if (item.data.organizers) {
                 const personEntry = await getEntry("people", org.person);
                 if (!personEntry) return null;
 
-                // Override affiliation if present in summit data
+                // People move. Without a per-summit override an archived page
+                // silently restates a past organiser's present-day employer,
+                // which is a claim about that summit that was never true.
                 const affiliation =
                     org.affiliation || personEntry.data.affiliation;
+                const country = org.country || personEntry.data.country;
 
                 return {
                     ...personEntry.data,
                     affiliation,
+                    country,
                     displayRole: org.role,
                     section: org.section,
                 } as Organizer;
