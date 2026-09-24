@@ -98,6 +98,26 @@ merged to `main`.
   the `https://rdrp.io/...` equivalent.
 - Branch pushes do not touch the scheduled rebuild agent, which only ever works on `main` in its own clone.
 
+## People, photos and archived affiliations
+
+- Organizer cards resolve from the `people` collection, but **not every field is shared**. `name`, `image` and the
+  fallbacks come from `people`; `role`, `affiliation` and `country` can be pinned per summit in the entry's
+  `organizers` array, and a pinned value wins.
+- **Pin `affiliation` and `country` when a summit's phase becomes `Archived`.** Leave an upcoming summit unpinned so
+  it tracks reality. An unpinned archive does not go stale, it goes wrong: it states where a past organiser works
+  *now* as though that were true at that summit. Before 2026-09-25 the 2023 page read "Tel Aviv University, Israel"
+  above "USA" for the same person.
+- **Photos and names stay shared on purpose.** Freezing them per summit would also freeze names, and an archive that
+  keeps showing a name someone has changed is worse than one showing a current photo on an old page. Replacing a
+  photo therefore updates every summit that person appears on, which is intended.
+- **Every person photo on the site is one that person consented to.** A missing photo means we have not asked yet,
+  not that they declined. Never fill the gap with a stock silhouette or a picture found elsewhere: the organizer grid
+  renders a dashed circle with their initials, which also makes the outstanding requests visible at a glance.
+- Journal Club chairs and speakers carry `name`/`affiliation` inline per entry, so they are already pinned and are
+  unaffected by `people` edits.
+- ⚠ `organizers[].weight` and `organizers[].section` are in the schema but **nothing sorts or groups by them** —
+  display order is array order. Worth knowing before a committee grows past one screen.
+
 ## Summit Phases
 
 - A summit's `phase` (Planning / Preview / Live / Archived) is **deliberately manual**, set per entry in Keystatic
