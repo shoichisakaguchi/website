@@ -293,6 +293,14 @@ export default config({
                         itemLabel: (props) => props.fields.label.value || 'Link',
                     }
                 ),
+                recordingUrl: fields.url({
+                    label: 'Recording URL',
+                    description: 'YouTube link to the session recording. Leave empty until it is published.',
+                }),
+                recordingUntil: fields.date({
+                    label: 'Recording available until',
+                    description: 'Last day the recording is online. The link disappears from the page by itself after this date, so it never points at a video that has been taken down.',
+                }),
                 calendarUrl: fields.url({ label: 'Google Calendar URL' }),
                 zoomUrl: fields.url({ label: 'Zoom URL' }),
                 showZoomLink: fields.checkbox({ label: 'Show Zoom Link', defaultValue: true }),

@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { JOURNAL_CLUB_TIMEZONE_DISPLAY } from '../../lib/journalClubTimezones';
-import { resolveEventTimes, DEFAULT_DURATION_MINUTES } from '../../lib/journalClubTime.mjs';
+import { resolveEventTimes, DEFAULT_DURATION_MINUTES, zonedWallTimeToUtc } from '../../lib/journalClubTime.mjs';
 import { resolveDescription, resolveOgImage } from '../../lib/og';
 import PrevNextNav from '../../components/PrevNextNav.astro';
 
@@ -149,6 +149,22 @@ const eventEndUtc = effectiveStartDateTimeUtc
       ).toISOString()
     : null;
 
+// The recording is published for a limited window and then taken down, so the
+// page has to stop offering it without waiting for anyone to edit the entry.
+// recordingUntil names the last day it is up; the link survives to the end of
+// that day in the event's own timezone.
+const recordingExpiresUtc = data.recordingUntil
+    ? zonedWallTimeToUtc(
+          data.recordingUntil.toISOString().split('T')[0],
+          '23:59',
+          data.eventTz || 'Asia/Tokyo',
+      ).toISOString()
+    : null;
+// No recordingUntil means no known takedown date, so nothing retires it.
+const recordingExpired = recordingExpiresUtc
+    ? Date.now() > new Date(recordingExpiresUtc).getTime()
+    : false;
+
 // Check if calendar link should be shown (event not yet ended)
 // Event duration: ~60 minutes (30 min talk + 30 min discussion)
 // Fallback: use date field end-of-day if no time metadata available
@@ -255,6 +271,22 @@ const ogImage = resolveOgImage({
             >
                 Join Slack
             </a>
+            {data.recordingUrl && !recordingExpired && (
+                <a
+                    href={data.recordingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="action-button recording-button"
+                    data-jc-hide-after={recordingExpiresUtc}
+                >
+                    Watch the recording
+                </a>
+            )}
+            {data.recordingUrl && !recordingExpired && data.recordingUntil && (
+                <span class="recording-note" data-jc-hide-after={recordingExpiresUtc}>
+                    Available until {formatHeaderDate(data.recordingUntil)}
+                </span>
+            )}
             {data.calendarUrl && isCalendarUpcoming && (
                 <a
                     href={data.calendarUrl}
@@ -468,6 +500,16 @@ const ogImage = resolveOgImage({
     .zoom-button {
         background-color: #2d8cff;
         color: white;
+    }
+
+    .recording-button {
+        background-color: #c4302b;
+        color: white;
+    }
+
+    .recording-note {
+        font-size: 0.9em;
+        color: var(--c-text-secondary, #666);
     }
 
     .zoom-note {

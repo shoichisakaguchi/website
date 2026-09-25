@@ -78,6 +78,12 @@ const journalClub = defineCollection({
         // Bluesky for every session), so the site withholding it only cost
         // visitors a detour. Set false per entry if a host ever needs a gate.
         showZoomLink: z.boolean().default(true),
+        // Recording of the session, when one is published. recordingUntil is
+        // the last day it is available: these are taken down after a couple of
+        // weeks, and a link that outlives the video is worse than no link at
+        // all, so the page retires it on its own.
+        recordingUrl: z.string().url().optional().or(z.literal('')),
+        recordingUntil: z.coerce.date().optional(),
         // Legacy fields (kept for backward compatibility during migration)
         speaker: z.string().optional(),
         paperUrl: z.string().optional(),
