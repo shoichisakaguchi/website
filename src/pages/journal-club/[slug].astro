@@ -138,10 +138,10 @@ const hasEventEnded = effectiveStartDateTimeUtc
     ? new Date().getTime() > new Date(effectiveStartDateTimeUtc).getTime() + EVENT_DURATION_MINUTES * 60 * 1000 // Event end = start + duration
     : false;
 
-// The Zoom button below is only rendered when the event had not ended at build
-// time, which keeps stale links out of past-event pages. That alone still
-// depends on a rebuild, so the instant is also handed to the browser, which
-// hides the button the moment the session actually ends.
+// The Zoom and calendar buttons below are only rendered when the event had not
+// ended at build time, which keeps stale links out of past-event pages. That
+// alone still depends on a rebuild, so the instant is also handed to the
+// browser, which retires them the moment the session actually ends.
 const eventEndUtc = effectiveStartDateTimeUtc
     ? new Date(
           new Date(effectiveStartDateTimeUtc).getTime() +
@@ -261,6 +261,7 @@ const ogImage = resolveOgImage({
                     target="_blank"
                     rel="noopener noreferrer"
                     class="action-button calendar-button"
+                    data-jc-hide-after={eventEndUtc}
                 >
                     Add to Calendar
                 </a>
@@ -271,13 +272,13 @@ const ogImage = resolveOgImage({
                     target="_blank"
                     rel="noopener noreferrer"
                     class="action-button zoom-button"
-                    data-jc-zoom-end={eventEndUtc}
+                    data-jc-hide-after={eventEndUtc}
                 >
                     Join Zoom
                 </a>
             )}
             {data.zoomUrl && !data.showZoomLink && !hasEventEnded && (
-                <span class="zoom-note" data-jc-zoom-end={eventEndUtc}>Add to Google Calendar to get the Zoom link.</span>
+                <span class="zoom-note" data-jc-hide-after={eventEndUtc}>Add to Google Calendar to get the Zoom link.</span>
             )}
         </div>
 
@@ -308,16 +309,17 @@ const ogImage = resolveOgImage({
 </Layout>
 
 <script is:inline>
-    // Retire the join link on the visitor's clock. Without this the button
-    // survives until the next build, which is the same failure that once left
-    // a finished session showing "Live Now" on the homepage for three months.
+    // Retire anything that stops being useful at the end of the session, on the
+    // visitor's clock. Without this these survive until the next build, which is
+    // the same failure that once left a finished session showing "Live Now" on
+    // the homepage for three months.
     (() => {
-        const els = document.querySelectorAll("[data-jc-zoom-end]");
+        const els = document.querySelectorAll("[data-jc-hide-after]");
         if (!els.length) return;
         const tick = () => {
             const now = Date.now();
             els.forEach((el) => {
-                const end = Date.parse(el.getAttribute("data-jc-zoom-end") || "");
+                const end = Date.parse(el.getAttribute("data-jc-hide-after") || "");
                 if (!Number.isNaN(end)) el.hidden = now > end;
             });
         };
