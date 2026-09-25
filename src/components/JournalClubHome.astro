@@ -38,6 +38,18 @@ const chosen = cardEvents[0] ?? null;
 const upcomingJournalClub = chosen?.item ?? null;
 const isLiveNow = !!chosen && now >= chosen.start;
 
+// The join link opens shortly before the start, so someone arriving a few
+// minutes early is not told to come back, and it disappears with the rest of
+// the card at the end. JOIN_LEAD_MS is repeated in the inline script below,
+// which cannot see this frontmatter.
+const JOIN_LEAD_MS = 15 * 60 * 1000;
+const joinUrl =
+    chosen && chosen.item.data.showZoomLink && chosen.item.data.zoomUrl
+        ? chosen.item.data.zoomUrl
+        : null;
+const isJoinOpen =
+    !!chosen && now.valueOf() >= chosen.start.valueOf() - JOIN_LEAD_MS;
+
 // Helper to get speaker display (two-line format)
 function getSpeakerInfo(data: typeof upcomingJournalClub.data) {
     // New structured fields
@@ -106,6 +118,10 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
         speakerName: speaker?.name ?? null,
         speakerAffiliation: speaker?.affiliation ?? null,
         calendarUrl: item.data.calendarUrl || null,
+        zoomUrl:
+            item.data.showZoomLink && item.data.zoomUrl
+                ? item.data.zoomUrl
+                : null,
         start: start.toISOString(),
         end: end.toISOString(),
     };
@@ -227,6 +243,16 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
                 </div>
                 <div class="card-actions">
                     <a
+                        href={joinUrl ?? "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="button small join-zoom"
+                        data-jc-zoom
+                        hidden={!(joinUrl && isJoinOpen)}
+                    >
+                        Join Zoom
+                    </a>
+                    <a
                         href={calendarUrl ?? "#"}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -316,6 +342,16 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
                 const date = q("[data-jc-date]");
                 if (date) date.textContent = ev.dateLabel;
 
+                // Same 15-minute lead as JOIN_LEAD_MS in the frontmatter.
+                const zoom = q("[data-jc-zoom]");
+                if (zoom) {
+                    const open =
+                        !!ev.zoomUrl &&
+                        Date.parse(ev.start) - 15 * 60 * 1000 <= now;
+                    zoom.hidden = !open;
+                    if (ev.zoomUrl) zoom.href = ev.zoomUrl;
+                }
+
                 const cal = q("[data-jc-calendar]");
                 if (cal) {
                     cal.hidden = !ev.calendarUrl;
@@ -388,6 +424,15 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
     }
     .button.secondary:hover {
         background-color: rgba(0, 112, 243, 0.05);
+    }
+
+    .button.join-zoom {
+        background-color: #2d8cff;
+        color: white;
+        border: none;
+    }
+    .button.join-zoom:hover {
+        opacity: 0.9;
     }
 
     .button.primary-cal {
