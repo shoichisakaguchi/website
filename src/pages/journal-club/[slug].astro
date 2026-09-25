@@ -338,7 +338,6 @@ const ogImage = resolveOgImage({
         {/* B2. Recording, while it is still online */}
         {recordingVideoId && !recordingExpired && (
             <section class="recording-section" data-jc-hide-after={recordingExpiresUtc}>
-                <h2 class="recording-heading">Recording</h2>
                 <div class="recording-frame">
                     <iframe
                         src={`https://www.youtube-nocookie.com/embed/${recordingVideoId}`}
@@ -554,12 +553,6 @@ const ogImage = resolveOgImage({
         margin: 0 0 40px;
     }
 
-    .recording-heading {
-        font-size: 1.05rem;
-        font-weight: 600;
-        margin: 0 0 12px;
-    }
-
     /* The player keeps 16:9 at any width, and the black ground means a slow
        frame does not flash the page background. */
     .recording-frame {
@@ -581,7 +574,8 @@ const ogImage = resolveOgImage({
 
     .recording-note {
         font-size: 0.9em;
-        color: var(--c-text-secondary, #666);
+        font-weight: 600;
+        color: #b45309;
         margin: 10px 0 0;
     }
 
