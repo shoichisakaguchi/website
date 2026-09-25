@@ -240,6 +240,10 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
                         {upcomingJournalClub &&
                             formatCardDate(upcomingJournalClub.data.date)}
                     </p>
+                    {/* Filled in by the script below and hidden until then. A
+                        build-time countdown would be wrong the moment it was
+                        cached, so this one is deliberately JavaScript-only. */}
+                    <p class="meeting-countdown" data-jc-countdown hidden></p>
                 </div>
                 <div class="card-actions">
                     <a
@@ -308,6 +312,18 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
 
             const q = (sel) => card.querySelector(sel);
 
+            // Coarse on purpose: the exact date is already on the card, and
+            // this line only answers "is it soon?" without timezone arithmetic.
+            const relative = (ms) => {
+                const m = Math.round(ms / 60000);
+                if (m < 1) return "less than a minute";
+                if (m < 60) return m + (m === 1 ? " minute" : " minutes");
+                const h = Math.round(m / 60);
+                if (h < 48) return h + (h === 1 ? " hour" : " hours");
+                const d = Math.round(h / 24);
+                return d + (d === 1 ? " day" : " days");
+            };
+
             const render = () => {
                 const now = Date.now();
                 const ev = events.find((e) => Date.parse(e.end) > now);
@@ -341,6 +357,24 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
 
                 const date = q("[data-jc-date]");
                 if (date) date.textContent = ev.dateLabel;
+
+                const cd = q("[data-jc-countdown]");
+                if (cd) {
+                    const startMs = Date.parse(ev.start);
+                    const endMs = Date.parse(ev.end);
+                    const WEEK = 7 * 24 * 60 * 60 * 1000;
+                    if (live) {
+                        cd.textContent = "Ends in " + relative(endMs - now);
+                        cd.hidden = false;
+                    } else if (startMs - now <= WEEK) {
+                        cd.textContent = "Starts in " + relative(startMs - now);
+                        cd.hidden = false;
+                    } else {
+                        // Further out than a week the date label says it better.
+                        cd.hidden = true;
+                    }
+                    cd.classList.toggle("is-live", live);
+                }
 
                 // Same 15-minute lead as JOIN_LEAD_MS in the frontmatter.
                 const zoom = q("[data-jc-zoom]");
@@ -607,6 +641,17 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
     .meeting-date {
         margin: 0;
         color: var(--c-text-secondary);
+    }
+
+    .meeting-countdown {
+        margin: 6px 0 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--c-text-secondary);
+    }
+
+    .meeting-countdown.is-live {
+        color: #166534;
     }
 
     .card-actions {

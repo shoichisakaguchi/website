@@ -295,7 +295,7 @@ export default config({
                 ),
                 calendarUrl: fields.url({ label: 'Google Calendar URL' }),
                 zoomUrl: fields.url({ label: 'Zoom URL' }),
-                showZoomLink: fields.checkbox({ label: 'Show Zoom Link', defaultValue: false }),
+                showZoomLink: fields.checkbox({ label: 'Show Zoom Link', defaultValue: true }),
                 content: markdownSource({
                     label: 'Content (Markdown)',
                     description: 'Write Markdown source. Tables and code blocks are supported.',

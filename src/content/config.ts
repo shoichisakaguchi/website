@@ -74,7 +74,10 @@ const journalClub = defineCollection({
         // Calendar and Zoom links
         calendarUrl: z.string().url().optional().or(z.literal('')),
         zoomUrl: z.string().url().optional().or(z.literal('')),
-        showZoomLink: z.boolean().default(false),
+        // Defaults to showing it: the link is public anyway (it is posted to
+        // Bluesky for every session), so the site withholding it only cost
+        // visitors a detour. Set false per entry if a host ever needs a gate.
+        showZoomLink: z.boolean().default(true),
         // Legacy fields (kept for backward compatibility during migration)
         speaker: z.string().optional(),
         paperUrl: z.string().optional(),

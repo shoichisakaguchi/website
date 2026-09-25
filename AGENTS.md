@@ -37,6 +37,21 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
   list, and normal content pushes already do that. Correctness of the badge no longer depends on it.
 - ⚠ Toggling with the `hidden` attribute needs `[hidden] { display: none !important }` in these components: author
   rules like `.button { display: inline-flex }` outbid the UA stylesheet and the element stays visible otherwise.
+- **The Zoom link is shown on the site, on purpose.** It used to be withheld, with the Google Calendar invite as the
+  only route to it, as an anti-spam measure. That protected nothing: Ingrida posts the same URL publicly to Bluesky for
+  every session, so the only effect was to split the community into people who found the Bluesky post and people who
+  used the site, with the latter paying a detour. Someone joining mid-session could not find the URL from rdrp.io at
+  all. Decided 2026-09-25. Do not "harden" this back without also changing what gets posted to Bluesky.
+  - `showZoomLink` now **defaults to true** (`src/content/config.ts`, `keystatic.config.ts`), so a new entry only needs
+    `zoomUrl` filled in. Set it false per entry if a host ever requires a gated link.
+  - The homepage card's Join Zoom button opens **15 minutes before the start** and disappears at the end, on the
+    visitor's clock like the badge. The detail page renders its button only if the event had not ended at build time,
+    which keeps dead links out of past-event pages, and *also* hides it client-side the moment the end passes.
+  - No waiting room is enforced Zoom-side, by decision: there has never been a spam incident, so that stays a reaction
+    rather than a precaution.
+- **Countdown on the homepage card** ("Starts in 3 hours", "Ends in 25 minutes") is **JavaScript-only and has no
+  server-rendered fallback**. That is deliberate: a countdown baked at build time is wrong as soon as it is cached. It
+  stays hidden further out than a week, where the date label reads better.
 - **Live window / end time:** set `durationMinutes` per entry (Keystatic field). The site (`src/components/JournalClubHome.astro`) and the rebuild trigger both read it, so they always agree on when an event becomes past.
 - **Automated post-event rebuild:** a scheduled job (`ops/scheduled-rebuild/`, launchd every 15 min) POSTs a Cloudflare Deploy Hook shortly after each event ends — no commit, clean history. See `ops/scheduled-rebuild/README.md`.
 - **Where it runs:** the **Mac mini** (always on — `pmset` reports `sleep 0` on AC), out of a **dedicated clone at `~/ops/rdrp-website` that nobody edits by hand**. Agent label `io.rdrp.jc-rebuild`, log `~/Library/Logs/rdrp-jc-rebuild.log`. `RDRP_REPO_DIR` in the secrets file selects that clone. The Cloudflare deploy hook is named `journal-club-auto-rebuild` (branch `main`); its URL is a secret kept outside the repo at `~/.config/rdrp/deploy-hook.env` (chmod 600) and must never be committed.
