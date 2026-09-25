@@ -348,10 +348,10 @@ const ogImage = resolveOgImage({
                         allowfullscreen
                     />
                 </div>
+                {/* No "watch on YouTube" link: the player carries its own. */}
                 {data.recordingUntil && (
                     <p class="recording-note">
                         Available until {formatHeaderDate(data.recordingUntil)}.
-                        <a href={data.recordingUrl} target="_blank" rel="noopener noreferrer">Watch on YouTube &nearr;</a>
                     </p>
                 )}
             </section>
@@ -583,9 +583,6 @@ const ogImage = resolveOgImage({
         font-size: 0.9em;
         color: var(--c-text-secondary, #666);
         margin: 10px 0 0;
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
     }
 
     .zoom-note {
