@@ -279,11 +279,23 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
                 </p>
             </div>
             <div class="empty-state" data-jc-empty hidden={!!upcomingJournalClub}>
-                <h3>No upcoming meetings scheduled</h3>
-                <p>Stay tuned for the next Journal Club.</p>
-                <a href="/journal-club" class="link-arrow">
-                    Browse past Journal Clubs &rarr;
-                </a>
+                {/* Seen between sessions, so it should read as a pause, not
+                    a shutdown, and should give the visitor something to do. */}
+                <h3>The next session is not announced yet</h3>
+                <p>New dates are posted here and in the community Slack.</p>
+                <div class="empty-actions">
+                    <a href="/journal-club" class="link-arrow">
+                        Browse past Journal Clubs &rarr;
+                    </a>
+                    <a
+                        href="https://docs.google.com/forms/d/e/1FAIpQLSdjvzJGh4vtCcq76qP79CW2qniycLix_LMwIfVRdG2bbuuPNg/viewform?usp=dialog"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="link-arrow"
+                    >
+                        Nominate a speaker &rarr;
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -684,6 +696,14 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
     }
 
     /* Empty State */
+    .empty-actions {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 16px;
+    }
+
     .empty-state {
         text-align: center;
         padding: 1rem;
