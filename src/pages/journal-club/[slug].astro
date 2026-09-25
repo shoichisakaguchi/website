@@ -165,6 +165,32 @@ const recordingExpired = recordingExpiresUtc
     ? Date.now() > new Date(recordingExpiresUtc).getTime()
     : false;
 
+// Pull the video id out of whatever YouTube URL shape was pasted in, so the
+// entry can hold the ordinary watch link an editor copies from the browser.
+// A recordingUrl we cannot parse is not an error: it falls back to a plain
+// link, which is also what a recording hosted somewhere else would get.
+function youTubeId(url: string): string | null {
+    let id: string | null = null;
+    try {
+        const u = new URL(url);
+        const host = u.hostname.replace(/^www\./, '');
+        if (host === 'youtu.be') {
+            id = u.pathname.slice(1).split('/')[0] || null;
+        } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+            if (u.pathname === '/watch') {
+                id = u.searchParams.get('v');
+            } else {
+                const m = u.pathname.match(/^\/(?:embed|live|shorts|v)\/([^/]+)/);
+                id = m ? m[1] : null;
+            }
+        }
+    } catch {
+        return null;
+    }
+    return id && /^[A-Za-z0-9_-]{6,20}$/.test(id) ? id : null;
+}
+const recordingVideoId = data.recordingUrl ? youTubeId(data.recordingUrl) : null;
+
 // Check if calendar link should be shown (event not yet ended)
 // Event duration: ~60 minutes (30 min talk + 30 min discussion)
 // Fallback: use date field end-of-day if no time metadata available
@@ -271,7 +297,7 @@ const ogImage = resolveOgImage({
             >
                 Join Slack
             </a>
-            {data.recordingUrl && !recordingExpired && (
+            {data.recordingUrl && !recordingVideoId && !recordingExpired && (
                 <a
                     href={data.recordingUrl}
                     target="_blank"
@@ -281,11 +307,6 @@ const ogImage = resolveOgImage({
                 >
                     Watch the recording
                 </a>
-            )}
-            {data.recordingUrl && !recordingExpired && data.recordingUntil && (
-                <span class="recording-note" data-jc-hide-after={recordingExpiresUtc}>
-                    Available until {formatHeaderDate(data.recordingUntil)}
-                </span>
             )}
             {data.calendarUrl && isCalendarUpcoming && (
                 <a
@@ -313,6 +334,28 @@ const ogImage = resolveOgImage({
                 <span class="zoom-note" data-jc-hide-after={eventEndUtc}>Add to Google Calendar to get the Zoom link.</span>
             )}
         </div>
+
+        {/* B2. Recording, while it is still online */}
+        {recordingVideoId && !recordingExpired && (
+            <section class="recording-section" data-jc-hide-after={recordingExpiresUtc}>
+                <h2 class="recording-heading">Recording</h2>
+                <div class="recording-frame">
+                    <iframe
+                        src={`https://www.youtube-nocookie.com/embed/${recordingVideoId}`}
+                        title={`Recording: ${data.title}`}
+                        loading="lazy"
+                        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                    />
+                </div>
+                {data.recordingUntil && (
+                    <p class="recording-note">
+                        Available until {formatHeaderDate(data.recordingUntil)}.
+                        <a href={data.recordingUrl} target="_blank" rel="noopener noreferrer">Watch on YouTube &nearr;</a>
+                    </p>
+                )}
+            </section>
+        )}
 
         {/* C. Main Content */}
 		<div class="content-wrapper">
@@ -507,9 +550,42 @@ const ogImage = resolveOgImage({
         color: white;
     }
 
+    .recording-section {
+        margin: 0 0 40px;
+    }
+
+    .recording-heading {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin: 0 0 12px;
+    }
+
+    /* The player keeps 16:9 at any width, and the black ground means a slow
+       frame does not flash the page background. */
+    .recording-frame {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .recording-frame iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
+
     .recording-note {
         font-size: 0.9em;
         color: var(--c-text-secondary, #666);
+        margin: 10px 0 0;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
     }
 
     .zoom-note {
