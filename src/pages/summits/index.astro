@@ -1,141 +1,226 @@
 ---
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
-import { type CollectionEntry } from 'astro:content';
 import { sortEntriesByDateDesc } from '../../utils/sortDate';
 
 export const prerender = true;
 
 const summits = await getCollection('summits');
 const sortedSummits = sortEntriesByDateDesc(summits, "summits");
-
-// Helper to get organizer name
-async function getOrganizerName(slug: string | undefined) {
-    if (!slug) return null;
-    try {
-        const person = await getEntry('people', slug);
-        return person ? person.data.name : null;
-    } catch (e) {
-        return null;
-    }
-}
-
-// Pre-fetch organizer names
-const summitsWithOrganizers = await Promise.all(sortedSummits.map(async (summit) => {
-    const organizerName = await getOrganizerName(summit.data.organizer);
-    return { ...summit, organizerName };
-}));
 ---
 
 <Layout>
 	<div class="container page-content">
 		<h1 class="text-center page-title">Summits</h1>
-		
-		<div class="summit-list">
-            {summitsWithOrganizers.map(summit => (
-                <div class="summit-item">
-                    <div class="summit-date">{summit.data.year}</div>
-                    <div class="summit-info">
-                        <h2>
-                            <a href={`/summits/${summit.slug}`}>{summit.data.title}</a>
-                        </h2>
-                        {summit.organizerName && <p class="organizer">Organizer: {summit.organizerName}</p>}
-                        <div class="actions">
-                            <a href={`/summits/${summit.slug}`}>
-                                {summit.data.phase === 'Archived'
-                                    ? 'View Proceedings'
-                                    : 'View details'} &rarr;
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            ))}
-            
-            {summitsWithOrganizers.length === 0 && (
-                <div class="no-summits">
-                    <p>No summits found. Please add content via Keystatic.</p>
-                </div>
-            )}
-		</div>
+
+		<ul class="summit-list">
+			{sortedSummits.map((summit) => {
+				// Peer-reviewed outputs of the summit itself, shown next to it as
+				// evidence. Same rule as the homepage list.
+				const statements = (summit.data.communityOutcomes ?? []).filter(
+					(outcome) => outcome.type === "Consensus statement" && outcome.doi,
+				);
+				return (
+					<li class="summit-item">
+						<div class="summit-row">
+							<span class="summit-year">{summit.data.year}</span>
+							<a href={`/summits/${summit.slug}`} class="summit-title">
+								{summit.data.title}
+							</a>
+							{(summit.data.city || summit.data.country) && (
+								<span class="summit-location">
+									{[summit.data.city, summit.data.country]
+										.filter(Boolean)
+										.join(", ")}
+								</span>
+							)}
+							{/* "Archived" only says "not upcoming", which the absence of a badge already says. */}
+							{summit.data.phase && summit.data.phase !== "Archived" && (
+								<span class={`summit-phase ${summit.data.phase.toLowerCase()}`}>
+									{summit.data.phase}
+								</span>
+							)}
+						</div>
+						{statements.length > 0 && (
+							<div class="summit-outcomes">
+								{statements.map((outcome) => (
+									<div class="summit-outcome">
+										<span class="outcome-chip">Consensus statement</span>
+										<a
+											class="outcome-doi"
+											href={`https://doi.org/${outcome.doi}`}
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											https://doi.org/{outcome.doi}
+										</a>
+									</div>
+								))}
+							</div>
+						)}
+					</li>
+				);
+			})}
+
+			{sortedSummits.length === 0 && (
+				<li class="no-summits">
+					<p>No summits found. Please add content via Keystatic.</p>
+				</li>
+			)}
+		</ul>
 	</div>
 </Layout>
 
 <style>
 	.page-content {
-        max-width: 980px;
-        margin: 0 auto;
-    }
-
-	.page-title {
-		margin-bottom: 60px;
-        margin-top: 40px;
-        text-align: center;
-	}
-
-	.summit-list {
-		max-width: 800px;
+		max-width: 980px;
 		margin: 0 auto;
 	}
 
-	.summit-item {
+	.page-title {
+		margin-bottom: 60px;
+		margin-top: 40px;
+		text-align: center;
+	}
+
+	/* Deliberately the same row as the homepage's RdRp Summits list. This page
+	   used to carry a second link per row ("View details" / "View Proceedings")
+	   pointing at the same URL as the heading, with the heading styled as plain
+	   text so it did not read as a link at all. Two targets, one destination,
+	   and two names for the same action. */
+	.summit-list {
 		display: flex;
 		flex-direction: column;
-		padding: 40px 0;
-		border-bottom: 1px solid var(--c-divider, #eee);
+		gap: 12px;
+		max-width: 800px;
+		margin: 0 auto;
+		list-style: none;
+		padding: 0;
 	}
 
-	.summit-item:last-child {
-		border-bottom: none;
+	.summit-item {
+		padding: 20px 24px;
+		background: white;
+		border-radius: 12px;
+		border: 1px solid rgba(0, 0, 0, 0.05);
+		transition: box-shadow 0.2s;
 	}
 
-	@media (min-width: 600px) {
-		.summit-item {
-			flex-direction: row;
-			gap: 40px;
+	.summit-item:hover {
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	}
+
+	.summit-row {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto auto;
+		align-items: center;
+		gap: 16px;
+	}
+
+	.summit-year {
+		font-weight: 700;
+		font-size: 1.25rem;
+		color: var(--c-link);
+	}
+
+	.summit-title {
+		font-weight: 600;
+		font-size: 1.15rem;
+		text-align: left;
+		color: inherit;
+		text-decoration: none;
+	}
+
+	.summit-title:hover {
+		text-decoration: underline;
+	}
+
+	.summit-location {
+		font-size: 0.9rem;
+		color: var(--c-text-secondary);
+	}
+
+	.summit-phase {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		font-weight: 600;
+		padding: 4px 8px;
+		border-radius: 4px;
+		background: #f3f4f6;
+		color: #374151;
+	}
+
+	.summit-phase.planning {
+		background: #e0f2fe;
+		color: #0369a1;
+	}
+
+	.summit-phase.preview {
+		background: #fef3c7;
+		color: #92400e;
+	}
+
+	.summit-phase.live {
+		background: #dcfce7;
+		color: #15803d;
+	}
+
+	.summit-outcomes {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin-top: 10px;
+		padding-top: 10px;
+		border-top: 1px solid var(--c-divider);
+	}
+
+	.summit-outcome {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 10px;
+	}
+
+	.outcome-chip {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		font-weight: 600;
+		padding: 4px 8px;
+		border-radius: 4px;
+		background: #eef4ff;
+		color: #1c4fa1;
+		white-space: nowrap;
+	}
+
+	.outcome-doi {
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 0.8125rem;
+		color: var(--c-link);
+		text-decoration: none;
+		overflow-wrap: anywhere;
+	}
+
+	.outcome-doi:hover {
+		text-decoration: underline;
+	}
+
+	.no-summits {
+		text-align: center;
+		color: var(--c-text-secondary, #666);
+		padding: 40px;
+		list-style: none;
+	}
+
+	@media (max-width: 640px) {
+		.summit-row {
+			grid-template-columns: 1fr;
+			text-align: center;
+			gap: 8px;
+			justify-items: center;
+		}
+
+		.summit-title {
+			text-align: center;
 		}
 	}
-
-	.summit-date {
-		font-size: 24px;
-		font-weight: 700;
-		color: var(--c-text-secondary, #666);
-		flex-basis: 120px;
-		flex-shrink: 0;
-	}
-
-	.summit-info h2 {
-		margin-top: 0;
-		font-size: 24px;
-		margin-bottom: 10px;
-	}
-    
-    .summit-info h2 a {
-        color: var(--c-text, #333);
-        text-decoration: none;
-    }
-    
-    .summit-info h2 a:hover {
-        color: var(--c-link, #0070f3);
-    }
-
-    .organizer {
-        color: var(--c-text-secondary, #666);
-        margin-bottom: 15px;
-    }
-    
-    .actions a {
-        color: var(--c-link, #0070f3);
-        text-decoration: none;
-        font-weight: 500;
-    }
-    
-    .actions a:hover {
-        text-decoration: underline;
-    }
-    
-    .no-summits {
-        text-align: center;
-        color: var(--c-text-secondary, #666);
-        padding: 40px;
-    }
 </style>
