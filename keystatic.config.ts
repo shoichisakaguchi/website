@@ -204,7 +204,18 @@ export default config({
             format: { contentField: 'content' },
             previewUrl: '/journal-club/{slug}',
             schema: {
-                title: fields.slug({ name: { label: 'Paper Title/Topic' } }),
+                title: fields.slug({
+                    name: { label: 'Paper Title/Topic' },
+                    slug: {
+                        label: 'URL slug',
+                        description:
+                            'Write it as YYYY-MM-DD-speaker-name, e.g. 2026-10-08-uri-neri. ' +
+                            'No Dr. or Prof.: honorifics change over time and the slug cannot. ' +
+                            'Overwrite the suggestion, which is generated from the title. ' +
+                            'Set it once when you create the entry and never touch it again: it ' +
+                            'is the public URL, and the link is shared before the topic is known.',
+                    },
+                }),
                 date: fields.date({ label: 'Date', validation: { isRequired: true } }),
                 publishedDate: fields.date({
                     label: 'Published Date (RSS)',

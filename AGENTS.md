@@ -52,6 +52,21 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 - **Countdown on the homepage card** ("Starts in 3 hours", "Ends in 25 minutes") is **JavaScript-only and has no
   server-rendered fallback**. That is deliberate: a countdown baked at build time is wrong as soon as it is cached. It
   stays hidden further out than a week, where the date label reads better.
+- **Entry slugs are `YYYY-MM-DD-speaker-name`** (`2026-10-08-uri-neri`), not the paper title. The slug is the public
+  URL and can never change, so it has to be decidable the moment the entry is created. A title usually is not: the
+  session is announced as soon as a speaker accepts, which is often weeks before a topic exists. The speaker and the
+  date always are, because a speaker accepting is what creates the entry in the first place. Two entries already
+  disagree with their own titles (`2025-11-06`, `2026-03-17`) because the title was edited afterwards, so the old
+  title-based rule was not holding anyway. Short slugs also survive being pasted into Slack and Bluesky; the longest
+  title-based one is 137 characters.
+  - ⚠ **No `Dr.` or `Prof.` in the slug.** Honorifics change with a career and the URL cannot follow; one current
+    speaker is `Professor Valerian Dolja`, so the format would not even be uniform. The courtesy belongs in
+    `speakerName`, which is what readers actually see.
+  - ⚠ **Do not rename the nine existing entries.** Their URLs have been shared for a year. A mixed set is fine: a slug
+    is an identifier, not a catalogue.
+  - Keystatic generates the slug from the title, so whoever creates the entry has to overwrite that suggestion by
+    hand. The instruction lives in the field's own `description` in `keystatic.config.ts`, because that is the only
+    place an editor reads (see the 2026-09-15 note under the article policy in `docs/HANDOFF.md`).
 - **Live window / end time:** set `durationMinutes` per entry (Keystatic field). The site (`src/components/JournalClubHome.astro`) and the rebuild trigger both read it, so they always agree on when an event becomes past.
 - **Automated post-event rebuild:** a scheduled job (`ops/scheduled-rebuild/`, launchd every 15 min) POSTs a Cloudflare Deploy Hook shortly after each event ends — no commit, clean history. See `ops/scheduled-rebuild/README.md`.
 - **Where it runs:** the **Mac mini** (always on — `pmset` reports `sleep 0` on AC), out of a **dedicated clone at `~/ops/rdrp-website` that nobody edits by hand**. Agent label `io.rdrp.jc-rebuild`, log `~/Library/Logs/rdrp-jc-rebuild.log`. `RDRP_REPO_DIR` in the secrets file selects that clone. The Cloudflare deploy hook is named `journal-club-auto-rebuild` (branch `main`); its URL is a secret kept outside the repo at `~/.config/rdrp/deploy-hook.env` (chmod 600) and must never be committed.
