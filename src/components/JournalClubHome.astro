@@ -28,7 +28,7 @@ const cardEvents = allJournalClub
     .flatMap((item) => {
         const times = resolveEventTimes(item.data);
         if (!times || times.end <= now) return [];
-        return [{ item, start: times.start, end: times.end }];
+        return [{ item, start: times.start, end: times.end, hasTime: times.hasTime }];
     })
     .sort((a, b) => a.start.valueOf() - b.start.valueOf());
 
@@ -109,7 +109,7 @@ function formatCardDate(value: Date | string) {
     });
 }
 
-const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
+const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
     const speaker = getSpeakerInfo(item.data);
     return {
         slug: item.slug,
@@ -124,6 +124,7 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
                 : null,
         start: start.toISOString(),
         end: end.toISOString(),
+        hasTime,
     };
 });
 ---
@@ -274,9 +275,6 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
                         View details &rarr;
                     </a>
                 </div>
-                <p class="calendar-hint" data-jc-hint hidden={!calendarUrl}>
-                    Timezones are handled automatically in Google Calendar.
-                </p>
             </div>
             <div class="empty-state" data-jc-empty hidden={!!upcomingJournalClub}>
                 {/* Seen between sessions, so it should read as a pause, not
@@ -367,8 +365,39 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
                     }
                 }
 
+                // The time in the visitor's own zone, so nobody has to add the
+                // event to a calendar just to learn when it is. Formatting the
+                // UTC instant with the visitor's named zone lets Intl apply the
+                // DST rule for the event's date; today's getTimezoneOffset()
+                // would be an hour out across a DST change. It also puts the
+                // date on the visitor's calendar, which the build-time label
+                // cannot. Entries with only a date keep that label.
                 const date = q("[data-jc-date]");
-                if (date) date.textContent = ev.dateLabel;
+                if (date) {
+                    let label = ev.dateLabel;
+                    if (ev.hasTime) {
+                        try {
+                            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                            const at = new Date(ev.start);
+                            const day = new Intl.DateTimeFormat("en-US", {
+                                timeZone: tz,
+                                weekday: "long",
+                                month: "long",
+                                day: "numeric",
+                            }).format(at);
+                            const time = new Intl.DateTimeFormat("en-US", {
+                                timeZone: tz,
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                            }).format(at);
+                            label = day + " · " + time + " your time";
+                        } catch {
+                            // keep the build-time date
+                        }
+                    }
+                    date.textContent = label;
+                }
 
                 const cd = q("[data-jc-countdown]");
                 if (cd) {
@@ -403,8 +432,6 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
                     cal.hidden = !ev.calendarUrl;
                     if (ev.calendarUrl) cal.href = ev.calendarUrl;
                 }
-                const hint = q("[data-jc-hint]");
-                if (hint) hint.hidden = !ev.calendarUrl;
 
                 const details = q("[data-jc-details]");
                 if (details) details.href = "/journal-club/" + ev.slug;
@@ -671,14 +698,6 @@ const cardEventsPayload = cardEvents.map(({ item, start, end }) => {
         gap: 12px;
         align-items: center;
         flex-wrap: wrap;
-    }
-
-    .calendar-hint {
-        font-size: 0.8rem;
-        color: var(--c-text-secondary, #666);
-        margin-top: 12px;
-        margin-bottom: 0;
-        font-style: italic;
     }
 
     .link-arrow {

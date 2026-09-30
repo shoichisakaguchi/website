@@ -52,6 +52,16 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 - **Countdown on the homepage card** ("Starts in 3 hours", "Ends in 25 minutes") is **JavaScript-only and has no
   server-rendered fallback**. That is deliberate: a countdown baked at build time is wrong as soon as it is cached. It
   stays hidden further out than a week, where the date label reads better.
+- **Start times are shown in the visitor's own timezone** on the homepage card ("Thursday, October 8 · 16:00 your
+  time") and in the detail page header, where the time as announced follows in small type ("announced as Thu 10:00
+  Jerusalem", from `eventTz`). Both format the UTC start with the visitor's *named* zone through `Intl`, which applies
+  the DST rule for the event's date. ⚠ Never compute it from today's `getTimezoneOffset()`: that is an hour out
+  whenever today and the event fall on opposite sides of a DST change. Without JavaScript the card shows the date and
+  the header shows the announced time. Because `eventTz` is now visible, set it to where the speaker or chair actually
+  announced the time; a zone missing from the picker goes in `JOURNAL_CLUB_TIMEZONES_EXTRA`
+  (`src/lib/journalClubTimezones.ts`), which makes it selectable without adding a row to the fixed Event Times list.
+  ⚠ Inline scripts are not parsed by `astro build`, so a syntax error there ships silently. Parse them from `dist/`
+  (`new Function(src)`) after editing.
 - **Entry slugs are `YYYY-MM-DD-speaker-name`** (`2026-10-08-uri-neri`), not the paper title. The slug is the public
   URL and can never change, so it has to be decidable the moment the entry is created. A title usually is not: the
   session is announced as soon as a speaker accepts, which is often weeks before a topic exists. The speaker and the
