@@ -156,10 +156,14 @@ Kranzler's lab."、GitHub の bio が "Research Fellow @ Kranzler lab @ BIU / Fo
   docs は urineri.github.io/rolypoly）。⚠ ただし **Marco が持ちかけた題であって本人の確約ではない**
   ので、`title` は `Topic to be announced` のまま、本文に "The expected topic is..." と書いた。
   確定したらタイトルと `links` を入れる。
+  → **2026-09-30 に Marco が確定**（"Yes! The topic is rolypoly"）。`title` を
+  `RolyPoly: a toolkit for RNA virus discovery and characterization`（README の一文から取った仮の題。
+  本人から正式な題が来たら差し替える）にし、`links` に GitHub（primary）と docs を入れ、本文を README から書き直した。
 - ⚠ **RolyPoly に論文はまだ無い。**README が "v1 manuscript ~late 2026" と書いている。
   `links` に Paper 行は当面作れない。
 - `calendarUrl` は入れた。`zoomUrl`・座長・`speakerAffiliation` は空のまま。
   ⚠ `speakerAffiliation` に `Bar-Ilan University` を入れるかはオーナー未回答。
+  → 2026-09-30 に入れた（根拠は本人サイトと GitHub の bio）。表記はオーナーが Slack で本人に確認中。
 - **07:00 UTC はこれまでで一番早い回。**欧州の常連は普段 13:00-14:00 に出ているので4時間早まる。
   東京は 16:00 で普段の 22:00 より出やすい。西海岸は午前0時ちょうど。
 
