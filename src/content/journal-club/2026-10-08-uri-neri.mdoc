@@ -1,5 +1,5 @@
 ---
-title: 'RolyPoly: a toolkit for RNA virus discovery and characterization'
+title: RolyPoly - simplifying RNA virus identification and characterization
 date: 2026-10-08
 publishedDate: 2026-09-29
 isPinned: false
@@ -21,8 +21,10 @@ calendarUrl: https://calendar.app.google/xZvpYqGKfL83RF9K8
 zoomUrl: https://us02web.zoom.us/j/87307230459?pwd=AH1tFtHoWd0cQ53rKbyEiM9teiE3VX.1
 showZoomLink: true
 ---
-RolyPoly is an RNA virus analysis toolkit, meant to be a "swiss-army knife" for RNA virus discovery and characterization. It brings together commands, wrappers, parsers and automations covering a virus investigation from raw read processing to genome annotation, including an end-to-end pipeline.
+Virus analysis requires many different tools for different steps. While many effective software options exist for automating these, they usually follow an end-to-end schema (a single input and output point), and are highly niche specific (e.g. this or that lineage). This can create 'lock-in' and force researchers without computational background to compromise on a software that may miss their specific research focus.
 
-It has two aims: to let non-computational researchers take a deep dive into their own data using tools that are friendly to non-specialists, and to let developers of virus analysis pipelines plug gaps in their own frameworks with individual RolyPoly commands.
+RolyPoly provides multiple "standalone" commands for common virus analysis tasks (raw read processing, assembly, identification and annotations etc.), supporting multiple backend tools and unified outputs. Essentially, you can put into it results from other tools, and get RolyPoly's results to supplement "missing holes" in other software. For example, you can use the RNA annotation command to get an Rfam search + secondary structure analysis, or the cluster command on preassembled data.
 
-RolyPoly is open source and still under active development, installable from PyPI (`rolypoly-tk`) and Bioconda.
+RolyPoly is implemented as a Python library, and supports extension and contributions (there's even a nifty contribution + AGENTS.md setup that will have an LLM add commands for you using RolyPoly's internals).
+
+RolyPoly also includes a variety of "quality of life" utilities: contig name formatting, deduplication, translation, scanning folders for Illumina library layout and format detection (e.g. figuring out what R1 and R2 and interleaved and how many...), and a nice visual summary.
