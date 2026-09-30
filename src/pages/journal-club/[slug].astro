@@ -155,7 +155,8 @@ const announced = effectiveStartDateTimeUtc && data.localTime
           }).format(new Date(effectiveStartDateTimeUtc));
           return {
               tz,
-              header: `${day} · ${time} ${zoneCity(tz)}`,
+              day: `${day} ·`,
+              time: `${time} ${zoneCity(tz)}`,
               short: `${short} ${zoneCity(tz)}`,
           };
       })()
@@ -292,7 +293,12 @@ const ogImage = resolveOgImage({
                         data-jc-announced={announced?.short}
                     >
                         <time class="event-when-main" datetime={effectiveStartDateTimeUtc}>
-                            {announced ? announced.header : formatHeaderDate(item.data.date)}
+                            {announced ? (
+                                <Fragment>
+                                    <span class="nowrap">{announced.day}</span>{' '}
+                                    <span class="nowrap">{announced.time}</span>
+                                </Fragment>
+                            ) : formatHeaderDate(item.data.date)}
                         </time>
                         <span class="event-when-announced" hidden></span>
                     </p>
@@ -501,7 +507,19 @@ const ogImage = resolveOgImage({
                 }
             })();
             const where = offset && city !== "UTC" ? city + ", " + offset : city;
-            el.querySelector(".event-when-main").textContent = day + " · " + time + " your time (" + where + ")";
+            // Each part stays on one line, so a narrow screen breaks between
+            // the date and the time rather than inside "(Tokyo, GMT+9)".
+            const setParts = (target, parts) => {
+                target.replaceChildren(
+                    ...parts.flatMap((text, i) => {
+                        const span = document.createElement("span");
+                        span.style.whiteSpace = "nowrap";
+                        span.textContent = text;
+                        return i ? [document.createTextNode(" "), span] : [span];
+                    }),
+                );
+            };
+            setParts(el.querySelector(".event-when-main"), [day + " ·", time + " (" + where + ")"]);
             const announcedTz = el.getAttribute("data-jc-announced-tz");
             const announced = el.getAttribute("data-jc-announced");
             if (announced && announcedTz !== tz) {
@@ -556,6 +574,10 @@ const ogImage = resolveOgImage({
         color: var(--c-text, #333);
         font-weight: 500;
         font-variant-numeric: tabular-nums;
+    }
+
+    .nowrap {
+        white-space: nowrap;
     }
 
     .event-when-announced {

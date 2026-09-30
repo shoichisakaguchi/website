@@ -52,8 +52,8 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 - **Countdown on the homepage card** ("Starts in 3 hours", "Ends in 25 minutes") is **JavaScript-only and has no
   server-rendered fallback**. That is deliberate: a countdown baked at build time is wrong as soon as it is cached. It
   stays hidden further out than a week, where the date label reads better.
-- **Start times are shown in the visitor's own timezone** on the homepage card ("Thursday, October 8 · 16:00 your
-  time (GMT+9)") and in the detail page header ("16:00 your time (Tokyo, GMT+9)"), where the time as announced follows
+- **Start times are shown in the visitor's own timezone** on the homepage card ("Thursday, October 8 · 16:00
+  (GMT+9)") and in the detail page header ("16:00 (Tokyo, GMT+9)"), where the time as announced follows
   in small type ("announced as Thu 10:00 Jerusalem", from `eventTz`). The GMT offset is there so a visitor whose
   browser guessed the wrong zone (VPN, travel) can see it; offsets rather than abbreviations, because `Intl` in en-US
   only abbreviates US zones. The RSS feed cannot know the reader's zone, so it gives the announced time plus UTC

@@ -374,7 +374,19 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
                 // cannot. Entries with only a date keep that label.
                 const date = q("[data-jc-date]");
                 if (date) {
-                    let label = ev.dateLabel;
+                    // Each part stays on one line, so a narrow screen breaks between
+                    // the date and the time rather than inside "(Tokyo, GMT+9)".
+                    const setParts = (target, parts) => {
+                        target.replaceChildren(
+                            ...parts.flatMap((text, i) => {
+                                const span = document.createElement("span");
+                                span.style.whiteSpace = "nowrap";
+                                span.textContent = text;
+                                return i ? [document.createTextNode(" "), span] : [span];
+                            }),
+                        );
+                    };
+                    let parts = [ev.dateLabel];
                     if (ev.hasTime) {
                         try {
                             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -403,12 +415,12 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
                                     return ""; // older browsers lack shortOffset; the line still reads fine
                                 }
                             })();
-                            label = day + " · " + time + " your time" + (offset ? " (" + offset + ")" : "");
+                            parts = [day + " ·", time + (offset ? " (" + offset + ")" : "")];
                         } catch {
                             // keep the build-time date
                         }
                     }
-                    date.textContent = label;
+                    setParts(date, parts);
                 }
 
                 const cd = q("[data-jc-countdown]");

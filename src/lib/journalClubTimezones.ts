@@ -18,6 +18,7 @@ export const JOURNAL_CLUB_TIMEZONES: JournalClubTimezoneOption[] = [
 // Event Times list. Add a speaker's or chair's zone here when it is missing, so
 // the entry can record where the time was actually announced.
 export const JOURNAL_CLUB_TIMEZONES_EXTRA: JournalClubTimezoneOption[] = [
+    { value: 'Europe/Helsinki', label: 'Finland (Helsinki)' },
     { value: 'Asia/Jerusalem', label: 'Israel (Jerusalem)' },
 ];
 
