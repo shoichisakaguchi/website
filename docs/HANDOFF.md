@@ -152,8 +152,9 @@ Kranzler's lab."、GitHub の bio が "Research Fellow @ Kranzler lab @ BIU / Fo
 （9/16 に `Europe/Helsinki` で踏んだのと同じ穴）。10/8 はどちらも UTC+3 で同じ 07:00 UTC に解決する。
 ⚠ **詳細ページは `eventTz` を画面に出さない**（固定の7都市を並べるだけ）ので、表示は一切変わらない。
 → **2026-09-30 に解消。**`JOURNAL_CLUB_TIMEZONES_EXTRA` に `Asia/Jerusalem` を足した（Keystatic で選べるが
-固定7都市の行には出ない）ので、このエントリは `Asia/Jerusalem` に直した。同時に詳細ページの Event Times に
-「Your time (<見ている人の都市>): … (announced as Thu 10:00 Jerusalem)」の行を足したので、
+固定7都市の行には出ない）ので、このエントリは `Asia/Jerusalem` に直した。同時に詳細ページの見出し（タイトル上の日付の位置）に
+「Thu, Oct 8, 2026 · 16:00 your time (Tokyo)」＋小さく「announced as Thu 10:00 Jerusalem」を出すようにしたので
+（最初は下の Event Times に置いたが、同日のうちに上へ移した。JS なしだと告知どおりの時刻、終わった回は日付だけ）、
 **`eventTz` は画面に出るようになった。**告知した人（演者・チェア）の居場所を入れること。
 一覧に無い都市は `JOURNAL_CLUB_TIMEZONES_EXTRA` に1行足す（一覧外の値を直書きすると select が壊れる点は変わらない）。
 
