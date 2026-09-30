@@ -14,15 +14,26 @@ export const JOURNAL_CLUB_TIMEZONES: JournalClubTimezoneOption[] = [
     { value: 'Australia/Sydney', label: 'Australian Eastern (Sydney)' },
 ];
 
+// Selectable as an event's own timezone, but not shown as rows in the fixed
+// Event Times list. Add a speaker's or chair's zone here when it is missing, so
+// the entry can record where the time was actually announced.
+export const JOURNAL_CLUB_TIMEZONES_EXTRA: JournalClubTimezoneOption[] = [
+    { value: 'Asia/Jerusalem', label: 'Israel (Jerusalem)' },
+];
+
 // Legacy values kept for backward compatibility (do not show in public display)
 export const JOURNAL_CLUB_TIMEZONES_LEGACY: JournalClubTimezoneOption[] = [
     { value: 'America/Santiago', label: 'Legacy: Chile (Santiago)' },
     { value: 'UTC', label: 'Legacy: UTC' },
 ];
 
-export const JOURNAL_CLUB_TIMEZONE_OPTIONS = JOURNAL_CLUB_TIMEZONES;
+export const JOURNAL_CLUB_TIMEZONE_OPTIONS = [
+    ...JOURNAL_CLUB_TIMEZONES,
+    ...JOURNAL_CLUB_TIMEZONES_EXTRA,
+];
 export const JOURNAL_CLUB_TIMEZONE_OPTIONS_WITH_LEGACY = [
     ...JOURNAL_CLUB_TIMEZONES,
+    ...JOURNAL_CLUB_TIMEZONES_EXTRA,
     ...JOURNAL_CLUB_TIMEZONES_LEGACY,
 ];
 

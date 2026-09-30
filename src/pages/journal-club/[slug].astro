@@ -123,6 +123,31 @@ function formatTimeInTimezone(utcIsoString: string, timezone: string): string {
     }
 }
 
+// The time as the chair or speaker announced it, in the entry's own zone.
+// Formatted from the UTC instant rather than echoing localTime, so it is the
+// same instant the rest of the page uses. Only entries that give a local time
+// have one; an explicit UTC start says nothing about where it was announced.
+function zoneCity(tz: string): string {
+    return (tz.split('/').pop() || tz).replace(/_/g, ' ');
+}
+const announced = effectiveStartDateTimeUtc && data.localTime
+    ? (() => {
+          const tz = data.eventTz || 'Asia/Tokyo';
+          const short = new Intl.DateTimeFormat('en-US', {
+              timeZone: tz,
+              weekday: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+          }).format(new Date(effectiveStartDateTimeUtc));
+          return {
+              tz,
+              full: `${formatTimeInTimezone(effectiveStartDateTimeUtc, tz)} (${zoneCity(tz)})`,
+              short: `${short} ${zoneCity(tz)}`,
+          };
+      })()
+    : null;
+
 // Format date for header
 function formatHeaderDate(date: Date): string {
     const formatter = new Intl.DateTimeFormat('en-US', {
@@ -367,6 +392,17 @@ const ogImage = resolveOgImage({
         {effectiveStartDateTimeUtc && !isPast && (
             <aside class="event-times-section">
                 <h3 class="event-times-heading">Event Times</h3>
+                <p
+                    class="your-time"
+                    data-jc-start={effectiveStartDateTimeUtc}
+                    data-jc-announced-tz={announced?.tz}
+                    data-jc-announced={announced?.short}
+                    hidden={!announced}
+                >
+                    <span class="timezone-label your-time-label">Announced time:</span>
+                    <span class="timezone-time your-time-value">{announced?.full}</span>
+                    <span class="your-time-announced"></span>
+                </p>
                 <ul class="timezone-list">
                     {TIMEZONES.map(tz => (
                         <li class="timezone-item">
@@ -399,6 +435,50 @@ const ogImage = resolveOgImage({
         };
         tick();
         setInterval(tick, 60000);
+    })();
+
+    // The fixed city list only helps people near those cities, so also show
+    // the start in the visitor's own timezone. Without JavaScript this line
+    // shows the announced time instead, rendered at build time. It formats
+    // the UTC instant with the visitor's named zone, so Intl applies the DST
+    // rule in force on the event's date. Never derive it from today's getTimezoneOffset(): that
+    // is off by an hour whenever today and the event sit on opposite sides of
+    // a DST change.
+    (() => {
+        const el = document.querySelector(".your-time[data-jc-start]");
+        if (!el) return;
+        const start = new Date(el.getAttribute("data-jc-start") || "");
+        if (Number.isNaN(start.getTime())) return;
+        try {
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (!tz) return;
+            const time = new Intl.DateTimeFormat("en-US", {
+                timeZone: tz,
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+            }).format(start);
+            // Browsers still report some zones by their old IANA names.
+            const renamed = { Calcutta: "Kolkata", Kiev: "Kyiv", Saigon: "Ho Chi Minh", Rangoon: "Yangon", Katmandu: "Kathmandu" };
+            const last = tz.split("/").pop();
+            const city = (renamed[last] || last).replace(/_/g, " ");
+            el.querySelector(".your-time-label").textContent = "Your time (" + city + "):";
+            el.querySelector(".your-time-value").textContent = time;
+            // Keep the announced time beside it, so a visitor can match the
+            // page against the announcement. Pointless when they are the same.
+            const announcedTz = el.getAttribute("data-jc-announced-tz");
+            const announced = el.getAttribute("data-jc-announced");
+            if (announced && announcedTz !== tz) {
+                el.querySelector(".your-time-announced").textContent = "(announced as " + announced + ")";
+            }
+            el.hidden = false;
+        } catch (e) {
+            // Leave it hidden; the fixed list still gives the times.
+        }
     })();
 </script>
 
@@ -607,6 +687,31 @@ const ogImage = resolveOgImage({
         margin-bottom: 16px;
         margin-top: 0;
         color: var(--c-text-secondary, #666);
+    }
+
+    .your-time {
+        margin: 0 0 12px;
+        padding: 12px 14px;
+        font-size: 0.95em;
+        background-color: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+    }
+
+    .your-time .timezone-label {
+        color: var(--c-text, #333);
+        font-weight: 600;
+    }
+
+    .your-time .timezone-time {
+        font-weight: 600;
+    }
+
+    .your-time-announced {
+        margin-left: 6px;
+        color: var(--c-text-secondary, #666);
+        font-size: 0.9em;
+        white-space: nowrap;
     }
 
     .timezone-list {
