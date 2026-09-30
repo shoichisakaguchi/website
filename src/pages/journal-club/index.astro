@@ -500,15 +500,23 @@ function formatDate(date: Date): string {
         color: var(--c-text-secondary, #666);
     }
 
+    /* The marker is a standing underline, not the link colour. These titles run
+       to three lines, so colouring them put a wall of blue down the page. The
+       affordance still has to be there without :hover, or a touch device gets
+       nothing: before this the topic was plain body text and the blue
+       "Paper ↗" in the last column looked like the main target. */
     .topic-link {
         font-weight: var(--fw-semibold);
         color: var(--c-text, #333);
-        text-decoration: none;
+        text-decoration: underline;
+        text-decoration-color: rgba(0, 102, 204, 0.4);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
     }
 
     .topic-link:hover {
         color: var(--c-link, #0070f3);
-        text-decoration: underline;
+        text-decoration-color: currentColor;
     }
 
     .paper-link {
@@ -541,7 +549,15 @@ function formatDate(date: Date): string {
 
     .item-title a {
         color: var(--c-text, #333);
-        text-decoration: none;
+        text-decoration: underline;
+        text-decoration-color: rgba(0, 102, 204, 0.4);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 3px;
+    }
+
+    .item-title a:hover {
+        color: var(--c-link, #0070f3);
+        text-decoration-color: currentColor;
     }
 
     .item-speaker {

@@ -250,6 +250,20 @@ const topMessageHtml = topMessageMarkdown
 											{summit.data.phase}
 										</span>
 									)}
+									<svg
+										class="summit-chevron"
+										viewBox="0 0 24 24"
+										width="18"
+										height="18"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										aria-hidden="true"
+									>
+										<polyline points="9 18 15 12 9 6" />
+									</svg>
 								</div>
 								{statements.length > 0 && (
 									<div class="summit-outcomes">
@@ -443,7 +457,10 @@ const topMessageHtml = topMessageMarkdown
 		list-style: none;
 		padding: 0;
 	}
+	/* Same clickable card as /summits/. See that file for why the row is the
+	   target and blue is reserved for links that leave the site. */
 	.summit-item {
+		position: relative;
 		padding: 16px 20px;
 		background: white;
 		border-radius: 12px;
@@ -454,30 +471,63 @@ const topMessageHtml = topMessageMarkdown
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 	}
 	.summit-row {
-		display: grid;
-		grid-template-columns: auto minmax(0, 1fr) auto auto;
+		display: flex;
 		align-items: center;
 		gap: 16px;
 	}
 	.summit-year {
+		flex: 0 0 auto;
 		font-weight: 700;
 		font-size: 1.1rem;
 		color: var(--c-text-secondary);
 	}
 	.summit-title {
+		flex: 1 1 auto;
+		min-width: 0;
 		font-weight: 600;
 		text-align: left;
-		color: var(--c-link);
+		color: var(--c-text);
 		text-decoration: none;
 	}
-	.summit-title:hover {
+	.summit-title::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		border-radius: 12px;
+	}
+	.summit-item:hover .summit-title {
 		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+	.summit-title:focus-visible {
+		outline: 2px solid var(--c-link);
+		outline-offset: 2px;
+		border-radius: 4px;
+	}
+	@supports selector(:has(*)) {
+		.summit-title:focus-visible {
+			outline: none;
+		}
+		.summit-item:has(.summit-title:focus-visible) {
+			outline: 2px solid var(--c-link);
+			outline-offset: 2px;
+		}
+	}
+	.summit-chevron {
+		flex: 0 0 auto;
+		color: var(--c-text-secondary);
+		transition: transform 0.2s;
+	}
+	.summit-item:hover .summit-chevron {
+		transform: translateX(3px);
 	}
 	.summit-location {
+		flex: 0 0 auto;
 		font-size: 0.9rem;
 		color: var(--c-text-secondary);
 	}
 	.summit-phase {
+		flex: 0 0 auto;
 		font-size: 0.75rem;
 		text-transform: uppercase;
 		font-weight: 600;
@@ -522,7 +572,10 @@ const topMessageHtml = topMessageMarkdown
 		color: #1c4fa1;
 		white-space: nowrap;
 	}
+	/* Lifted above the stretched ::after, or the card would swallow it. */
 	.outcome-doi {
+		position: relative;
+		z-index: 1;
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 		font-size: 0.8125rem;
 		color: var(--c-link);
@@ -539,16 +592,15 @@ const topMessageHtml = topMessageMarkdown
 
 	@media (max-width: 640px) {
 		.summit-row {
-			grid-template-columns: 1fr;
-			text-align: center;
-			gap: 8px;
-			justify-items: center;
+			flex-wrap: wrap;
+			gap: 8px 12px;
 		}
 		.summit-title {
-			text-align: center;
+			flex: 1 1 100%;
+			order: -1;
 		}
-		.summit-outcome {
-			justify-content: center;
+		.summit-chevron {
+			margin-left: auto;
 		}
 	}
 

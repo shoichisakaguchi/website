@@ -40,6 +40,20 @@ const sortedSummits = sortEntriesByDateDesc(summits, "summits");
 									{summit.data.phase}
 								</span>
 							)}
+							<svg
+								class="summit-chevron"
+								viewBox="0 0 24 24"
+								width="18"
+								height="18"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"
+							>
+								<polyline points="9 18 15 12 9 6" />
+							</svg>
 						</div>
 						{statements.length > 0 && (
 							<div class="summit-outcomes">
@@ -98,7 +112,15 @@ const sortedSummits = sortEntriesByDateDesc(summits, "summits");
 		padding: 0;
 	}
 
+	/* The whole card is the target, not the words in it. The title's ::after is
+	   stretched over the card, so a click anywhere on the row opens the summit
+	   and the text can stay plain. The chevron is what says the row goes
+	   somewhere: on a card, that reads as a property of the row rather than as
+	   a second link, which is what the old "View details" line looked like.
+	   Blue is left to mean "leaves the site" (the DOI below, Paper links
+	   elsewhere); internal navigation is the card and the underline. */
 	.summit-item {
+		position: relative;
 		padding: 20px 24px;
 		background: white;
 		border-radius: 12px;
@@ -111,36 +133,78 @@ const sortedSummits = sortEntriesByDateDesc(summits, "summits");
 	}
 
 	.summit-row {
-		display: grid;
-		grid-template-columns: auto minmax(0, 1fr) auto auto;
+		display: flex;
 		align-items: center;
 		gap: 16px;
 	}
 
 	.summit-year {
+		flex: 0 0 auto;
 		font-weight: 700;
 		font-size: 1.25rem;
 		color: var(--c-text-secondary);
 	}
 
 	.summit-title {
+		flex: 1 1 auto;
+		min-width: 0;
 		font-weight: 600;
 		font-size: 1.15rem;
 		text-align: left;
-		color: var(--c-link);
+		color: var(--c-text);
 		text-decoration: none;
 	}
 
-	.summit-title:hover {
+	.summit-title::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		border-radius: 12px;
+	}
+
+	.summit-item:hover .summit-title {
 		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	/* Keyboard users get the ring on the card, not around the words, since the
+	   card is what the click target actually covers. The plain rule stands for
+	   engines without :has(), where cancelling it would leave no indicator. */
+	.summit-title:focus-visible {
+		outline: 2px solid var(--c-link);
+		outline-offset: 2px;
+		border-radius: 4px;
+	}
+
+	@supports selector(:has(*)) {
+		.summit-title:focus-visible {
+			outline: none;
+		}
+
+		.summit-item:has(.summit-title:focus-visible) {
+			outline: 2px solid var(--c-link);
+			outline-offset: 2px;
+		}
+	}
+
+	.summit-chevron {
+		flex: 0 0 auto;
+		color: var(--c-text-secondary);
+		transition: transform 0.2s;
+	}
+
+	.summit-item:hover .summit-chevron {
+		transform: translateX(3px);
 	}
 
 	.summit-location {
+		flex: 0 0 auto;
 		font-size: 0.9rem;
 		color: var(--c-text-secondary);
 	}
 
 	.summit-phase {
+		flex: 0 0 auto;
 		font-size: 0.75rem;
 		text-transform: uppercase;
 		font-weight: 600;
@@ -192,7 +256,10 @@ const sortedSummits = sortEntriesByDateDesc(summits, "summits");
 		white-space: nowrap;
 	}
 
+	/* Lifted above the stretched ::after, or the card would swallow it. */
 	.outcome-doi {
+		position: relative;
+		z-index: 1;
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 		font-size: 0.8125rem;
 		color: var(--c-link);
@@ -213,14 +280,17 @@ const sortedSummits = sortEntriesByDateDesc(summits, "summits");
 
 	@media (max-width: 640px) {
 		.summit-row {
-			grid-template-columns: 1fr;
-			text-align: center;
-			gap: 8px;
-			justify-items: center;
+			flex-wrap: wrap;
+			gap: 8px 12px;
 		}
 
 		.summit-title {
-			text-align: center;
+			flex: 1 1 100%;
+			order: -1;
+		}
+
+		.summit-chevron {
+			margin-left: auto;
 		}
 	}
 </style>
