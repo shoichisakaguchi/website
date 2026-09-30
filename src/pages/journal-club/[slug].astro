@@ -487,7 +487,21 @@ const ogImage = resolveOgImage({
             const renamed = { Calcutta: "Kolkata", Kiev: "Kyiv", Saigon: "Ho Chi Minh", Rangoon: "Yangon", Katmandu: "Kathmandu" };
             const last = tz.split("/").pop();
             const city = (renamed[last] || last).replace(/_/g, " ");
-            el.querySelector(".event-when-main").textContent = day + " · " + time + " your time (" + city + ")";
+            // The offset for the event's own date, so a browser that guessed the
+            // wrong zone (VPN, travel) is visible to the person reading it.
+            const at = start;
+            const offset = (() => {
+                try {
+                    const part = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "shortOffset" })
+                        .formatToParts(at)
+                        .find((p) => p.type === "timeZoneName");
+                    return part ? part.value : "";
+                } catch {
+                    return ""; // older browsers lack shortOffset; the line still reads fine
+                }
+            })();
+            const where = offset && city !== "UTC" ? city + ", " + offset : city;
+            el.querySelector(".event-when-main").textContent = day + " · " + time + " your time (" + where + ")";
             const announcedTz = el.getAttribute("data-jc-announced-tz");
             const announced = el.getAttribute("data-jc-announced");
             if (announced && announcedTz !== tz) {

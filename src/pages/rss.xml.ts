@@ -3,6 +3,49 @@ import { getCollection } from 'astro:content';
 import { marked } from 'marked';
 import { getSortDate, sortEntriesByDateDesc } from '../utils/sortDate';
 import { formatDate } from '../utils/date';
+import { resolveEventTimes } from '../lib/journalClubTime.mjs';
+
+// A feed is read later, in someone else's app, with no way to know the
+// reader's timezone, so it states the time as announced (to match the Slack
+// or Bluesky post) and in UTC (one unambiguous reference). Both come from the
+// resolved UTC instant, so DST is handled the same way as on the site.
+function formatJournalClubWhen(data: {
+    date: Date;
+    localTime?: string;
+    eventTz?: string;
+}): string {
+    const times = resolveEventTimes(data);
+    if (!times || !times.hasTime || !data.localTime) {
+        return formatDate(data.date);
+    }
+    const tz = data.eventTz || 'Asia/Tokyo';
+    const city = (tz.split('/').pop() || tz).replace(/_/g, ' ');
+    const fmt = (timeZone: string, withDay: boolean) =>
+        new Intl.DateTimeFormat('en-US', {
+            timeZone,
+            ...(withDay
+                ? { weekday: 'short', month: 'short', day: 'numeric' }
+                : {}),
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+        }).format(times.start);
+    const dayIn = (timeZone: string) =>
+        new Intl.DateTimeFormat('en-CA', { timeZone }).format(times.start);
+    const local = new Intl.DateTimeFormat('en-US', {
+        timeZone: tz,
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    }).format(times.start);
+    // Name the UTC day only when it differs from the announced one.
+    const utc = fmt('UTC', dayIn(tz) !== dayIn('UTC'));
+    return `${local} ${city} (${utc} UTC)`;
+}
 
 function toRssDate(value: unknown): Date | undefined {
     if (value instanceof Date && !Number.isNaN(value.valueOf())) {
@@ -80,7 +123,7 @@ export async function GET(context: { site: URL }) {
                       .map((chair) => `${chair.name} (${chair.affiliation})`)
                       .join(' · ')
                 : '';
-            const dateLine = formatDate(item.data.date);
+            const dateLine = formatJournalClubWhen(item.data);
             return [
                 `<p><strong>Date:</strong> ${dateLine}</p>`,
                 speakerLine

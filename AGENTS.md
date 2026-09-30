@@ -53,8 +53,11 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
   server-rendered fallback**. That is deliberate: a countdown baked at build time is wrong as soon as it is cached. It
   stays hidden further out than a week, where the date label reads better.
 - **Start times are shown in the visitor's own timezone** on the homepage card ("Thursday, October 8 · 16:00 your
-  time") and in the detail page header, where the time as announced follows in small type ("announced as Thu 10:00
-  Jerusalem", from `eventTz`). Both format the UTC start with the visitor's *named* zone through `Intl`, which applies
+  time (GMT+9)") and in the detail page header ("16:00 your time (Tokyo, GMT+9)"), where the time as announced follows
+  in small type ("announced as Thu 10:00 Jerusalem", from `eventTz`). The GMT offset is there so a visitor whose
+  browser guessed the wrong zone (VPN, travel) can see it; offsets rather than abbreviations, because `Intl` in en-US
+  only abbreviates US zones. The RSS feed cannot know the reader's zone, so it gives the announced time plus UTC
+  ("Thu, Oct 8, 2026, 10:00 Jerusalem (07:00 UTC)"). Both format the UTC start with the visitor's *named* zone through `Intl`, which applies
   the DST rule for the event's date. ⚠ Never compute it from today's `getTimezoneOffset()`: that is an hour out
   whenever today and the event fall on opposite sides of a DST change. Without JavaScript the card shows the date and
   the header shows the announced time. Because `eventTz` is now visible, set it to where the speaker or chair actually

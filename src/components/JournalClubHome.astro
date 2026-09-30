@@ -391,7 +391,19 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
                                 minute: "2-digit",
                                 hour12: false,
                             }).format(at);
-                            label = day + " · " + time + " your time";
+                            // The offset for the event's own date, so a wrong
+                            // browser guess (VPN, travel) is visible.
+                            const offset = (() => {
+                                try {
+                                    const part = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "shortOffset" })
+                                        .formatToParts(at)
+                                        .find((p) => p.type === "timeZoneName");
+                                    return part ? part.value : "";
+                                } catch {
+                                    return ""; // older browsers lack shortOffset; the line still reads fine
+                                }
+                            })();
+                            label = day + " · " + time + " your time" + (offset ? " (" + offset + ")" : "");
                         } catch {
                             // keep the build-time date
                         }
