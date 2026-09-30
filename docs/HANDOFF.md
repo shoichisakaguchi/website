@@ -1,19 +1,40 @@
 # HANDOFF — rdrp.io
 
-最終更新: 2026-09-25 / セッション: d2bb2b68
+最終更新: 2026-09-30 / セッション: d2bb2b68
 
 このファイルはセッション間の引き継ぎ用。安定した設計事実は `AGENTS.md` に、
 ここには「いまどこまで進んでいて、次に何をするか」だけを書く。
 
 ## いまブロックされていること
 
-**RdRp Summit 2027 の日程は 2027-03-07〜11 でほぼ確定。ただしサイトには入れない。**
-理由は**本家の ViBioM が正式な日程を発表していない**から（2025 と同じくサテライト開催。
-2025 の `satelliteOf` は ViBioM 2025 / https://evbc.uni-jena.de/events/vibiom2025/）。
-ViBioM の発表が出たら `src/content/summits/2027-rdrp-summit-2027.mdoc` に
-`startDate` / `endDate` / `satelliteOf` を入れる（5分）。**これが今いちばん価値の高い1行**で、
-トップの2027カードが「年号だけ」から「日程の決まった会議」に変わる。
-2027 の準備物は `~/Dropbox/omc/がっかい/20270307-11_RdRp_summit/`。
+**RdRp Summit 2027 のページは `preview` ブランチにあり、委員会の返信4件を待っている。**
+盤 `rdrp-202`（due 2026-10-08）。未回収は ①日程 3/12-13 を公開してよいか ②Hisham の役職
+③Milica を載せるか ④写真4名（Katy, Gytis, Lana, Michael）。
+回収済: Ingrida=EBI、Rachid 追加＋写真、Ella の写真差し替え。
+
+⚠ **ViBioM 待ちは 2026-09-29 に解消した。**ViBioM 2027 は
+`9 March 2027 - 11 March 2027 / Jena, Germany` を公式サイトで発表済み
+（https://evbc.uni-jena.de/event/international-virus-bioinformatics-meeting-2027-vibiom/）。
+残っているのは委員会確認だけ。
+
+🔴 **日程の数字が2系統ある。どちらが正か未確定。**
+
+| 出どころ | RdRp Summit の日程 |
+|---|---|
+| このファイルの旧記述 | 2027-03-07〜11 |
+| Dropbox のフォルダ名 `20270307-11_RdRp_summit` | 2027-03-07〜11 |
+| `preview` ブランチの現物 | **2027-03-12〜13**（ViBioM 3/9-11 の直後） |
+
+3/9-11 が ViBioM 本体なので、旧記述の「3/7-11」は**親会議の日程を写し取ったものに見える**。
+ただし Dropbox のフォルダ名も同じ数字なので、当時そう聞いていた可能性が消えない。
+⚠ **委員会に確認するまでどちらにも寄せない。**2027 の準備物は
+`~/Dropbox/omc/がっかい/20270307-11_RdRp_summit/`（フォルダ名は旧日程のまま）。
+
+⚠ **`main` に入れる前に `heroImage-PLACEHOLDER.svg` を外すこと。**
+
+⚠ ViBioM 側のページは RdRp Summit をサテライトとして**載せていない**（隣接イベントは EVE と
+ECV 2027 のみ）。preview 側は `satelliteOf` で ViBioM を指しているので片側だけのリンク。
+載せてもらう依頼を出す価値はあるかもしれない。
 
 ## 記事作成ポリシー（2026-09-15 制定・未実装）
 
@@ -55,6 +76,173 @@ ViBioM の発表が出たら `src/content/summits/2027-rdrp-summit-2027.mdoc` �
 **DOI か URL だけで投稿受付とする**（著者に文章を書かせない）。
 ⚠ ウェブ担当は2027の会議まで未定なので、**当面は坂口**と明記すること。
 委員会承認・編集会議・コンテンツカレンダーは作らない。
+
+## 2026-09-29〜30 にやったこと（本番反映済み）
+
+`e3ee84c` `9b1fd1b` `f17b3c1` `fb85ee4` `2f8d346` `ea588bb` `15774fc` `76afd53` `8b9970d`。
+
+9/25 の続きで入った回。2027 の preview に着手するつもりが、10/8 の JC・写真・一覧の
+押しにくさ・落ちていたスポンサーの謝辞と、先に片付くものが次々出て、そちらを全部通した。
+**2027 のページ自体はまだ委員会待ちで、preview ブランチに置いたまま。**
+
+### ブランチの分岐を解消した（これが最初の仕事だった）
+
+`preview` は `dd9dbf5` で分岐していて、**main にある 9/25 の JC 作業13コミットが入っていなかった。**
+そのままマージすると Zoom リンク・カウントダウン・録画埋め込みが巻き戻る状態。
+
+- `git rebase main preview` で解決。重複していた2コミット（`65a04ae`↔`297f554`、
+  `8cce3a9`↔`4dd8f3b`）は**パッチが同一**だったので git が自動で落とした。
+- ⚠ **以後 main に何か入れるたびに `git rebase main preview` を打つこと。**
+  今回の作業中に3回やった。放置すると同じ罠が育つ。
+- ⚠ **2027 の mdoc は必ずコンフリクトする。**preview の `3fe9aeb` が main のスタブを丸ごと
+  置き換えるため。**解決は常に preview 側を採用**（`git checkout --theirs`）。1回だけ起きて、
+  以後は解決済みなので起きていない。
+- バックアップは `preview-backup-20260929`（分岐前の preview）。不要になったら消してよい。
+
+### 人物写真2枚
+
+- **Ella Sieradzki。**本人が**preview ブランチの2027ページを見て**差し替えを希望。
+  900x1200 の上から正方形を切って 400x400 JPEG。原本は Dropbox
+  `omc/RdRp_Summit/pictures/headshot_ISME.jpg`。所属 Aarhus は本人が preview を見た上で
+  何も言わなかったので現状維持（オーナーが Slack で別途確認）。
+- **坂口。**3453x3453 の正方形だったので縮小のみ（構図は写真家の判断なので切らない）。
+  原本は同じフォルダの `DSC06645.jpeg`。ついでに**パスを他の20人と揃えた**
+  （`people/shoichi-sakaguchi.jpeg` + 相対パス → `people/shoichi-sakaguchi/image.jpg` + 絶対パス）。
+  1人だけ Keystatic から編集できない形だった。
+- ⚠ **写真は全サミット共有。**2023 と 2025 のアーカイブページの顔も変わる。仕様どおり
+  （名前を凍結すると改名した人の旧姓が残るため、名前と写真は共有・所属と国は pin）。
+
+### 🔴 `qlmanage -t` ではなく `qlmanage -p` なら hydrate できる
+
+9/25 の節に「`qlmanage -t` では hydrate できなかった」と書いたが、**`-p`（プレビュー）は効く。**
+`-t` はサムネイル生成で別物。Finder で「オフラインで利用可能にする」を手でやる必要はもう無い。
+
+```
+$ ls -l headshot_ISME.jpg      # 0 バイト・エラーは出ない
+$ qlmanage -p headshot_ISME.jpg
+$ ls -l headshot_ISME.jpg      # 373410 バイト
+```
+
+⚠ オーナーが渡してくるパスが `~/Library/CloudStorage/Dropbox/...` のことがあるが、
+**この Mac の実体は `~/Dropbox`**。CloudStorage 配下には存在しない。
+
+### Uri Neri をイスラエルに移した
+
+`people/uri-neri.yaml` は `Joint Genome Institute / USA` のままだった。**2026年6月から古い。**
+
+根拠は本人の記述2つ。ランディングページ（urineri.github.io）が
+"I have recently started a new postdoctoral position at Bar-Ilan University, in Chana
+Kranzler's lab."、GitHub の bio が "Research Fellow @ Kranzler lab @ BIU / Former Postdoc @ JGI"。
+
+⚠ **時刻の齟齬は完全に消えた。**Marco の Slack に Neri 本人の言葉があった
+（"I'm on GMT+3 and prefer noon and morning time slots"）。Marco の推測ではなく本人の申告。
+10/8 は Israel も Paris も夏時間内（終了は 10/25 と 10/26）なので、
+10:00 IDT = 09:00 CEST = 16:00 JST = **07:00 UTC** で3つとも一致する。
+
+⚠ サミット2行（2023 Tel Aviv University / 2025 Joint Genome Institute）は pin 済みなので
+アーカイブは動かない。変わったのは `/people` のカード1枚だけ。
+
+### 10/8 の JC を公開した
+
+`src/content/journal-club/2026-10-08-uri-neri.mdoc`。**演題が決まる前に出した。**
+9日前に「The next session is not announced yet」のままなのは、穴のあるエントリより悪い。
+
+🔴 **`eventTz` は `Europe/Vilnius` と書くこと。`Asia/Jerusalem` ではない。**
+`src/lib/journalClubTimezones.ts` の選択肢に無く、書くと Keystatic の select が壊れる
+（9/16 に `Europe/Helsinki` で踏んだのと同じ穴）。10/8 はどちらも UTC+3 で同じ 07:00 UTC に解決する。
+⚠ **詳細ページは `eventTz` を画面に出さない**（固定の7都市を並べるだけ）ので、表示は一切変わらない。
+
+- 演題は **RolyPoly**（`github.com/UriNeri/rolypoly`・PyPI `rolypoly-tk`・Bioconda・GPL-3.0・
+  docs は urineri.github.io/rolypoly）。⚠ ただし **Marco が持ちかけた題であって本人の確約ではない**
+  ので、`title` は `Topic to be announced` のまま、本文に "The expected topic is..." と書いた。
+  確定したらタイトルと `links` を入れる。
+- ⚠ **RolyPoly に論文はまだ無い。**README が "v1 manuscript ~late 2026" と書いている。
+  `links` に Paper 行は当面作れない。
+- `calendarUrl` は入れた。`zoomUrl`・座長・`speakerAffiliation` は空のまま。
+  ⚠ `speakerAffiliation` に `Bar-Ilan University` を入れるかはオーナー未回答。
+- **07:00 UTC はこれまでで一番早い回。**欧州の常連は普段 13:00-14:00 に出ているので4時間早まる。
+  東京は 16:00 で普段の 22:00 より出やすい。西海岸は午前0時ちょうど。
+
+### 🔴 JC エントリのスラッグ規則を決めた（`YYYY-MM-DD-speaker-name`）
+
+タイトルではなく**発表者名**。理由は美しさではなくタイミング。
+
+> スラッグは公開 URL で二度と変えられないので、**エントリを作る瞬間に確定している必要がある**。
+> タイトルはその時点で無いことが多い（話者が承諾した時点で告知するため）。発表者と日付は必ずある。
+
+- ⚠ **敬称（Dr./Prof.）は入れない。**昇進や学位で変わるが URL は追随できない。
+  現に `Professor Valerian Dolja` が居るので形も揃わない。丁寧さは `speakerName` が担う。
+- ⚠ **既存9件はリネームしない。**1年分の共有済みリンクが死ぬ。混在でよい。
+- ⚠ **旧ルールは既に破れていた。**`2025-11-06` と `2026-03-17` はタイトルと食い違っている
+  （作成後にタイトルを編集しても Keystatic はファイルをリネームしないため）。
+- 書いた場所は **`keystatic.config.ts` の `title` フィールドの `description`**（編集画面に出る文字列
+  だけが読まれるという 9/15 の教訓）と `AGENTS.md`。⚠ Keystatic はタイトルからスラッグを自動提案
+  するので、**作る人が手で上書きする必要がある**。自動化はできない。
+- ⚠ **Keystatic の編集画面で description が実際に出るところは未確認。**型とビルドは通っている。
+  次にエントリを作るとき目視で確かめること。
+
+### PCI が 2025 のスポンサーから落ちていた
+
+オーナーの記憶が正しかった。Wayback の `/sponsorship/`（2025-05-23）にスポンサーが2件ある。
+
+> **Travel Grant Sponsorship by ISME**（2025.04.30）
+> **Sponsorship by PCI**（2025.05.01）"our conference is supported by Peer Community In (PCI)...
+> We are grateful for their support of open science and our event."
+
+⚠ **ISME と同じ穴。**Astro 移行時に `sponsors: []` で出発して両方落ちていた。ISME は 9/24 に戻したが
+PCI を見落としていた。支援は現物で履行されている（2本目の Consensus statement が
+Peer Community Journal Vol.6 e50 に無料・オープンアクセスで掲載）。
+
+- `supportType` は素の `Sponsor`。旧サイトが "supported by" としか書いていないため。
+  ISME が具体的なのは受諾書が travel grant を名指ししているから。
+- ロゴは WordPress の原本（457x382/145KB）を 320px 高の WebP/21KB に縮小。
+  原本は `omc/RdRp_Summit/wordpress/uploads/2025/04/logo_PCI.png`。
+- ⚠ **PCI にロゴ掲載が契約条件だったかは未確認。**ISME は受諾書の条件2にある。
+
+### 一覧の「押すところ」を作り直した
+
+オーナーの指摘（「押すところがややこしい」「サミットかプロシーディングか統一されていない」）が起点。
+
+**見つかった問題。** `/summits/` の各行に**同じ URL のリンクが2本**あった（見出しと
+`View details` / `View Proceedings`）。しかも見出しは本文色でリンクに見えず、ラベルが行ごとに違い、
+"Proceedings" は中身と合っていない（プログラム・委員会・スポンサーであって講演論文集ではない）。
+`Organizer:` の1行は `summit.data.organizer`（単数）を読む**死んだコード**でスキーマに無い。
+
+トップの `(Planning)` 二重表示も同根で、2027 の `title` に `(Planning)` が入ったまま
+`phase` バッジも出ていた。**タイトルから外して解決。**
+
+**決めた配色ルール。**
+
+```
+青      外部に出る       DOI / Paper ↗ / Join Slack
+下線    サイト内に進む   JC の演題
+カード  サイト内に進む   サミットの行
+```
+
+⚠ 前は内部も外部も青で混ざっていた。⚠ **年号に `--c-link` が付いていて、リンクでない要素が
+青かった。**リンクである見出しが黒。逆だった。
+
+- **サミット2ページ（トップと `/summits/`）はカード全体が的。**`.summit-title::after` を
+  `inset: 0` で敷き、右端に薄いシェブロン（ホバーで 3px 動く）。`.outcome-doi` は
+  `position: relative; z-index: 1` で上に逃がす。**これが無いとカードが DOI を飲む。**
+- **`/journal-club/` は黒＋薄い青の下線**（`text-decoration-color: rgba(0,102,204,.4)`）。
+  表のセルでカード化するとテキスト選択の邪魔になるため。⚠ 一度タイトルを青にしたら
+  **演題が3行に折り返して青の壁になった**ので下線に変えた経緯がある。戻さないこと。
+- ⚠ **ホバーだけに依存しない。**タッチ端末にはホバーが無い。下線もシェブロンも常時出ている。
+  旧実装は `:hover` でしか目印が出ず、スマホでは**目印ゼロ**だった。
+- **キーボード。**`:has()` でカードに枠を出し、`@supports selector(:has(*))` の中で
+  タイトル側の枠を消す。⚠ **`:has()` 非対応で枠が消える事故を避けるため、素の
+  `:focus-visible` 規則を外に残してある。**消さないこと。
+- 検証は `elementFromPoint` で本番実測（余白→サミット、DOI 座標→DOI）。
+  ⚠ 圧縮で `::after` が `:after` になる。grep するとき見落とす。
+
+### 🔴 デプロイ直後の確認は必ずキャッシュバスターを付ける
+
+今日3回引っかかった。`curl` で素に叩くと**古い HTML が返る**。`?cb=$RANDOM` を付ける。
+
+⚠ **ステータスコードでは判定できない。**`/journal-club/2026-10-08-uri-neri/` は中身が
+無い状態でも 200 を返していた。**実際の文字列で確認すること。**
+デプロイ所要は実測 50〜100 秒。
 
 ## 2026-09-15 にやったこと（本番反映済み）
 
@@ -146,7 +334,7 @@ Zoom のローカル録画は**録画者の Zoom ウィンドウのサイズと�
   **数値指標を決めたら必ずフレームを目で確認する。**
 - ⚠ **Dropbox のオンライン専用ファイルは `cp` が成功して 0 バイトを返す。**
   `RVJC/` は既定でオンライン専用。Finder で「オフラインで利用可能にする」が要る。
-  `qlmanage -t` では hydrate できなかった。
+  `qlmanage -t` では hydrate できなかった（⚠ **`-p` なら効く。**2026-09-29 の節を見よ）。
 
 ### YouTube 側
 
@@ -394,15 +582,34 @@ Archived バッジを外し、Google Calendar を2箇所でリンクにし、`li
 
 ## 次にやること
 
-1. **`keystatic.config.ts` の posts に上の記事作成ポリシーを `description` として書く。**
-   これが今いちばん効く（今回の知見が全部そこに集約される）。
+**期限つき（盤の ⏳ に立っている）**
+
+| 札 | due | 何 |
+|---|---|---|
+| `rdrp-jc-20261008-entry` | 2026-10-05 | 10/8 の JC。**ページは出した**ので、残りは演題・Zoom URL・座長の確定と反映 |
+| `rdrp-202` | 2026-10-08 | 2027 preview。委員会の返信4件待ち |
+| `jc-20260925-video-removal` | 2026-10-09 | **Heli への約束の履行。**YouTube から `yqdF7g1Lxlg` を削除 |
+
+**期限なし**
+
+1. **`keystatic.config.ts` の posts に記事作成ポリシーを `description` として書く。**
+   ⚠ 9/29 に journalClub の `title` へスラッグ規則を書いた形がそのまま使える（実装例あり）。
 2. 「移行で落ちたテキスト」3点の復元（下記）。素材の在り処は特定済み。
 3. `natural-english` スキルの検討。`~/.claude/skills/natural-japanese` の英語版が無い。
    このサイトは英語で、Keystatic 経由で他の人も書く。日本語版の構造を移植できる。
+4. 講演確定メールのテンプレート（下の 9/16 の節）。⚠ 未作成のまま。写真4名が未取得なのも同根。
+5. ⚠ **Keystatic の編集画面でスラッグの `description` が実際に出るか目視確認。**
+   型とビルドは通っているが UI は見ていない。
 
 ## 注意点
 
-- **push = 本番デプロイ。** `main` への push で Cloudflare Pages が自動デプロイ（実測140秒）。指示があるまで push しない。
+- **push = 本番デプロイ。** `main` への push で Cloudflare Pages が自動デプロイ（実測 50〜140秒）。指示があるまで push しない。
+- ⚠ **デプロイ確認は `?cb=$RANDOM` を付ける。**素に叩くと古い HTML が返る（9/29 に3回踏んだ）。
+  **ステータスコードでは判定できない**ので、実際の文字列を見ること。
+- ⚠ **`main` に何か入れたら `git rebase main preview` を打つ。**放置すると preview が遅れ、
+  マージで巻き戻る。2027 の mdoc は必ずコンフリクトするので、**常に preview 側を採用**する。
+  preview の force push は `git push --force git@github.com:shoichisakaguchi/website.git preview`、
+  URL は https://preview.website-8cm.pages.dev/ に固定。
 - `origin` は HTTPS だが認証情報が無いので push は SSH:
   `git push git@github.com:shoichisakaguchi/website.git main`
 - Keystatic の編集は `main` に直コミットされる＝ローカルが黙って古くなる。作業前に `git pull --rebase`。
