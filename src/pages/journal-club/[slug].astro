@@ -395,7 +395,7 @@ const ogImage = resolveOgImage({
 
         {/* B2. Recording, while it is still online */}
         {recordingVideoId && !recordingExpired && (
-            <section class="recording-section" data-jc-hide-after={recordingExpiresUtc}>
+            <section id="recording" class="recording-section" data-jc-hide-after={recordingExpiresUtc}>
                 <div class="recording-frame">
                     <iframe
                         src={`https://www.youtube-nocookie.com/embed/${recordingVideoId}`}

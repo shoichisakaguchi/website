@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import { resolveEventTimes } from "../lib/journalClubTime.mjs";
+import { resolveEventTimes, zonedWallTimeToUtc } from "../lib/journalClubTime.mjs";
 
 interface Props {
     variant?: "standard" | "hero";
@@ -107,6 +107,54 @@ function formatCardDate(value: Date | string) {
         month: "long",
         day: "numeric",
     });
+}
+
+// Recordings are online for a couple of weeks and then taken down, and the
+// session page is the only place that links them, so someone who missed a
+// session has no way to find out from the homepage. Every finished session
+// whose recording is still up at build time goes into the payload, newest
+// first; the script below shows the first one that has not expired on the
+// visitor's clock. Deciding expiry here alone would leave a dead link on the
+// homepage until the next build, the same way "Live Now" once got stuck.
+// The expiry rule (end of recordingUntil in the event's zone) matches the
+// session page.
+const recordingsPayload = allJournalClub
+    .flatMap((item) => {
+        const { recordingUrl, recordingUntil } = item.data;
+        if (!recordingUrl) return [];
+        const times = resolveEventTimes(item.data);
+        if (!times || times.end > now) return [];
+        const expires = recordingUntil
+            ? zonedWallTimeToUtc(
+                  recordingUntil.toISOString().split("T")[0],
+                  "23:59",
+                  item.data.eventTz || "Asia/Tokyo",
+              )
+            : null;
+        if (expires && expires <= now) return [];
+        return [{ item, start: times.start, expires }];
+    })
+    .sort((a, b) => b.start.valueOf() - a.start.valueOf())
+    .map(({ item, start, expires }) => ({
+        slug: item.slug,
+        speakerName: getSpeakerInfo(item.data)?.name ?? null,
+        untilLabel: item.data.recordingUntil
+            ? new Date(item.data.recordingUntil).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  timeZone: "UTC",
+              })
+            : null,
+        start: start.toISOString(),
+        expires: expires ? expires.toISOString() : null,
+    }));
+const latestRecording = recordingsPayload[0] ?? null;
+
+function recordingLinkText(rec: (typeof recordingsPayload)[number]) {
+    const talk = rec.speakerName ? `${rec.speakerName}'s talk` : "the recording";
+    return rec.untilLabel
+        ? `Watch ${talk} (until ${rec.untilLabel})`
+        : `Watch ${talk}`;
 }
 
 const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
@@ -295,6 +343,24 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
                     </a>
                 </div>
             </div>
+            {/* Outside both states: a recent recording is worth offering
+                whether or not the next session is announced yet. */}
+            <script
+                type="application/json"
+                data-jc-recordings
+                is:inline
+                set:html={JSON.stringify(recordingsPayload).replace(/</g, "\\u003c")}
+            />
+            <p class="recording-teaser" data-jc-recording hidden={!latestRecording}>
+                Missed the last session?{" "}
+                <a
+                    href={latestRecording ? `/journal-club/${latestRecording.slug}#recording` : "/journal-club"}
+                    class="link-arrow"
+                    data-jc-recording-link
+                >
+                    {latestRecording && recordingLinkText(latestRecording)} &rarr;
+                </a>
+            </p>
         </div>
     </div>
 </section>
@@ -334,8 +400,40 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
                 return d + (d === 1 ? " day" : " days");
             };
 
+            // The newest recording still online on the visitor's clock. Kept
+            // apart from the event list so a parse failure here cannot take
+            // the next-session card down with it.
+            let recordings = [];
+            try {
+                const raw = card.querySelector("[data-jc-recordings]");
+                const parsed = JSON.parse((raw && raw.textContent) || "[]");
+                if (Array.isArray(parsed)) recordings = parsed;
+            } catch {
+                recordings = null; // leave the server-rendered line alone
+            }
+            const renderRecording = (now) => {
+                const line = q("[data-jc-recording]");
+                const link = q("[data-jc-recording-link]");
+                if (!line || !link || recordings === null) return;
+                const rec = recordings.find(
+                    (r) => !r.expires || Date.parse(r.expires) > now,
+                );
+                line.hidden = !rec;
+                if (!rec) return;
+                const talk = rec.speakerName
+                    ? rec.speakerName + "'s talk"
+                    : "the recording";
+                link.textContent =
+                    "Watch " +
+                    talk +
+                    (rec.untilLabel ? " (until " + rec.untilLabel + ")" : "") +
+                    " →";
+                link.href = "/journal-club/" + rec.slug + "#recording";
+            };
+
             const render = () => {
                 const now = Date.now();
+                renderRecording(now);
                 const ev = events.find((e) => Date.parse(e.end) > now);
                 if (!ev) {
                     content.hidden = true;
@@ -751,5 +849,13 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
         text-align: center;
         padding: 1rem;
         color: #666;
+    }
+
+    .recording-teaser {
+        margin: 20px 0 0;
+        padding-top: 16px;
+        border-top: 1px solid rgba(0, 0, 0, 0.06);
+        font-size: 14px;
+        color: var(--c-text-secondary);
     }
 </style>
