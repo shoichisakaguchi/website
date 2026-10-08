@@ -52,6 +52,11 @@ CLAUDE.md is a symlink to this file so multiple tools read the same source.
 - **Countdown on the homepage card** ("Starts in 3 hours", "Ends in 25 minutes") is **JavaScript-only and has no
   server-rendered fallback**. That is deliberate: a countdown baked at build time is wrong as soon as it is cached. It
   stays hidden further out than a week, where the date label reads better.
+- **Recordings are offered on the homepage card too**, as one line under the card ("Missed the last session? Watch
+  …"), linking to the session page's `#recording`. It shows the newest finished session whose `recordingUrl` is set
+  and whose `recordingUntil` has not passed, so filling those two fields in is all it takes. Expiry is decided on the
+  visitor's clock, like the badge, so the line disappears on time even without a rebuild. Added 2026-10-08; before
+  that only the session page linked a recording, and nobody arriving at the homepage could find one.
 - **Start times are shown in the visitor's own timezone** on the homepage card ("Thursday, October 8 · 16:00
   (GMT+9)") and in the detail page header ("16:00 (Tokyo, GMT+9)"), where the time as announced follows
   in small type ("announced as Thu 10:00 Jerusalem", from `eventTz`). The GMT offset is there so a visitor whose
