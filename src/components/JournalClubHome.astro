@@ -153,7 +153,7 @@ const latestRecording = recordingsPayload[0] ?? null;
 function recordingLinkText(rec: (typeof recordingsPayload)[number]) {
     const talk = rec.speakerName ? `${rec.speakerName}'s talk` : "the recording";
     return rec.untilLabel
-        ? `Watch ${talk} (until ${rec.untilLabel})`
+        ? `Watch ${talk} (until\u00a0${rec.untilLabel.replace(" ", "\u00a0")})`
         : `Watch ${talk}`;
 }
 
@@ -426,7 +426,10 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
                 link.textContent =
                     "Watch " +
                     talk +
-                    (rec.untilLabel ? " (until " + rec.untilLabel + ")" : "") +
+                    // Non-breaking, so a narrow card does not split "October 22".
+                    (rec.untilLabel
+                        ? " (until\u00a0" + rec.untilLabel.replace(" ", "\u00a0") + ")"
+                        : "") +
                     " →";
                 link.href = "/journal-club/" + rec.slug + "#recording";
             };
