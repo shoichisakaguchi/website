@@ -854,6 +854,13 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
         color: #666;
     }
 
+    /* Centred lines in a narrow card otherwise strand one word ("Slack.")
+       on a line of its own. */
+    .empty-state h3,
+    .empty-state p {
+        text-wrap: balance;
+    }
+
     .recording-teaser {
         margin: 20px 0 0;
         padding-top: 16px;
