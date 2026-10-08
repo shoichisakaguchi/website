@@ -351,16 +351,21 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
                 is:inline
                 set:html={JSON.stringify(recordingsPayload).replace(/</g, "\\u003c")}
             />
-            <p class="recording-teaser" data-jc-recording hidden={!latestRecording}>
-                Missed the last session?{" "}
-                <a
-                    href={latestRecording ? `/journal-club/${latestRecording.slug}#recording` : "/journal-club"}
-                    class="link-arrow"
-                    data-jc-recording-link
-                >
-                    {latestRecording && recordingLinkText(latestRecording)} &rarr;
-                </a>
-            </p>
+            <div class="recording-teaser" data-jc-recording hidden={!latestRecording}>
+                {/* Two fixed lines, so the block can shrink to its longer line
+                    and sit centred while the text inside stays left-aligned.
+                    Run together, it wraps to the full width and cannot centre. */}
+                <p class="recording-teaser-body">
+                    <span class="recording-teaser-lead">Missed the last session?</span>
+                    <a
+                        href={latestRecording ? `/journal-club/${latestRecording.slug}#recording` : "/journal-club"}
+                        class="link-arrow"
+                        data-jc-recording-link
+                    >
+                        {latestRecording && recordingLinkText(latestRecording)} &rarr;
+                    </a>
+                </p>
+            </div>
         </div>
     </div>
 </section>
@@ -867,5 +872,17 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
         border-top: 1px solid rgba(0, 0, 0, 0.06);
         font-size: 14px;
         color: var(--c-text-secondary);
+    }
+
+    .recording-teaser-body {
+        width: fit-content;
+        max-width: 100%;
+        margin: 0 auto;
+        text-align: left;
+    }
+
+    .recording-teaser-lead {
+        display: block;
+        margin-bottom: 2px;
     }
 </style>
