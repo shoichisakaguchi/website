@@ -81,7 +81,9 @@ ECV 2027 のみ）。preview 側は `satelliteOf` で ViBioM を指している�
 
 - 録画: YouTube 限定公開 https://youtu.be/yeUsyck6zCo（RdRp Summit チャンネル、再生リスト
   「RNA Virus Journal Club」）。**プレゼン部分だけ**をクラウド録画した（質疑は録っていない、事前に決めた方針）。
-  デモ中に Uri の画面に出ていた Zoom 小窓（Ella、名前つき）は、mini jc セッションで黒塗りした版を上げた。
+  デモ中に Uri の画面に出ていた Zoom 小窓（Ella、名前つき）とタスクバーのプレビュー2か所を、mini jc セッションで
+  JC ロゴで隠した版を上げた（元録画の 6:55.0〜49:23 を切り出し、42:28）。完成版とサムネは
+  `~/Dropbox/omc/RdRp_Summit/RVJC/20261008_Uri.mp4` / `20261008_Uri_thumb.png`。
 - 記事 `2026-10-08-uri-neri.mdoc` に `recordingUrl` / `recordingUntil: 2026-10-22`（開催から2週間、前回と同じ）と
   座長 Marco Forgia (IPSP-CNR Turin) を追加。
 - トップの JC カードの下に「Missed the last session? Watch …」の1行を追加（`JournalClubHome.astro`）。
