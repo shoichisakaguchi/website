@@ -704,6 +704,9 @@ const ogImage = resolveOgImage({
 
     .recording-section {
         margin: 0 0 40px;
+        /* The homepage links to #recording; stop below the sticky header
+           instead of under it. */
+        scroll-margin-top: 80px;
     }
 
     /* The player keeps 16:9 at any width, and the black ground means a slow
