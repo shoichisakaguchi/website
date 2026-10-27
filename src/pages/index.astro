@@ -383,7 +383,8 @@ const topMessageHtml = topMessageMarkdown
 		grid-template-columns: auto auto;
 		justify-content: center;
 		align-items: center;
-		column-gap: 56px;
+		/* Not the flex gap of .hero-card: that would also open 56px under the label. */
+		gap: 4px 56px;
 	}
 	.hero-card:has(.hero-logo) .hero-title {
 		display: contents;
