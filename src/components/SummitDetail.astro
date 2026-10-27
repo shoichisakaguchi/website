@@ -78,7 +78,8 @@ const isArchivedHome = variant === "home" && item.data.phase === "Archived";
 const showVenue =
     !isArchivedHome &&
     (variant === "summit" || item.data.format !== "Online") &&
-    (item.data.venue || item.data.city || item.data.country);
+    // A city alone is not a venue: its map adds nothing to the city's name.
+    !!item.data.venue;
 
 const mapQuery = [item.data.venue, item.data.city, item.data.country]
     .filter(Boolean)
