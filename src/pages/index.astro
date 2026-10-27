@@ -376,8 +376,29 @@ const topMessageHtml = topMessageMarkdown
 		border-radius: 16px;
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
 	}
+	/* With a logo the label stays top left, and the logo, the divider and the
+	   facts centre on each other: a grid row for the label, one for the pair. */
 	.hero-card:has(.hero-logo) {
+		display: grid;
+		grid-template-columns: auto auto;
+		justify-content: center;
 		align-items: center;
+		column-gap: 56px;
+	}
+	.hero-card:has(.hero-logo) .hero-title {
+		display: contents;
+	}
+	.hero-card:has(.hero-logo) .eyebrow {
+		grid-column: 1;
+		grid-row: 1;
+	}
+	.hero-card:has(.hero-logo) .hero-logo {
+		grid-column: 1;
+		grid-row: 2;
+	}
+	.hero-card:has(.hero-logo) .hero-facts {
+		grid-column: 2;
+		grid-row: 2;
 	}
 	.hero-title {
 		flex: 0 1 auto;
@@ -439,7 +460,8 @@ const topMessageHtml = topMessageMarkdown
 		.hero-preview {
 			margin-top: -20px;
 		}
-		.hero-card {
+		.hero-card,
+		.hero-card:has(.hero-logo) {
 			display: block;
 			padding: 26px 22px;
 		}
