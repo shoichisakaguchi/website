@@ -4,7 +4,7 @@ import HomeAnnouncements from "../components/HomeAnnouncements.astro";
 import JournalClubHome from "../components/JournalClubHome.astro";
 import { getCollection, getEntry, type CollectionEntry } from "astro:content";
 import SummitDetail from "../components/SummitDetail.astro";
-import { formatDate } from "../utils/date";
+import { formatDateRange } from "../utils/date";
 import { Marked } from "marked";
 import { getSortDate, sortEntriesByDateDesc } from "../utils/sortDate";
 
@@ -158,7 +158,7 @@ const topMessageHtml = topMessageMarkdown
 								{activeSummit.data.startDate && (
 									<p class="date">
 										Save the Date:{" "}
-										{formatDate(new Date(activeSummit.data.startDate))}
+										{formatDateRange(activeSummit.data.startDate, activeSummit.data.endDate)}
 									</p>
 								)}
 								{(activeSummit.data.city ||
