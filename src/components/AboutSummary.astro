@@ -1,10 +1,18 @@
 ---
 // What the RdRp Summit is, for someone arriving from a search. It does not
-// change between editions, so the homepage puts it under the summit banner
+// change between editions, so the homepage puts it under the summit card
 // while a summit is announced (Preview / Live) and on top otherwise.
+//
+// Under the card it is `secondary`: the heading drops to a small label (the
+// card's own "Upcoming Event" style) and the paragraph carries the section.
+// A 2rem heading there competed with the summit title.
+interface Props {
+	secondary?: boolean;
+}
+const { secondary = false } = Astro.props;
 ---
 
-<section class="about-summary">
+<section class:list={["about-summary", { secondary }]}>
 	<div class="container">
 		<h2>About RdRp Summit</h2>
 		<p>
@@ -46,6 +54,19 @@
 		line-height: 1.7;
 		max-width: 700px;
 		margin: 0 auto 1.5rem;
+	}
+	.about-summary.secondary h2 {
+		margin-bottom: 12px;
+		font-size: 0.75rem;
+		font-weight: 700;
+		line-height: 1.5;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--c-text-secondary);
+	}
+	.about-summary.secondary p {
+		font-size: 1.2rem;
+		color: var(--c-text);
 	}
 	.link-arrow {
 		font-size: 14px;
