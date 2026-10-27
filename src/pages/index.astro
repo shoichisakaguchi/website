@@ -137,33 +137,35 @@ const topMessageHtml = topMessageMarkdown
 			currentPhase === "Preview" && !!activeSummit && (
 				<>
 					<section class="hero-preview">
-						<div class="container hero-content">
-							<span class="eyebrow">Upcoming Event</span>
-							<h1>{activeSummit.data.title}</h1>
-							<div class="event-meta">
-								{activeSummit.data.startDate && (
-									<p class="date">
-										Save the Date:{" "}
-										{formatDateRange(activeSummit.data.startDate, activeSummit.data.endDate)}
-									</p>
-								)}
-								{(activeSummit.data.city ||
-									activeSummit.data.country) && (
-									<p class="location">
-										{[
-											activeSummit.data.city,
-											activeSummit.data.country,
-										]
-											.filter(Boolean)
-											.join(", ")}
-									</p>
-								)}
-							</div>
-							{/* The summit page already says what is settled, and it is what ViBioM links to. */}
-							<div class="cta-wrapper">
-								<a class="details-link" href={`/summits/${activeSummit.slug}`}>
-									What is confirmed so far &rarr;
-								</a>
+						<div class="container">
+							<div class="hero-card">
+								<div class="hero-title">
+									<span class="eyebrow">Upcoming Event</span>
+									<h1>{activeSummit.data.title}</h1>
+								</div>
+								<div class="hero-facts">
+									{activeSummit.data.startDate && (
+										<p class="date">
+											<span class="date-label">Save the date</span>
+											{formatDateRange(activeSummit.data.startDate, activeSummit.data.endDate)}
+										</p>
+									)}
+									{(activeSummit.data.city ||
+										activeSummit.data.country) && (
+										<p class="location">
+											{[
+												activeSummit.data.city,
+												activeSummit.data.country,
+											]
+												.filter(Boolean)
+												.join(", ")}
+										</p>
+									)}
+									{/* The summit page already says what is settled, and it is what ViBioM links to. */}
+									<a class="details-link" href={`/summits/${activeSummit.slug}`}>
+										What is confirmed so far &rarr;
+									</a>
+								</div>
 							</div>
 						</div>
 					</section>
@@ -298,25 +300,6 @@ const topMessageHtml = topMessageMarkdown
 		background: var(--c-bg);
 	}
 
-	/* A tinted band rather than a card: the site uses cards for one item among
-	   several (the next Journal Club session), and this is the page's headline. */
-	.hero-preview {
-		/* Pull the band up to the header: main's 40px top padding (Layout) would
-		   otherwise leave a strip of page colour above it. */
-		margin-top: -40px;
-		padding: 56px 0 60px;
-		text-align: center;
-		background: color-mix(in srgb, var(--c-link) 6%, var(--c-bg));
-		border-bottom: 1px solid color-mix(in srgb, var(--c-link) 12%, var(--c-bg));
-	}
-
-	.hero-content h1 {
-		font-size: 2.5rem;
-		font-weight: 800;
-		margin-bottom: 20px;
-		color: var(--c-text);
-	}
-
 	.subtitle {
 		font-size: 1.25rem;
 		color: var(--c-text-secondary);
@@ -324,10 +307,6 @@ const topMessageHtml = topMessageMarkdown
 		max-width: 600px;
 		margin-left: auto;
 		margin-right: auto;
-	}
-
-	.cta-wrapper {
-		margin-top: 30px;
 	}
 
 	.button.primary {
@@ -377,28 +356,99 @@ const topMessageHtml = topMessageMarkdown
 		background: #f6f8fa;
 	}
 
-	/* Preview Specific */
-	.eyebrow {
-		text-transform: uppercase;
-		font-size: 0.9rem;
-		letter-spacing: 0.1em;
-		color: var(--c-link);
-		font-weight: 700;
-		margin-bottom: 10px;
-		display: block;
+	/* Preview: the announced summit, as a card. The site uses cards for the
+	   things a visitor can act on (the next Journal Club session), and a card
+	   gives a coloured logo a white ground once the edition has one. */
+	.hero-preview {
+		/* main has 40px of top padding (Layout); the card wants less. */
+		margin-top: -16px;
+		padding: 0 0 8px;
 	}
-	.event-meta {
-		font-size: 1.2rem;
-		margin-bottom: 30px;
+	.hero-card {
+		display: flex;
+		justify-content: center;
+		/* Text title: top-aligned, so "Upcoming Event" and "Save the date" sit on
+		   one line. A logo is taller than the facts, so centre it instead. */
+		align-items: flex-start;
+		gap: 56px;
+		padding: 40px 44px;
+		background: #fff;
+		border-radius: 16px;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+	}
+	.hero-card:has(.hero-logo) {
+		align-items: center;
+	}
+	.hero-title {
+		flex: 0 1 auto;
+	}
+	.eyebrow,
+	.date-label {
+		display: block;
+		margin-bottom: 6px;
+		font-size: 0.75rem;
+		font-weight: 700;
+		line-height: 1.5;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+	.eyebrow {
+		color: var(--c-link);
+	}
+	.date-label {
+		color: var(--c-text-secondary);
+	}
+	.hero-title h1 {
+		margin: 0;
+		font-size: clamp(2.25rem, 4.5vw, 3rem);
+		line-height: 1.05;
+		font-weight: 750;
+		letter-spacing: -0.03em;
 		color: var(--c-text);
 	}
-	.details-link {
-		color: var(--c-link);
+	.hero-facts {
+		flex: 0 0 auto;
+		padding: 0 0 4px 40px;
+		border-left: 1px solid var(--c-divider);
+	}
+	.hero-facts p {
+		margin: 0;
+	}
+	.date {
+		font-size: 1.375rem;
 		font-weight: 600;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+	.location {
+		margin-top: 4px;
+		color: var(--c-text-secondary);
+	}
+	.details-link {
+		display: inline-block;
+		margin-top: 16px;
+		font-size: var(--fs-meta);
+		font-weight: 600;
+		color: var(--c-link);
 		text-decoration: none;
 	}
 	.details-link:hover {
 		text-decoration: underline;
+	}
+	@media (max-width: 700px) {
+		.hero-preview {
+			margin-top: -20px;
+		}
+		.hero-card {
+			display: block;
+			padding: 26px 22px;
+		}
+		.hero-facts {
+			margin-top: 20px;
+			padding: 18px 0 0;
+			border-left: 0;
+			border-top: 1px solid var(--c-divider);
+		}
 	}
 
 	/* Past Summits Section Wrapper (Archived) */
