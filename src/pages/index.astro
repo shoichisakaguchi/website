@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import HomeAnnouncements from "../components/HomeAnnouncements.astro";
 import JournalClubHome from "../components/JournalClubHome.astro";
+import AboutSummary from "../components/AboutSummary.astro";
 import { getCollection, getEntry, type CollectionEntry } from "astro:content";
 import SummitDetail from "../components/SummitDetail.astro";
 import { formatDateRange } from "../utils/date";
@@ -65,6 +66,7 @@ if (
 }
 
 const currentPhase = activeSummit?.data.phase || "Planning";
+const summitAnnounced = currentPhase === "Preview" || currentPhase === "Live";
 
 const topMessageMarkdown =
 	currentPhase === "Planning"
@@ -98,25 +100,8 @@ const topMessageHtml = topMessageMarkdown
 
 <Layout>
 	<div data-pagefind-body>
-		{/* About RdRp Summit Section - Shown at top for all phases */}
-		<section class="about-summary">
-			<div class="container">
-				<h2>About RdRp Summit</h2>
-				<p>
-					The RdRp Summit is a global research community focused on RNA-dependent RNA polymerase (RdRp),
-					a key enzyme shared by all RNA viruses. We bring together researchers to advance the discovery,
-					classification, and analysis of RNA viruses through open discussion, shared data, and community-driven standards.
-				</p>
-				<a
-					href="https://forms.gle/oPdeSmmLnQTi8UAB8"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="link-arrow"
-				>
-					Join the community on Slack &rarr;
-				</a>
-			</div>
-		</section>
+		{/* While a summit is announced, its banner leads and About follows it. */}
+		{!summitAnnounced && <AboutSummary />}
 
 		{topMessageHtml && (
 			<section class="top-message">
@@ -182,6 +167,7 @@ const topMessageHtml = topMessageMarkdown
 							</div>
 						</div>
 					</section>
+					<AboutSummary />
 					<JournalClubHome variant="hero" showIcon={true} hideActions={true} />
 				</>
 			)
@@ -198,6 +184,7 @@ const topMessageHtml = topMessageMarkdown
 			currentPhase === "Live" && !!activeSummit && (
 				<>
 					<SummitDetail item={activeSummit} variant="home" />
+					<AboutSummary />
 					<JournalClubHome variant="hero" showIcon={true} hideActions={true} />
 				</>
 			)
@@ -305,11 +292,19 @@ const topMessageHtml = topMessageMarkdown
 	}
 
 	/* Hero Styles for Planning & Preview */
-	.hero-planning,
-	.hero-preview {
+	.hero-planning {
 		padding: 100px 0;
 		text-align: center;
 		background: var(--c-bg);
+	}
+
+	/* A tinted band rather than a card: the site uses cards for one item among
+	   several (the next Journal Club session), and this is the page's headline. */
+	.hero-preview {
+		padding: 56px 0 60px;
+		text-align: center;
+		background: color-mix(in srgb, var(--c-link) 6%, var(--c-bg));
+		border-bottom: 1px solid color-mix(in srgb, var(--c-link) 12%, var(--c-bg));
 	}
 
 	.hero-content h1 {
@@ -418,26 +413,6 @@ const topMessageHtml = topMessageMarkdown
 	.past-summits-section p {
 		color: var(--c-text-secondary);
 		font-size: 1.1rem;
-	}
-
-	/* About Summary Section */
-	.about-summary {
-		text-align: center;
-		padding: 60px 0 40px;
-		background: var(--c-bg);
-	}
-	.about-summary h2 {
-		font-size: 2rem;
-		line-height: 1.2;
-		margin-bottom: 1rem;
-		font-weight: 700;
-	}
-	.about-summary p {
-		color: var(--c-text-secondary);
-		font-size: 1.1rem;
-		line-height: 1.7;
-		max-width: 700px;
-		margin: 0 auto 1.5rem;
 	}
 
 	/* Past Summits List Section */
