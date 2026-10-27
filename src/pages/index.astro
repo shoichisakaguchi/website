@@ -301,6 +301,9 @@ const topMessageHtml = topMessageMarkdown
 	/* A tinted band rather than a card: the site uses cards for one item among
 	   several (the next Journal Club session), and this is the page's headline. */
 	.hero-preview {
+		/* Pull the band up to the header: main's 40px top padding (Layout) would
+		   otherwise leave a strip of page colour above it. */
+		margin-top: -40px;
 		padding: 56px 0 60px;
 		text-align: center;
 		background: color-mix(in srgb, var(--c-link) 6%, var(--c-bg));
