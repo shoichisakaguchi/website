@@ -3,6 +3,7 @@ import { getEntry } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import { marked } from "marked";
 import { formatDate, formatDateRange } from "../utils/date";
+import { phaseLabel } from "../utils/summitPhase";
 import CommunityFooter from "./CommunityFooter.astro";
 
 interface Props {
@@ -146,7 +147,7 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
                                 {item.data.phase === "Planning" &&
                                 variant === "home"
                                     ? "Planning Phase"
-                                    : item.data.phase}
+                                    : phaseLabel(item.data.phase)}
                             </div>
                         )
                     }
@@ -267,7 +268,10 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
         {
             item.data.intro && (
                 <div class="summit-intro">
-                    <p>{item.data.intro}</p>
+                    {/* A blank line in the field is a paragraph break, as it is everywhere else in Keystatic. */}
+                    {item.data.intro
+                        .split(/\n\s*\n/)
+                        .map((para: string) => <p>{para.trim()}</p>)}
                 </div>
             )
         }
@@ -1265,6 +1269,10 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
     .phase-badge.planning {
         background: #e0f2fe;
         color: #0369a1;
+    }
+    .phase-badge.preview {
+        background: #fef3c7;
+        color: #92400e;
     }
     .phase-badge.live {
         background: #dcfce7;

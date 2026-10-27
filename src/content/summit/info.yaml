@@ -1,6 +1,6 @@
 # The featured summit drives the homepage phase, which in turn selects which
 # of the three messages below is shown.
-featuredSummit: 2027-rdrp-summit-2027
+featuredSummit: rdrp-summit-2027
 overridePhase: Auto
 
 # Phase messages. These used to live as .mdoc sidecar files in info/, which the

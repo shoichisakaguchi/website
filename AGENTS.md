@@ -177,6 +177,15 @@ merged to `main`.
   so switching between those two changes nothing; and the three `topMessage*` fields never reach the page, because
   Keystatic stores them as `.mdoc` files under `src/content/summit/info/` while the Astro `summit` collection is
   `type: 'data'` and only reads `info.yaml`. Only `Preview` and `Live` currently produce a distinct homepage.
+- Visitors never see the word "Preview": `src/utils/summitPhase.ts` shows it as **Upcoming** on every badge, because
+  "Preview" reads as "draft" to anyone who does not know it is an editorial state.
+- **Summit slugs are `rdrp-summit-YYYY`**, with no date. Like Journal Club slugs, the rule is that the slug must be
+  decidable when the entry is created, and for a summit that is only the year: the entry exists for months before
+  the dates are fixed. On 2026-02-09 all three summits were renamed to start with their first day, without redirects,
+  so every link shared before then silently showed the homepage (Pages answers an unknown path with 200 and the
+  homepage, so nothing reported it). On 2026-10-27 they went back to `rdrp-summit-YYYY`, and `public/_redirects`
+  sends both the dated names and the pre-February Journal Club and post URLs to their current pages.
+  ⚠ **Any rename needs a line in `public/_redirects`.** A broken URL here does not 404; it just lands on the homepage.
 
 ## Git Workflow
 - Before starting any repository edits, check `git status`.

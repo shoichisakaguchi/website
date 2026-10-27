@@ -331,7 +331,17 @@ export default config({
                 // ─────────────────────────────────────────────────────────────
                 // 1. Hero / Title / Meta
                 // ─────────────────────────────────────────────────────────────
-                title: fields.slug({ name: { label: 'Title' } }),
+                title: fields.slug({
+                    name: { label: 'Title' },
+                    slug: {
+                        label: 'URL slug',
+                        description:
+                            'Write it as rdrp-summit-YYYY, e.g. rdrp-summit-2027. No dates: the ' +
+                            'entry is created long before the dates are fixed, and the slug is the ' +
+                            'public URL, so it must not change when they are. Set it once when you ' +
+                            'create the entry and never touch it again.',
+                    },
+                }),
                 year: fields.text({ label: 'Year' }),
                 heroImage: fields.image({
                     label: 'Hero Image',

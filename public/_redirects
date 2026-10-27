@@ -4,3 +4,35 @@
 # 404ing visitors who arrive from search.
 /contact    https://forms.gle/oPdeSmmLnQTi8UAB8  301
 /contact/   https://forms.gle/oPdeSmmLnQTi8UAB8  301
+
+
+# Summits are named rdrp-summit-YYYY: the year is known when the entry is
+# created, so the URL never has to change. On 2026-02-09 they were renamed to
+# start with the summit's first day, which left the original URLs showing the
+# homepage; on 2026-10-27 the names went back and both forms now redirect.
+/summits/2023-05-22-rdrp-summit-2023    /summits/rdrp-summit-2023/  301
+/summits/2023-05-22-rdrp-summit-2023/   /summits/rdrp-summit-2023/  301
+/summits/2025-05-11-rdrp-summit-2025    /summits/rdrp-summit-2025/  301
+/summits/2025-05-11-rdrp-summit-2025/   /summits/rdrp-summit-2025/  301
+/summits/2027-rdrp-summit-2027    /summits/rdrp-summit-2027/  301
+/summits/2027-rdrp-summit-2027/   /summits/rdrp-summit-2027/  301
+
+# Journal Club sessions and posts were renamed with a date prefix on
+# 2026-02-09 without redirects, so links shared before then showed the
+# homepage. Their current names stay (see AGENTS.md); these restore the old ones.
+/journal-club/unicore-a-novel-method-for-identifying-structural-core-genes-for-downstream-phylogenetic-analysis    /journal-club/2025-09-04-unicore-a-novel-method-for-identifying-structural-core-genes-for-downstream-phylogenetic-analysis/  301
+/journal-club/unicore-a-novel-method-for-identifying-structural-core-genes-for-downstream-phylogenetic-analysis/   /journal-club/2025-09-04-unicore-a-novel-method-for-identifying-structural-core-genes-for-downstream-phylogenetic-analysis/  301
+/journal-club/integrative-modeling-of-seasonal-influenza-evolution-via-ai-powered-antigenic-cartography    /journal-club/2025-10-02-integrative-modeling-of-seasonal-influenza-evolution-via-ai-powered-antigenic-cartography/  301
+/journal-club/integrative-modeling-of-seasonal-influenza-evolution-via-ai-powered-antigenic-cartography/   /journal-club/2025-10-02-integrative-modeling-of-seasonal-influenza-evolution-via-ai-powered-antigenic-cartography/  301
+/journal-club/clae-a-high-fidelity-nanopore-sequencing-strategy-for-read-level-viral-variant-detection-and-environmental-rna-virus-discovery    /journal-club/2025-11-06-clae-a-high-fidelity-nanopore-sequencing-strategy-for-read-level-viral-variant-detection-and-environmental-rna-virus-discovery/  301
+/journal-club/clae-a-high-fidelity-nanopore-sequencing-strategy-for-read-level-viral-variant-detection-and-environmental-rna-virus-discovery/   /journal-club/2025-11-06-clae-a-high-fidelity-nanopore-sequencing-strategy-for-read-level-viral-variant-detection-and-environmental-rna-virus-discovery/  301
+/journal-club/finding-endogenous-viral-elements-in-genomic-data    /journal-club/2025-12-11-finding-endogenous-viral-elements-in-genomic-data/  301
+/journal-club/finding-endogenous-viral-elements-in-genomic-data/   /journal-club/2025-12-11-finding-endogenous-viral-elements-in-genomic-data/  301
+/journal-club/baltic-python-based-phylogenetic-tree-visualisation-module    /journal-club/2026-01-15-baltic-python-based-phylogenetic-tree-visualisation-module/  301
+/journal-club/baltic-python-based-phylogenetic-tree-visualisation-module/   /journal-club/2026-01-15-baltic-python-based-phylogenetic-tree-visualisation-module/  301
+/journal-club/diversity-and-evolution-of-the-global-rna-virome    /journal-club/2026-02-12-diversity-and-evolution-of-the-global-rna-virome/  301
+/journal-club/diversity-and-evolution-of-the-global-rna-virome/   /journal-club/2026-02-12-diversity-and-evolution-of-the-global-rna-virome/  301
+/posts/rdrp-io-is-moving-to-astro-cloudflare-pages    /posts/2026-01-10-rdrp-io-is-moving-to-astro-cloudflare-pages/  301
+/posts/rdrp-io-is-moving-to-astro-cloudflare-pages/   /posts/2026-01-10-rdrp-io-is-moving-to-astro-cloudflare-pages/  301
+/posts/phylogenetic-inference-and-visualization-community-insights    /posts/2026-02-09-phylogenetic-inference-and-visualization-community-insights/  301
+/posts/phylogenetic-inference-and-visualization-community-insights/   /posts/2026-02-09-phylogenetic-inference-and-visualization-community-insights/  301
