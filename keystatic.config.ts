@@ -348,6 +348,15 @@ export default config({
                     directory: 'public/images/summits/hero',
                     publicPath: '/images/summits/hero',
                 }),
+                logo: fields.image({
+                    label: 'Logo',
+                    description:
+                        "The edition's logo, transparent background, without a date or place line " +
+                        '(the page shows those next to it). Replaces the title on the homepage card ' +
+                        'and sits above the title on the summit page. Hero Image is for a photo banner.',
+                    directory: 'public/images/summits/hero',
+                    publicPath: '/images/summits/hero',
+                }),
                 description: fields.text({ label: 'Description (OGP/Card)', multiline: true }),
                 ogImage: fields.image({
                     label: 'OG Image',

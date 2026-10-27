@@ -141,7 +141,14 @@ const topMessageHtml = topMessageMarkdown
 							<div class="hero-card">
 								<div class="hero-title">
 									<span class="eyebrow">Upcoming Event</span>
-									<h1>{activeSummit.data.title}</h1>
+									{activeSummit.data.logo ? (
+										<>
+											<img class="hero-logo" src={activeSummit.data.logo} alt="" width="400" />
+											<h1 class="visually-hidden">{activeSummit.data.title}</h1>
+										</>
+									) : (
+										<h1>{activeSummit.data.title}</h1>
+									)}
 								</div>
 								<div class="hero-facts">
 									{activeSummit.data.startDate && (
@@ -428,6 +435,21 @@ const topMessageHtml = topMessageMarkdown
 		letter-spacing: -0.03em;
 		color: var(--c-text);
 	}
+	.hero-logo {
+		display: block;
+		width: 400px;
+		max-width: 100%;
+		height: auto;
+	}
+	/* The logo already reads "RdRp Summit 2027"; the title stays for screen readers and search. */
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+	}
 	.hero-facts {
 		flex: 0 0 auto;
 		padding: 0 0 4px 40px;
@@ -471,6 +493,9 @@ const topMessageHtml = topMessageMarkdown
 			padding: 18px 0 0;
 			border-left: 0;
 			border-top: 1px solid var(--c-divider);
+		}
+		.hero-logo {
+			width: 100%;
 		}
 	}
 

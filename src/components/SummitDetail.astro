@@ -137,6 +137,13 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
                     )
                 }
 
+                {/* A logo is not a banner: it sits above the title at a readable size, where a hero photo spans the page. */}
+                {
+                    !isArchivedHome && item.data.logo && (
+                        <img src={item.data.logo} alt="" class="summit-logo" />
+                    )
+                }
+
                 {/* Phase Badge / Eyebrow */}
                 <div class="phase-wrapper">
                     {
@@ -795,12 +802,25 @@ const registrationFeesHtml = item.data.registrationFees?.trim()
         border-radius: 12px;
     }
 
+    .summit-logo {
+        display: block;
+        width: 100%;
+        max-width: 560px;
+        height: auto;
+        margin: 0 auto 20px;
+    }
+
     .meta {
         color: var(--c-text-light, #666);
         font-size: 1.2rem;
         display: flex;
+        flex-wrap: wrap;
         justify-content: center;
-        gap: 20px;
+        gap: 4px 20px;
+    }
+    /* Wrap between items, never inside one: "Mar 12-13, / 2027" on a phone. */
+    .meta > * {
+        white-space: nowrap;
     }
 
     .content-wrapper {

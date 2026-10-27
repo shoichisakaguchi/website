@@ -94,6 +94,7 @@ const summits = defineCollection({
     schema: z.object({
         title: z.string(),
         heroImage: z.string().optional(),
+        logo: z.string().optional(),
         ogImage: z.string().optional().or(z.literal('')),
         ogImageAlt: z.string().optional().or(z.literal('')),
         description: z.string().optional(),
