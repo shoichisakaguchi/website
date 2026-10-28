@@ -367,8 +367,8 @@ const topMessageHtml = topMessageMarkdown
 	   things a visitor can act on (the next Journal Club session), and a card
 	   gives a coloured logo a white ground once the edition has one. */
 	.hero-preview {
-		/* main has 40px of top padding (Layout); the card wants less. */
-		margin-top: -16px;
+		/* main's 40px top padding (Layout) is the gap under the header, the same
+		   as above every page title on the site. */
 		padding: 0 0 8px;
 	}
 	.hero-card {
@@ -481,7 +481,7 @@ const topMessageHtml = topMessageMarkdown
 	}
 	@media (max-width: 700px) {
 		.hero-preview {
-			margin-top: -20px;
+			margin-top: -16px;
 		}
 		.hero-card,
 		.hero-card:has(.hero-logo) {
