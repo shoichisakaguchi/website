@@ -1,40 +1,44 @@
 # HANDOFF — rdrp.io
 
-最終更新: 2026-10-08 / セッション: def36c03
+最終更新: 2026-11-12 / セッション: eeda8497
 
 このファイルはセッション間の引き継ぎ用。安定した設計事実は `AGENTS.md` に、
 ここには「いまどこまで進んでいて、次に何をするか」だけを書く。
 
-## いまブロックされていること
+## いまの状態（2026-11-12）
 
-**RdRp Summit 2027 のページは `preview` ブランチにあり、委員会の返信4件を待っている。**
-盤 `rdrp-202`（due 2026-10-08）。未回収は ①日程 3/12-13 を公開してよいか ②Hisham の役職
-③Milica を載せるか ④写真4名（Katy, Gytis, Lana, Michael）。
-回収済: Ingrida=EBI、Rachid 追加＋写真、Ella の写真差し替え。
+**RdRp Summit 2027 は Upcoming として本番に出ている。**オーガナイザー一覧は載せていない。
+委員会は当面決まらないので、名前を出さずに日程と場所だけで先に公開する段（Save the date）を挟んだ。
 
-⚠ **ViBioM 待ちは 2026-09-29 に解消した。**ViBioM 2027 は
-`9 March 2027 - 11 March 2027 / Jena, Germany` を公式サイトで発表済み
-（https://evbc.uni-jena.de/event/international-virus-bioinformatics-meeting-2027-vibiom/）。
-残っているのは委員会確認だけ。
+- `phase: Preview`（画面上の表示は Upcoming。`src/utils/summitPhase.ts`）。日程は 2027-03-12〜13、Jena とオンライン。
+  ViBioM 2027（3/9-11）のサテライト。旧記述の「3/7-11」は誤りだった（Dropbox のフォルダ名だけ旧日程のまま）。
+- トップ: サミットのカード（ロゴ｜日付・場所）が先頭で、About は小見出しにしてその下。`src/pages/index.astro`。
+- ロゴ: 2026-11-12 に Option 1 に決定（Lana 作・最終投票の青いポリメラーゼ版）。Lana の最新版はバナーの日付も 12-13 に直っている。日付行なしの透過ワイド版を
+  `public/images/summits/hero/rdrp-summit-2027/logo.webp` に置き、エントリの `logo` 欄で使う。
+  下書き PNG と AI ファイルはリポジトリの外（`~/Projects/rdrp-design/logo_2027/`）。
+- 共有画像: 2027 は `public/images/og/summits/rdrp-summit-2027/ogImage.png`（ロゴ＋日付・場所、1200×630）。
+  サミットが Upcoming / Live の間は**トップページも同じ画像を共有する**。Keystatic の共有画像はそのまま使う方式に変えた
+  （未設定のサミットだけ自動生成カード）。2025 は旧カードを画像として保存し直したので見た目は同じ。
+- スラッグを `rdrp-summit-YYYY` に戻し、2026-02 の改名で壊れていた旧 URL（サミット3件、JC 6件、記事2件）を
+  `public/_redirects` で 301 にした。
+- ViBioM 2027 の公式サイト（https://evbc.uni-jena.de/events/vibiom2027/ ）が RdRp Summit をサテライトとして載せ、
+  rdrp.io にリンクしている。こちらからもリンク済み。双方向。
 
-🔴 **日程の数字が2系統ある。どちらが正か未確定。**
+### 次に検討すること
 
-| 出どころ | RdRp Summit の日程 |
-|---|---|
-| このファイルの旧記述 | 2027-03-07〜11 |
-| Dropbox のフォルダ名 `20270307-11_RdRp_summit` | 2027-03-07〜11 |
-| `preview` ブランチの現物 | **2027-03-12〜13**（ViBioM 3/9-11 の直後） |
+- **`/summits/` 一覧に各年のアイコンを付けるか**（オーナーが次のセッションで検討したい、2026-11-12）。
+  手元にある素材: 2023 は `hero/rdrp-summit-2023/heroImage.png`、2025 は正方形ロゴ
+  `hero/rdrp-summit-2025/logo_RdRpSummit2025.jpg`（トラムの絵）、2027 はワイドの `logo.webp`。
+  形（正方形とワイド）が揃っていない点が論点。一覧は今は画像を使っていない（`src/pages/summits/index.astro`）。
 
-3/9-11 が ViBioM 本体なので、旧記述の「3/7-11」は**親会議の日程を写し取ったものに見える**。
-ただし Dropbox のフォルダ名も同じ数字なので、当時そう聞いていた可能性が消えない。
-⚠ **委員会に確認するまでどちらにも寄せない。**2027 の準備物は
-`~/Dropbox/omc/がっかい/20270307-11_RdRp_summit/`（フォルダ名は旧日程のまま）。
+### 未了
 
-⚠ **`main` に入れる前に `heroImage-PLACEHOLDER.svg` を外すこと。**
-
-⚠ ViBioM 側のページは RdRp Summit をサテライトとして**載せていない**（隣接イベントは EVE と
-ECV 2027 のみ）。preview 側は `satelliteOf` で ViBioM を指しているので片側だけのリンク。
-載せてもらう依頼を出す価値はあるかもしれない。
+- `preview` ブランチ（オーガナイザー一覧入り）は main から大きく離れている。2027 のファイル名が変わったので
+  rebase は手作業。委員会が決まったら作り直す方が早いかもしれない。
+- `save-the-date` ブランチ（旧プレビュー）が GitHub に残っている。消してよいかオーナー確認待ち。
+- WordPress 時代の URL（例 `/the-rdrp-summit-2023-was-held-in-valencia-spain/`）はまだトップに落ちる（soft 404）。
+- オーナー側: Slack でロゴ反映の一言、Marco への 2025 参加費（オンライン分）の回答。2025 の料金は Budget 2025.xlsx の
+  「Calculations of Registration fees」タブ（EUR、早期/通常）にある。
 
 ## 記事作成ポリシー（2026-09-15 制定・未実装）
 
