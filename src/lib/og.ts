@@ -38,7 +38,8 @@ const stripMarkdown = (value: string): string => {
     .replace(/!\[[^\]]*]\([^)]+\)/g, ' ')
     .replace(/\[([^\]]+)]\([^)]+\)/g, '$1')
     .replace(/<\/?[^>]+>/g, ' ')
-    .replace(/[#>*_~\-]+/g, ' ')
+    .replace(/^\s*[-*+]\s+/gm, ' ')
+    .replace(/[#>*_~]+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 };

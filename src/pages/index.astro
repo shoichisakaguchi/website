@@ -7,6 +7,7 @@ import { getCollection, getEntry, type CollectionEntry } from "astro:content";
 import SummitDetail from "../components/SummitDetail.astro";
 import { formatDateRange } from "../utils/date";
 import { phaseLabel } from "../utils/summitPhase";
+import { resolveOgImage } from "../lib/og";
 import { Marked } from "marked";
 import { getSortDate, sortEntriesByDateDesc } from "../utils/sortDate";
 
@@ -67,6 +68,15 @@ if (
 
 const currentPhase = activeSummit?.data.phase || "Planning";
 const summitAnnounced = currentPhase === "Preview" || currentPhase === "Live";
+// While a summit is announced, a shared link to the homepage previews that summit.
+const homeOgImage =
+	summitAnnounced && activeSummit?.data.ogImage
+		? resolveOgImage({
+				image: activeSummit.data.ogImage,
+				alt: activeSummit.data.ogImageAlt,
+				title: activeSummit.data.title,
+			})
+		: undefined;
 
 const topMessageMarkdown =
 	currentPhase === "Planning"
@@ -98,7 +108,7 @@ const topMessageHtml = topMessageMarkdown
 	: "";
 ---
 
-<Layout>
+<Layout ogImage={homeOgImage}>
 	<div data-pagefind-body>
 		{/* While a summit is announced, its banner leads and About follows it. */}
 		{!summitAnnounced && <AboutSummary />}

@@ -360,7 +360,9 @@ export default config({
                 description: fields.text({ label: 'Description (OGP/Card)', multiline: true }),
                 ogImage: fields.image({
                     label: 'OG Image',
-                    description: 'Optional social share image (1200x630 recommended).',
+                    description:
+                        'Social share image, 1200x630, used as it is. While this summit is Upcoming or Live, ' +
+                        'the homepage shares it too. Leave empty for a generated card with the title and description.',
                     directory: 'public/images/og/summits',
                     publicPath: '/images/og/summits',
                     validation: { isRequired: false },

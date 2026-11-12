@@ -27,7 +27,8 @@ const ogImage = resolveOgImage({
   category: "summits",
   title: item.data.title,
   description: metaDescription,
-  useDynamic: true,
+  // A share image set in Keystatic is used as it is; only summits without one get the generated card.
+  useDynamic: !item.data.ogImage,
 });
 ---
 
