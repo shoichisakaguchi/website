@@ -19,6 +19,7 @@ export const JOURNAL_CLUB_TIMEZONES: JournalClubTimezoneOption[] = [
 // the entry can record where the time was actually announced.
 export const JOURNAL_CLUB_TIMEZONES_EXTRA: JournalClubTimezoneOption[] = [
     { value: 'Europe/Helsinki', label: 'Finland (Helsinki)' },
+    { value: 'Europe/Ljubljana', label: 'Slovenia (Ljubljana)' },
     { value: 'Asia/Jerusalem', label: 'Israel (Jerusalem)' },
 ];
 
