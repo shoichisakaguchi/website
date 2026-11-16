@@ -2,7 +2,7 @@
  * Single source of truth for Journal Club event timing.
  *
  * Three places need to agree on when an event starts and ends: the homepage
- * "Next Meeting" card, the event detail page, and the scheduled rebuild
+ * "Next Talk" card, the event detail page, and the scheduled rebuild
  * trigger. They used to carry three copies of the conversion, and two of them
  * used a technique whose result depended on the timezone of the machine
  * running the build:

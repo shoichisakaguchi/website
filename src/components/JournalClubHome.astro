@@ -189,14 +189,19 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
                                 <div class="journal-icon">
                                     <img
                                         src="/images/journal_club/journal_club.png"
-                                        alt="Journal Club Icon"
+                                        alt=""
                                         class="journal-icon-img"
                                         loading="eager"
                                     />
                                 </div>
                             )}
+                            {/* Name the series: right under the Summit banner, an
+                                unnamed "Next Meeting" read as a Summit meeting. */}
                             <div>
-                                <h2>Stay connected with the RdRp community</h2>
+                                <h2>RNA Virus Journal Club</h2>
+                                <p class="subtitle">
+                                    Stay connected with the RdRp community
+                                </p>
                             </div>
                         </div>
                     </>
@@ -263,7 +268,7 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
                     class={`badge ${isLiveNow ? "badge-live" : ""}`}
                     data-jc-badge
                 >
-                    {isLiveNow ? "Live Now" : "Next Meeting"}
+                    {isLiveNow ? "Live Now" : "Next Talk"}
                 </span>
                 <h3 class="paper-title" data-jc-title>
                     {upcomingJournalClub?.data.title}
@@ -452,7 +457,7 @@ const cardEventsPayload = cardEvents.map(({ item, start, end, hasTime }) => {
                 const live = Date.parse(ev.start) <= now;
                 const badge = q("[data-jc-badge]");
                 if (badge) {
-                    badge.textContent = live ? "Live Now" : "Next Meeting";
+                    badge.textContent = live ? "Live Now" : "Next Talk";
                     badge.classList.toggle("badge-live", live);
                 }
 
