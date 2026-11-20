@@ -16,7 +16,7 @@
 - ロゴ: 2026-11-12 に Option 1 に決定（Lana 作・最終投票の青いポリメラーゼ版）。Lana の最新版はバナーの日付も 12-13 に直っている。日付行なしの透過ワイド版を
   `public/images/summits/hero/rdrp-summit-2027/logo.webp` に置き、エントリの `logo` 欄で使う。
   下書き PNG と AI ファイルはリポジトリの外（`~/Projects/rdrp-design/logo_2027/`）。
-- 共有画像: 2027 は `public/images/og/summits/rdrp-summit-2027/ogImage.png`（ロゴ＋日付・場所、1200×630）。
+- 共有画像: 2027 は `public/images/og/summits/rdrp-summit-2027/ogImage-march.png`（ロゴ＋「March 2027」・場所、1200×630）。2026-11-21 に ViBioM の日程変更で日付を外した（日が決まったら日付入りに戻す）。
   サミットが Upcoming / Live の間は**トップページも同じ画像を共有する**。Keystatic の共有画像はそのまま使う方式に変えた
   （未設定のサミットだけ自動生成カード）。2025 は旧カードを画像として保存し直したので見た目は同じ。
 - スラッグを `rdrp-summit-YYYY` に戻し、2026-02 の改名で壊れていた旧 URL（サミット3件、JC 6件、記事2件）を
